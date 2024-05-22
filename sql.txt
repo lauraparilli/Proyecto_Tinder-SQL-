@@ -1,0 +1,49 @@
+SET search_path TO tinder_viejos_egresados, public;
+SET DateStyle TO European;
+
+CREATE TABLE IF NOT EXISTS tier(
+    nombre_tier VARCHAR(10),
+    PRIMARY KEY (nombre_tier)
+);
+
+CREATE TABLE IF NOT EXISTS permiso(
+    nombre_permiso VARCHAR(100),
+    descripcion_permiso VARCHAR(100),
+    PRIMARY KEY (nombre_permiso)
+);
+
+CREATE TABLE IF NOT EXISTS chat(
+    idchat INT GENERATED ALWAYS AS IDENTITY,
+    PRIMARY KEY (idchat)
+);
+
+CREATE TABLE IF NOT EXISTS empresa(
+    idempresa INT GENERATED ALWAYS AS IDENTITY,
+    nombre_empresa VARCHAR(100) NOT NULL,
+    PRIMARY KEY (empresa)
+);
+
+CREATE TABLE IF NOT EXISTS perfil(
+    id_cuenta INT,
+    id_perfil INT GENERATED ALWAYS AS IDENTITYm
+    estado BOOLEAN NOT NULL,
+    sexo VARCHAR(11) NOT NULL,
+    descripcion VARCHAR(200),
+    verificado BOOLEAN DEFAULT FALSE NOT NULL,
+    coordenada VARCHAR(30) NOT NULL,
+    PRIMARY KEY (id_cuenta, id_perfil), 
+    FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+         ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS suscrita(
+    id_cuenta INT,
+	nombre_tier VARCHAR(10),
+	fecha_inicio DATE NOT NULL,
+	fecha_caducidad DATE NOT NULL,
+    PRIMARY KEY (id_cuenta, nombre_tier),
+	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+		ON DELETE CASCADE	ON UPDATE CASCADE,
+	FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
+		ON DELETE CASCADE	ON UPDATE CASCADE
+);
