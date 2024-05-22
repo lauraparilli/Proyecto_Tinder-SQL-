@@ -1,5 +1,5 @@
 SET search_path TO tinder_viejos_egresados, public;
-SET DATASTYLE TO 'European';
+SET DATESTYLE TO 'European';
 
 CREATE DOMAIN tiers AS VARCHAR(16)
 	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum'));
@@ -8,7 +8,7 @@ CREATE DOMAIN sexos AS CHAR(1)
 	CONSTRAINT sexos_validos CHECK (VALUE IN ('f', 'm', 'n'));
 
 CREATE DOMAIN orientaciones AS VARCHAR(16)
-	CONSTRAINT orientaciones_validas CHECK (VALUE IN ('Heterosexual', 'Gay', 'Lesbiana', 'Bisexual', 'Asexual', 'Demisexual', 'Pansexual', 'Queer', 'Cuestionamiento' ));
+	CONSTRAINT orientaciones_validas CHECK (VALUE IN ('Heterosexual', 'Gay', 'Lesbiana', 'Bisexual', 'Asexual', 'Demisexual', 'Pansexual', 'Queer', 'Cuestionamiento'));
 
 CREATE DOMAIN estudios AS VARCHAR(16)
 	CONSTRAINT estudios_validos CHECK (VALUE IN ('Maestria', 'Master', 'Especializacion', 'Diplomado', 'Doctorado'));
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS permiso(
 
 CREATE TABLE IF NOT EXISTS chat(
     id_chat INT GENERATED ALWAYS AS IDENTITY,
-    PRIMARY KEY (id_chat)
+    PRIMARY KEY(id_chat)
 );
 
 CREATE TABLE IF NOT EXISTS institucion (
@@ -77,13 +77,13 @@ CREATE TABLE IF NOT EXISTS institucion (
     coordenada VARCHAR(30) NOT NULL,
     tipo tipo_instituciones NOT NULL,
     ano_fundacion INT NOT NULL,
-	PRIMARY KEY(dominio)
+	PRIMARY KEY(dominio)
 );
 
 CREATE TABLE IF NOT EXISTS empresa(
     id_empresa INT GENERATED ALWAYS AS IDENTITY,
     nombre_empresa VARCHAR(100) NOT NULL,
-    PRIMARY KEY (empresa)
+    PRIMARY KEY(empresa)
 );
 
 CREATE TABLE IF NOT EXISTS perfil(
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS perfil(
     PRIMARY KEY (id_cuenta, id_perfil), 
     CONSTRAINT fk_id_cuenta_perfil
     	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
-         	ON DELETE CASCADE	ON UPDATE CASCADE
+         	ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS preferencias (
@@ -137,8 +137,8 @@ CREATE TABLE IF NOT EXISTS suscrita(
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_nombre_tier_suscrita
-	FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
-		ON DELETE CASCADE	ON UPDATE CASCADE
+		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS maneja(
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS maneja(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_nombre_permiso_maneja
 		FOREIGN KEY (nombre_permiso) REFERENCES permiso(nombre_permiso)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS likes(
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS match_with(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_matched_match_with
 		FOREIGN KEY(id_matched) REFERENCES cuenta(id_cuenta)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS trabaja_en (
@@ -201,10 +201,10 @@ CREATE TABLE IF NOT EXISTS trabaja_en (
     PRIMARY KEY(id_cuenta, id_perfil, id_empresa),
     CONSTRAINT fk_id_cuenta_id_perfil_trabaja_en
         FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
-        	ON UPDATE CASCADE ON DELETE CASCADE,
+        	ON DELETE CASCADE	ON UPDATE CASCADE,
     CONSTRAINT fk_id_empresa_trabaja_en
         FOREIGN KEY(id_empresa) REFERENCES empresa(id_empresa)
-        	ON UPDATE CASCADE ON DELETE CASCADE
+        	ON DELETE CASCADE	ON UPDATE CASCADE	
 );
 
 CREATE TABLE IF NOT EXISTS estudio_en(
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_dominio_estudio_en
 		FOREIGN KEY(dominio) REFERENCES institucion(dominio)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS chatea_con(
@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS realiza(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_digitos_tarjeta_realiza
 		FOREIGN KEY(digitos_tarjeta) REFERENCES tarjeta(digitos_tarjeta)
-			ON DELETE CASCADE	ON UPDATE CASCADE,
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS tiene_hobby (
     PRIMARY KEY(id_cuenta, id_perfil, hobby),
     CONSTRAINT fk_id_cuenta_id_perfil_tiene_hobby
         FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON DELETE CASCADE	ON UPDATE CASCADE 
 );
 
 
@@ -299,7 +299,7 @@ CREATE TABLE IF NOT EXISTS tiene_foto(
 	PRIMARY KEY(id_cuenta, id_perfil, foto),
 	CONSTRAINT fk_id_cuenta_id_perfil_tiene_foto
 		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS tiene_certificaciones(
 	PRIMARY KEY(id_cuenta, id_perfil, certificaciones),
 	CONSTRAINT fk_id_cuenta_id_perfil_tiene_certificaciones
 		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS archivo (
@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS pref_orientacion_sexual(
 	PRIMARY KEY(id_cuenta, id_perfil, id_pref, orientacion_sexual),
 	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_orientacion_sexual
 		FOREIGN KEY(id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS pref_sexo(
