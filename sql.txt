@@ -77,3 +77,18 @@ CREATE TABLE IF NOT EXISTS likes(
 		FOREIGN KEY (id_liked) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS chatea_con(
+    id_cuenta1 INT,
+	id_perfil1 INT,
+	id_cuenta2 INT,
+	id_perfil2 INT,
+	id_chat INT UNIQUE,
+    PRIMARY KEY (id_cuenta1, id_perfil1, id_cuenta2, id_perfil2),
+	CONSTRAINT fk_id_cuenta1_id_perfil1_chatea_con
+		FOREIGN KEY (id_cuenta1, id_perfil1) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_cuenta2_id_perfil2_chatea_con
+		FOREIGN KEY (id_cuenta2, id_perfil2) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
