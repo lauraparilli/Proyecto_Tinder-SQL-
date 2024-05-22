@@ -43,8 +43,10 @@ CREATE TABLE IF NOT EXISTS suscrita(
 	fecha_inicio DATE NOT NULL,
 	fecha_caducidad DATE NOT NULL,
     PRIMARY KEY (id_cuenta, nombre_tier),
-	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
-		ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_cuenta_suscrita
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_nombre_tier_suscrita
 	FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
 		ON DELETE CASCADE	ON UPDATE CASCADE
 );
