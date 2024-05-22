@@ -1,1 +1,20 @@
+SET search_path TO tinder_viejos_egresados, public;
+SET DATASTYLE TO 'European';
+
+CREATE DOMAIN tiers AS VARCHAR(16)
+	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum'));
+
+CREATE DOMAIN sexo AS CHAR(1)
+	CONSTRAINT sexo_validos CHECK (VALUE IN ('f', 'm', 'n'));
+
+CREATE DOMAIN orientacion_sexual AS VARCHAR(15)
+	CONSTRAINT orientacion_sexual_validos CHECK (VALUE IN ('Heterosexual', 'Gay', 'Lesbiana', 'Bisexual', 'Asexual', 'Demisexual', 'Pansexual', 'Queer', 'Cuestionamiento' ));
+
+CREATE DOMAIN estudios AS VARCHAR(16)
+	CONSTRAINT estudios_validos CHECK (VALUE IN ('Maestria', 'Master', 'Especializacion', 'Diplomado', 'Doctorado'));
+
+CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
+	CONSTRAINT tipo_instituciones_validos CHECK (VALUE IN ('Politica', 'Economica', 'Juridica', 'Laboral', 'Cientifica', 'Universitaria', 'Artistica'));
+
+
 
