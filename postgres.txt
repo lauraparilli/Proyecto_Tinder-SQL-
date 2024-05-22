@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS swipes (
     id_disliker INT,
     id_disliked INT,
     PRIMARY KEY (id_disliker, id_disliked),
-    CONSTRAINT fk_id_disliker_cuenta
+    CONSTRAINT fk_id_disliker_swipes
     FOREIGN KEY (id_disliker) REFERENCES cuenta(id_cuenta),
     CONSTRAINT fk_id_disliked_cuenta
     FOREIGN KEY (id_disliked) REFERENCES cuenta(id_cuenta)
@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS trabaja_en (
     cargo VARCHAR(24) NOT NULL,
     fecha_inicio DATE NOT NULL,
     PRIMARY KEY(id_cuenta, id_perfil, idempresa),
-    CONSTRAINT fk_id_cuenta_id_perfil_perfil
+    CONSTRAINT fk_id_cuenta_id_perfil_trabaja_en
         FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
         ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_idempresa_empresa
+    CONSTRAINT fk_idempresa_trabaja_en
         FOREIGN KEY(idempresa) REFERENCES empresa(idempresa)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -43,14 +43,15 @@ CREATE TABLE IF NOT EXISTS institucion (
 
 CREATE TABLE IF NOT EXISTS mensaje (
     id_chat INT,
-	numero_msj INT GENERATED,
-	id_remitente INT NOT NULL,
-	id_destinatario INT NOT NULL,
-	visto BOOLEAN DEFAULT FALSE,
-	texto BYTEA NOT NULL,
-	timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY(id_chat, numero_msg),
-	FOREIGN KEY(id_chat), REFERENCES chat(id_chat)
+    numero_msj INT GENERATED ALWAYS AS IDENTITY,
+    id_remitente INT NOT NULL,
+    id_destinatario INT NOT NULL,
+    visto BOOLEAN DEFAULT FALSE,
+    texto BYTEA NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(id_chat, numero_msj),
+    CONSTRAINT fk_id_chat_mensaje
+        FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
 );
 
 CREATE TABLE IF NOT EXISTS tiene_hobby (
@@ -58,7 +59,7 @@ CREATE TABLE IF NOT EXISTS tiene_hobby (
     id_perfil INT,
     hobby VARCHAR(64),
     PRIMARY KEY(id_cuenta, id_perfil, hobby),
-    CONSTRAINT fk_id_cuenta_id_perfil_perfil
+    CONSTRAINT fk_id_cuenta_id_perfil_tiene_hobby
         FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
