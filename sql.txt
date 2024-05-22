@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS permiso(
 
 CREATE TABLE IF NOT EXISTS chat(
     id_chat INT GENERATED ALWAYS AS IDENTITY,
-    PRIMARY KEY (idchat)
+    PRIMARY KEY (id_chat)
 );
 
 CREATE TABLE IF NOT EXISTS empresa(
@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS likes(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
+
 CREATE TABLE IF NOT EXISTS chatea_con(
     id_cuenta1 INT,
 	id_perfil1 INT,
@@ -90,7 +91,11 @@ CREATE TABLE IF NOT EXISTS chatea_con(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_cuenta2_id_perfil2_chatea_con
 		FOREIGN KEY (id_cuenta2, id_perfil2) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_chat_chatea_con 
+		FOREIGN KEY (id_chat) REFERENCES chat(id_chat)
 			ON DELETE CASCADE	ON UPDATE CASCADE
+
 );
 
 CREATE TABLE IF NOT EXISTS tiene_habilidades(
