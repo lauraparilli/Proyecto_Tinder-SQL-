@@ -16,6 +16,21 @@ CREATE TABLE IF NOT EXISTS cuenta(
 	PRIMARY KEY (id_cuenta)
 );
 
+CREATE TABLE IF NOT EXISTS preferencias (
+	id_cuenta INT, 
+	id_perfil INT, 
+	estudio VARCHAR(16),
+	coordanada_origen VARCHAR(30) NOT NULL,
+	distancia_maxima INT DEFAULT 0 CHECK (distancia_maxima <= 3000) NOT NULL,
+	min_edad INT DEFAULT 30 CHECK (min_edad >= 30 AND min_edad <= 99) NOT NULL,
+	max_edad INT DEFAULT 99 CHECK (max_edad >=30 AND max_edad <= 99) NOT NULL,
+	PRIMARY KEY (id_cuenta, id_perfil), 
+	CONSTRAINT fk_id_cuenta_id_perfil_preferencias
+		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE ON UPDATE CASCADE, 
+	CONSTRAINT check_edad CHECK (min_edad <= max_edad)
+);
+
 CREATE TABLE IF NOT EXISTS pago(
 	id_pago INT GENERATED ALWAYS AS IDENTITY,
 	numero_factura INT NOT NULL,
