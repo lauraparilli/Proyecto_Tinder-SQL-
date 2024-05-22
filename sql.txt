@@ -102,3 +102,13 @@ CREATE TABLE IF NOT EXISTS tiene_habilidades(
 		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
+    id_cuenta INT,
+	id_perfil INT,
+	orientacion_sexual VARCHAR(16),
+    PRIMARY KEY (id_cuenta, id_perfil, orientacion_sexual),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_orientacion_sexual
+		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
