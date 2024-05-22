@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS empresa(
 
 CREATE TABLE IF NOT EXISTS perfil(
     id_cuenta INT,
-    id_perfil INT GENERATED ALWAYS AS IDENTITYm
+    id_perfil INT GENERATED ALWAYS AS IDENTITY,
     estado BOOLEAN NOT NULL,
     sexo VARCHAR(11) NOT NULL,
     descripcion VARCHAR(200),
