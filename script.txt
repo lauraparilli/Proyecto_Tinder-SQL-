@@ -1,0 +1,30 @@
+SET search_path TO tinder_viejos_egresados, public;
+SET DATASTYLE TO 'European';
+
+CREATE TABLE IF NOT EXISTS cuenta(
+	id_cuenta INT GENERATED ALWAYS AS IDENTITY,
+	nombre VARCHAR(16) NOT NULL,
+	apellido VARCHAR(16) NOT NULL,
+	fecha_nacimiento DATE NOT NULL,
+	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
+	email VARCHAR(255) UNIQUE,
+	contrasena VARCHAR(128) NOT NULL,
+	telefono VARCHAR(13),
+	idioma VARCHAR(3) DEFAULT 'ESP' NOT NULL,
+	notificaciones BOOLEAN DEFAULT TRUE NOT NULL, 
+	tema BOOLEAN DEFAULT TRUE NOT NULL,
+	PRIMARY KEY (id_cuenta)
+);
+
+CREATE TABLE IF NOT EXISTS pago(
+	id_pago INT GENERATED ALWAYS AS IDENTITY,
+	numero_factura INT NOT NULL,
+	aprobado BOOLEAN NOT NULL,
+	metodo VARCHAR(7) NOT NULL,
+	monto INT DEFAULT 0 NOT NULL,
+	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
+	documento_factura BYTEA NOT NULL,
+ PRIMARY KEY (id_pago)
+	
+);
+
