@@ -86,3 +86,15 @@ CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
 		FOREIGN KEY (dominio) REFERENCES institucion
 			ON DELETE CASCADE 	ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS archivo (
+	id_chat INT,
+	numero_msj INT,
+	nombre VARCHAR(128) NOT NULL,
+	tipo VARCHAR(16) NOT NULL,
+	contenido BYTEA NOT NULL,
+	PRIMARY KEY(id_chat, numero_msj, nombre,tipo, contenido),
+	CONSTRAINT fk_id_chat_numero_msj_nombre_tipo_contenido
+		FOREIGN KEY(id_chat, numero_msj) REFERENCES mensaje(id_chat, numero_msj)
+			ON DELETE CASCADE 	ON UPDATE CASCADE
+);
