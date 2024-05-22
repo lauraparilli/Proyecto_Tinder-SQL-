@@ -92,3 +92,13 @@ CREATE TABLE IF NOT EXISTS chatea_con(
 		FOREIGN KEY (id_cuenta2, id_perfil2) REFERENCES perfil(id_cuenta, id_perfil)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS tiene_habilidades(
+    id_cuenta INT,
+	id_perfil INT,
+	habilidades VARCHAR(256),
+    PRIMARY KEY (id_cuenta, id_perfil, habilidades),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_habilidades
+		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
