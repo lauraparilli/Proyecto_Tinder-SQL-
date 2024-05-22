@@ -7,3 +7,18 @@ CREATE TABLE IF NOT EXISTS swipes (
     CONSTRAINT fk_id_disliked_cuenta
     FOREIGN KEY (id_disliked) REFERENCES cuenta(id_cuenta)
 );
+
+CREATE TABLE IF NOT EXISTS trabaja_en (
+    id_cuenta INT,
+    id_perfil INT,
+    idempresa INT,
+    cargo VARCHAR(24) NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    PRIMARY KEY(id_cuenta, id_perfil, idempresa),
+    CONSTRAINT fk_id_cuenta_id_perfil_perfil
+        FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_idempresa_empresa
+        FOREIGN KEY(idempresa) REFERENCES empresa(idempresa)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
