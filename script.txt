@@ -71,4 +71,18 @@ CREATE TABLE IF NOT EXISTS mensaje (
 	timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(id_chat, numero_msg),
 	FOREIGN KEY(id_chat), REFERENCES chat(id_chat)
-)
+);
+
+CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
+	id_cuenta INT,
+	id_perfil INT,
+	dominio VARCHAR(64),
+	agrupacion VARCHAR(64),
+	PRIMARY KEY(id_cuenta, id_perfil, dominio, agrupacion),
+	CONSTRAINT fk_id_cuenta_id_perfil_dominio_agrupacion
+		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE 	ON UPDATE CASCADE,
+	CONSTRAINT fk_domino_institucion
+		FOREIGN KEY (dominio) REFERENCES institucion
+			ON DELETE CASCADE 	ON UPDATE CASCADE
+);
