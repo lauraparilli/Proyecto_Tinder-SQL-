@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS institucion (
     nombre VARCHAR(32) NOT NULL,
     coordenada VARCHAR(30) NOT NULL,
     tipo VARCHAR(32),
-    anio_fundacion INT NOT NULL,
+    ano_fundacion INT NOT NULL,
 	PRIMARY KEY(dominio)
 );
 
