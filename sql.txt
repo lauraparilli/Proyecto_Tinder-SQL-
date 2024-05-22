@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS perfil(
     verificado BOOLEAN DEFAULT FALSE NOT NULL,
     coordenada VARCHAR(30) NOT NULL,
     PRIMARY KEY (id_cuenta, id_perfil), 
-    FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
-         ON DELETE CASCADE	ON UPDATE CASCADE
+	CONSTRAINT fk_id_cuenta_perfil
+    	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+         	ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS suscrita(
