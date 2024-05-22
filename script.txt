@@ -15,6 +15,17 @@ CREATE TABLE IF NOT EXISTS cuenta(
 	tema BOOLEAN DEFAULT TRUE NOT NULL,
 	PRIMARY KEY (id_cuenta)
 );
+CREATE TABLE IF NOT EXISTS pago(
+	id_pago INT GENERATED ALWAYS AS IDENTITY,
+	numero_factura INT NOT NULL,
+	aprobado BOOLEAN NOT NULL,
+	metodo VARCHAR(7) NOT NULL,
+	monto INT DEFAULT 0 NOT NULL,
+	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
+	documento_factura BYTEA NOT NULL,
+ PRIMARY KEY (id_pago)
+	
+);
 
 CREATE TABLE IF NOT EXISTS preferencias (
 	id_cuenta INT, 
@@ -31,47 +42,8 @@ CREATE TABLE IF NOT EXISTS preferencias (
 	CONSTRAINT check_edad CHECK (min_edad <= max_edad)
 );
 
-CREATE TABLE IF NOT EXISTS pago(
-	id_pago INT GENERATED ALWAYS AS IDENTITY,
-	numero_factura INT NOT NULL,
-	aprobado BOOLEAN NOT NULL,
-	metodo VARCHAR(7) NOT NULL,
-	monto INT DEFAULT 0 NOT NULL,
-	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
-	documento_factura BYTEA NOT NULL,
- PRIMARY KEY (id_pago)
-	
-);
 
-CREATE TABLE IF NOT EXISTS tarjeta (
-    digitos_tarjeta VARCHAR(19) CHECK (numero_tarjeta ~ '^[0-9]{16,19}$'),
-	nombre_titular VARCHAR(32) NOT NULL,
-	fecha_caducidad DATE NOT NULL,
-	codigo_cv VARCHAR(3) CHECK (codigo_cv ~ '^[0-9]{3}$'),
-	tipo VARCHAR(15) NOT NULL
-	PRIMARY KEY(digitos_tarjeta)
-);
 
-CREATE TABLE IF NOT EXISTS institucion (
-    dominio VARCHAR(64),
-    nombre VARCHAR(32) NOT NULL,
-    coordenada VARCHAR(30) NOT NULL,
-    tipo VARCHAR(32),
-    anio_fundacion INT NOT NULL,
-	PRIMARY KEY(dominio)
-);
-
-CREATE TABLE IF NOT EXISTS mensaje (
-    id_chat INT,
-	numero_msj INT GENERATED,
-	id_remitente INT NOT NULL,
-	id_destinatario INT NOT NULL,
-	visto BOOLEAN DEFAULT FALSE,
-	texto BYTEA NOT NULL,
-	timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY(id_chat, numero_msg),
-	FOREIGN KEY(id_chat), REFERENCES chat(id_chat)
-);
 
 CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
 	id_cuenta INT,
@@ -79,7 +51,7 @@ CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
 	dominio VARCHAR(64),
 	agrupacion VARCHAR(64),
 	PRIMARY KEY(id_cuenta, id_perfil, dominio, agrupacion),
-	CONSTRAINT fk_id_cuenta_id_perfil_dominio_agrupacion
+	CONSTRAINT fk_id_cuenta_id_perfil_esta_en_agrupacion
 		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
 			ON DELETE CASCADE 	ON UPDATE CASCADE,
 	CONSTRAINT fk_domino_institucion
@@ -94,7 +66,7 @@ CREATE TABLE IF NOT EXISTS archivo (
 	tipo VARCHAR(16) NOT NULL,
 	contenido BYTEA NOT NULL,
 	PRIMARY KEY(id_chat, numero_msj, nombre,tipo, contenido),
-	CONSTRAINT fk_id_chat_numero_msj_nombre_tipo_contenido
+	CONSTRAINT fk_id_chat_numero_msj_archivo
 		FOREIGN KEY(id_chat, numero_msj) REFERENCES mensaje(id_chat, numero_msj)
 			ON DELETE CASCADE 	ON UPDATE CASCADE
 );
