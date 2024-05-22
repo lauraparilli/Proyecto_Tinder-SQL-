@@ -13,16 +13,16 @@ CREATE TABLE IF NOT EXISTS swipes (
 CREATE TABLE IF NOT EXISTS trabaja_en (
     id_cuenta INT,
     id_perfil INT,
-    idempresa INT,
-    cargo VARCHAR(24) NOT NULL,
+    id_empresa INT,
+    cargo VARCHAR(32) NOT NULL,
     fecha_inicio DATE NOT NULL,
-    PRIMARY KEY(id_cuenta, id_perfil, idempresa),
+    PRIMARY KEY(id_cuenta, id_perfil, id_empresa),
     CONSTRAINT fk_id_cuenta_id_perfil_trabaja_en
         FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_idempresa_trabaja_en
-        FOREIGN KEY(idempresa) REFERENCES empresa(idempresa)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        	ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_id_empresa_trabaja_en
+        FOREIGN KEY(id_empresa) REFERENCES empresa(id_empresa)
+        	ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tarjeta (
