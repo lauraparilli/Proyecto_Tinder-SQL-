@@ -1,0 +1,87 @@
+CREATE TABLE IF NOT EXISTS match_with(
+	id_matcher INT,
+	id_matched INT,
+	Fecha DATE DEFAULT CURRENT_DATE NOT NULL,
+	PRIMARY KEY(id_matcher, id_matched),
+	CONSTRAINT fk_id_matcher_match_with
+		FOREIGN KEY(id_matcher) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_matched_match_with
+		FOREIGN KEY(id_matched) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS estudio_en(
+	id_cuenta INT,
+	id_perfil INT,
+	dominio VARCHAR(64),
+	titulo VARCHAR(64) NOT NULL, 
+	ano_ingreso INT NOT NULL,
+	ano_egreso INT NOT NULL,
+	PRIMARY KEY(id_cuenta, id_perfil, dominio),
+	CONSTRAINT fk_id_cuenta_id_perfil_estudio_en
+		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_dominio_estudio_en
+		FOREIGN KEY(dominio) REFERENCES institucion(dominio)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS realiza(
+	id_cuenta INT NOT NULL,
+	id_pago INT,
+	digitos_tarjeta INT NOT NULL,
+	PRIMARY KEY(id_pago),
+	CONSTRAINT fk_id_cuenta_realiza
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_pago_realiza
+		FOREIGN KEY(id_pago) REFERENCES pago(id_pago)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_digitos_tarjeta_realiza
+		FOREIGN KEY(digitos_tarjeta) REFERENCES tarjeta(digitos_tarjeta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+);
+
+CREATE TABLE IF NOT EXISTS tiene_foto(
+	id_cuenta INT,
+	id_perfil INT,
+	foto BYTEA,
+	PRIMARY KEY(id_cuenta, id_perfil, foto),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_foto
+		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tiene_certificaciones(
+	id_cuenta INT,
+	id_perfil INT,
+	certificaciones VARCHAR(256),
+	PRIMARY KEY(id_cuenta, id_perfil, certificaciones),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_certificaciones
+		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS pref_orientacion_sexual(
+	id_cuenta INT,
+	id_perfil INT,
+	id_pref INT,
+	orientacion_sexual VARCHAR(16),
+	PRIMARY KEY(id_cuenta, id_perfil, id_pref, orientacion_sexual),
+	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_orientacion_sexual
+		FOREIGN KEY(id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE DOMAIN tiers AS VARCHAR(16)
+	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum'));
+
+CREATE DOMAIN estudios AS VARCHAR(16)
+	CONSTRAINT estudios_validos CHECK (VALUE IN ('Maestria', 'Master', 'Especializacion', 'Diplomado', 'Doctorado'));
+
+CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
+	CONSTRAINT tipo_instituciones_validos CHECK (VALUE IN ('Politica', 'Economica', 'Juridica', 'Laboral', 'Cientifica', 'Universitaria', 'Artistica'));
+
+CREATE DOMAIN metodo_pago AS VARCHAR(16)
+	CONSTRAINT metodo_pago_validos CHECK (VALUE IN ('Tarjeta', 'Paypal'));
