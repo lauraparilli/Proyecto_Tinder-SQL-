@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS swipes (
     PRIMARY KEY (id_disliker, id_disliked),
     CONSTRAINT fk_id_disliker_swipes
     FOREIGN KEY (id_disliker) REFERENCES cuenta(id_cuenta),
-    CONSTRAINT fk_id_disliked_cuenta
+    CONSTRAINT fk_id_disliked_swipes
     FOREIGN KEY (id_disliked) REFERENCES cuenta(id_cuenta)
 );
 
