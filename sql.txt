@@ -55,10 +55,12 @@ CREATE TABLE IF NOT EXISTS maneja(
     nombre_tier VARCHAR(10),
 	nombre_permiso VARCHAR(100),
     PRIMARY KEY (nombre_tier, nombre_permiso),
-	FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
-		ON DELETE CASCADE	ON UPDATE CASCADE,
-	FOREIGN KEY (nombre_permiso) REFERENCES permiso(nombre_permiso)
-		ON DELETE CASCADE	ON UPDATE CASCADE
+	CONSTRAINT fk_nombre_tier_maneja
+		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_nombre_permiso_maneja
+		FOREIGN KEY (nombre_permiso) REFERENCES permiso(nombre_permiso)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 
