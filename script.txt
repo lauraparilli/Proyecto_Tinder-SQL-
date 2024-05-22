@@ -28,3 +28,32 @@ CREATE TABLE IF NOT EXISTS pago(
 	
 );
 
+CREATE TABLE IF NOT EXISTS tarjeta (
+    digitos_tarjeta VARCHAR(19) CHECK (numero_tarjeta ~ '^[0-9]{16,19}$'),
+	nombre_titular VARCHAR(32) NOT NULL,
+	fecha_caducidad DATE NOT NULL,
+	codigo_cv VARCHAR(3) CHECK (codigo_cv ~ '^[0-9]{3}$'),
+	tipo VARCHAR(15) NOT NULL
+	PRIMARY KEY(digitos_tarjeta)
+);
+
+CREATE TABLE IF NOT EXISTS institucion (
+    dominio VARCHAR(64),
+    nombre VARCHAR(32) NOT NULL,
+    coordenada VARCHAR(30) NOT NULL,
+    tipo VARCHAR(32),
+    anio_fundacion INT NOT NULL,
+	PRIMARY KEY(dominio)
+);
+
+CREATE TABLE IF NOT EXISTS mensaje (
+    id_chat INT,
+	numero_msj INT GENERATED,
+	id_remitente INT NOT NULL,
+	id_destinatario INT NOT NULL,
+	visto BOOLEAN DEFAULT FALSE,
+	texto BYTEA NOT NULL,
+	timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(id_chat, numero_msg),
+	FOREIGN KEY(id_chat), REFERENCES chat(id_chat)
+)
