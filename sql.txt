@@ -57,3 +57,16 @@ CREATE TABLE IF NOT EXISTS maneja(
 	FOREIGN KEY (nombre_permiso) REFERENCES permiso(nombre_permiso)
 		ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS likes(
+    id_liker INT,  
+	id_liked INT,
+	super BOOLEAN DEFAULT FALSE NOT NULL,
+	timestamp TIMESTAMP NOT NULL,
+    PRIMARY KEY (id_liker, id_liked),
+	FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
+		ON DELETE CASCADE	ON UPDATE CASCADE,
+	FOREIGN KEY (id_liked) REFERENCES cuenta(id_cuenta)
+		ON DELETE CASCADE	ON UPDATE CASCADE
+);
