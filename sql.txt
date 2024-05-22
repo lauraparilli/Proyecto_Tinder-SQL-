@@ -112,3 +112,14 @@ CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
 		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS pref_sexo(
+    id_cuenta INT,
+	id_perfil INT,
+	id_pref INT,
+	sexo VARCHAR(11),
+    PRIMARY KEY (id_cuenta, id_perfil, id_pref, sexo),
+	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_sexo
+		FOREIGN KEY (id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
