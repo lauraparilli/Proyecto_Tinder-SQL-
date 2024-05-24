@@ -4,12 +4,14 @@ SET DATESTYLE TO 'European';
 CREATE DOMAIN tiers AS VARCHAR(16)
 	CONSTRAINT tiers_validos CHECK (VALUE = 'Plus' OR 
 	VALUE = 'Gold' OR
-	VALUE = 'Platinum');
+	VALUE = 'Platinum' OR
+	VALUE = 'Otro');
 
 CREATE DOMAIN sexos AS CHAR(1)
 	CONSTRAINT sexos_validos CHECK (VALUE = 'f' OR
 	VALUE = 'm' OR 
-	VALUE = 'n');
+	VALUE = 'n' OR
+	VALUE = 'Otro');
 
 CREATE DOMAIN orientaciones AS VARCHAR(16)
 	CONSTRAINT orientaciones_validas CHECK (VALUE = 'Heterosexual' OR
@@ -20,14 +22,16 @@ CREATE DOMAIN orientaciones AS VARCHAR(16)
 	VALUE = 'Demisexual' OR
 	VALUE = 'Pansexual' OR
 	VALUE = 'Queer' OR
-	VALUE = 'Cuestionamiento');
+	VALUE = 'Cuestionamiento' OR
+	VALUE = 'Buscando Chamba');
 
 CREATE DOMAIN estudios AS VARCHAR(16)
 	CONSTRAINT estudios_validos CHECK (VALUE = 'Maestria' OR
 	VALUE = 'Master' OR
 	VALUE = 'Especializacion' OR
 	VALUE = 'Diplomado' OR
-	VALUE = 'Doctorado');
+	VALUE = 'Doctorado' OR
+	VALUE = 'Otro');
 
 CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
 	CONSTRAINT tipo_instituciones_validos CHECK (VALUE = 'Politica' OR
@@ -36,7 +40,8 @@ CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
 	VALUE = 'Laboral' OR
 	VALUE = 'Cientifica' OR
 	VALUE = 'Universitaria' OR
-	VALUE = 'Artistica');
+	VALUE = 'Artistica' OR 
+	VALUE = 'Otro');
 
 CREATE DOMAIN metodo_pago AS VARCHAR(16)
 	CONSTRAINT metodo_pago_validos CHECK (VALUE = 'Tarjeta' OR
