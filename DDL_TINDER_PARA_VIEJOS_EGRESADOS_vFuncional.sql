@@ -23,7 +23,8 @@ CREATE DOMAIN orientaciones AS VARCHAR(16)
 	VALUE = 'Pansexual' OR
 	VALUE = 'Queer' OR
 	VALUE = 'Cuestionamiento' OR
-	VALUE = 'Buscando Chamba');
+	VALUE = 'Buscando Chamba' OR
+	VALUE = 'Otro');
 
 CREATE DOMAIN estudios AS VARCHAR(16)
 	CONSTRAINT estudios_validos CHECK (VALUE = 'Maestria' OR
@@ -67,7 +68,7 @@ CREATE TABLE IF NOT EXISTS pago(
 	numero_factura INT NOT NULL,
 	aprobado BOOLEAN NOT NULL,
 	metodo metodo_pago NOT NULL,
-	monto INT DEFAULT 0 NOT NULL,
+	monto DECIMAL DEFAULT 0 NOT NULL,
 	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
 	documento_factura BYTEA NOT NULL,
  PRIMARY KEY (id_pago)	
