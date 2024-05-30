@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS pago(
 	numero_factura INT NOT NULL,
 	aprobado BOOLEAN NOT NULL,
 	metodo metodo_pago NOT NULL,
-	monto DECIMAL DEFAULT 0 NOT NULL,
+	monto DECIMAL(10,2) DEFAULT 0 NOT NULL,
 	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
 	documento_factura BYTEA NOT NULL,
  PRIMARY KEY (id_pago)	
