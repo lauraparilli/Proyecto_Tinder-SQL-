@@ -2,51 +2,22 @@ SET search_path TO tinder_viejos_egresados, public;
 SET DATESTYLE TO 'European';
 
 CREATE DOMAIN tiers AS VARCHAR(16)
-	CONSTRAINT tiers_validos CHECK (VALUE = 'Plus' OR 
-	VALUE = 'Gold' OR
-	VALUE = 'Platinum' OR
-	VALUE = 'Otro');
+	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum', 'Otro'));
 
-CREATE DOMAIN sexos AS CHAR(1)
-	CONSTRAINT sexos_validos CHECK (VALUE = 'f' OR
-	VALUE = 'm' OR 
-	VALUE = 'n' OR
-	VALUE = 'Otro');
+CREATE DOMAIN sexos AS VARCHAR(4)
+	CONSTRAINT sexos_validos CHECK (VALUE IN ('M', 'F', 'Otro'));
 
 CREATE DOMAIN orientaciones AS VARCHAR(16)
-	CONSTRAINT orientaciones_validas CHECK (VALUE = 'Heterosexual' OR
-	VALUE = 'Gay' OR
-	VALUE = 'Lesbiana' OR
-	VALUE = 'Bisexual' OR
-	VALUE = 'Asexual' OR
-	VALUE = 'Demisexual' OR
-	VALUE = 'Pansexual' OR
-	VALUE = 'Queer' OR
-	VALUE = 'Cuestionamiento' OR
-	VALUE = 'Buscando Chamba' OR
-	VALUE = 'Otro');
+	CONSTRAINT orientaciones_validas CHECK (VALUE IN ('Heterosexual', 'Gay', 'Lesbiana', 'Bisexual', 'Asexual', 'Demisexual', 'Pansexual', 'Queer', 'Cuestionamiento', 'Buscando Chamba', 'Otro'));
 
 CREATE DOMAIN estudios AS VARCHAR(16)
-	CONSTRAINT estudios_validos CHECK (VALUE = 'Maestria' OR
-	VALUE = 'Master' OR
-	VALUE = 'Especializacion' OR
-	VALUE = 'Diplomado' OR
-	VALUE = 'Doctorado' OR
-	VALUE = 'Otro');
+	CONSTRAINT estudios_validos CHECK (VALUE IN ('Maestria', 'Master', 'Especializacion', 'Diplomado', 'Doctorado', 'Otro'));
 
 CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
-	CONSTRAINT tipo_instituciones_validos CHECK (VALUE = 'Politica' OR
-	VALUE = 'Economica' OR
-	VALUE = 'Juridica' OR
-	VALUE = 'Laboral' OR
-	VALUE = 'Cientifica' OR
-	VALUE = 'Universitaria' OR
-	VALUE = 'Artistica' OR 
-	VALUE = 'Otro');
+	CONSTRAINT tipo_instituciones_validos CHECK (VALUE IN ('Politica', 'Economica', 'Juridica', 'Laboral', 'Cientifica', 'Universitaria', 'Artistica', 'Otro'));
 
 CREATE DOMAIN metodo_pago AS VARCHAR(16)
-	CONSTRAINT metodo_pago_validos CHECK (VALUE = 'Tarjeta' OR
-	VALUE = 'Paypal');
+	CONSTRAINT metodo_pago_validos CHECK (VALUE IN ('Tarjeta', 'Paypal', 'Crypto', 'Otro'));
 
 CREATE TABLE IF NOT EXISTS cuenta(
 	id_cuenta INT GENERATED ALWAYS AS IDENTITY,
