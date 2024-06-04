@@ -1,0 +1,130 @@
+SET search_path TO tinder_viejos_egresados, public;
+SET DateStyle TO European;
+
+CREATE TABLE IF NOT EXISTS tier(
+    nombre_tier VARCHAR(10),
+    PRIMARY KEY (nombre_tier)
+);
+
+CREATE TABLE IF NOT EXISTS permiso(
+    nombre_permiso VARCHAR(100),
+    descripcion_permiso VARCHAR(100) NOT NULL,
+    PRIMARY KEY (nombre_permiso)
+);
+
+CREATE TABLE IF NOT EXISTS chat(
+    id_chat INT GENERATED ALWAYS AS IDENTITY,
+    PRIMARY KEY (id_chat)
+);
+
+CREATE TABLE IF NOT EXISTS empresa(
+    idempresa INT GENERATED ALWAYS AS IDENTITY,
+    nombre_empresa VARCHAR(100) NOT NULL,
+    PRIMARY KEY (empresa)
+);
+
+CREATE TABLE IF NOT EXISTS perfil(
+    id_cuenta INT,
+    id_perfil INT GENERATED ALWAYS AS IDENTITY,
+    estado BOOLEAN NOT NULL,
+    sexo VARCHAR(11) NOT NULL,
+    descripcion VARCHAR(200),
+    verificado BOOLEAN DEFAULT FALSE NOT NULL,
+    coordenada VARCHAR(30) NOT NULL,
+    PRIMARY KEY (id_cuenta, id_perfil), 
+	CONSTRAINT fk_id_cuenta_perfil
+    	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+         	ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS suscrita(
+    id_cuenta INT,
+	nombre_tier VARCHAR(10),
+	fecha_inicio DATE NOT NULL,
+	fecha_caducidad DATE NOT NULL,
+    PRIMARY KEY (id_cuenta, nombre_tier),
+	CONSTRAINT fk_id_cuenta_suscrita
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_nombre_tier_suscrita
+	FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
+		ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS maneja(
+    nombre_tier VARCHAR(10),
+	nombre_permiso VARCHAR(100),
+    PRIMARY KEY (nombre_tier, nombre_permiso),
+	CONSTRAINT fk_nombre_tier_maneja
+		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_nombre_permiso_maneja
+		FOREIGN KEY (nombre_permiso) REFERENCES permiso(nombre_permiso)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS likes(
+    id_liker INT,  
+	id_liked INT,
+	super BOOLEAN DEFAULT FALSE NOT NULL,
+	timestamp TIMESTAMP NOT NULL,
+    PRIMARY KEY (id_liker, id_liked),
+	CONSTRAINT fk_id_liker_likes
+		FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_liked_likes
+		FOREIGN KEY (id_liked) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS chatea_con(
+    id_cuenta1 INT,
+	id_perfil1 INT,
+	id_cuenta2 INT,
+	id_perfil2 INT,
+	id_chat INT UNIQUE,
+    PRIMARY KEY (id_cuenta1, id_perfil1, id_cuenta2, id_perfil2),
+	CONSTRAINT fk_id_cuenta1_id_perfil1_chatea_con
+		FOREIGN KEY (id_cuenta1, id_perfil1) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_cuenta2_id_perfil2_chatea_con
+		FOREIGN KEY (id_cuenta2, id_perfil2) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_chat_chatea_con 
+		FOREIGN KEY (id_chat) REFERENCES chat(id_chat)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+
+);
+
+CREATE TABLE IF NOT EXISTS tiene_habilidades(
+    id_cuenta INT,
+	id_perfil INT,
+	habilidades VARCHAR(256),
+    PRIMARY KEY (id_cuenta, id_perfil, habilidades),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_habilidades
+		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
+    id_cuenta INT,
+	id_perfil INT,
+	orientacion_sexual VARCHAR(16),
+    PRIMARY KEY (id_cuenta, id_perfil, orientacion_sexual),
+	CONSTRAINT fk_id_cuenta_id_perfil_tiene_orientacion_sexual
+		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS pref_sexo(
+    id_cuenta INT,
+	id_perfil INT,
+	id_pref INT,
+	sexo VARCHAR(11),
+    PRIMARY KEY (id_cuenta, id_perfil, id_pref, sexo),
+	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_sexo
+		FOREIGN KEY (id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
+			ON DELETE CASCADE	ON UPDATE CASCADE
+);
