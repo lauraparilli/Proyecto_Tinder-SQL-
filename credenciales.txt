@@ -1,0 +1,4 @@
+PGHOST='ep-ancient-block-a5e0v69s.us-east-2.aws.neon.tech'
+PGDATABASE='main'
+PGUSER='main_owner'
+PGPASSWORD='5gvz0EKJGWAI'
