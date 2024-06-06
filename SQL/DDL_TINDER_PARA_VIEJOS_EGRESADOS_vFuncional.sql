@@ -19,10 +19,13 @@ CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
 CREATE DOMAIN metodo_pago AS VARCHAR(16)
 	CONSTRAINT metodo_pago_validos CHECK (VALUE IN ('Tarjeta', 'Paypal', 'Crypto', 'Otro'));
 
+CREATE DOMAIN tipo_tarjeta AS VARCHAR(16)
+	CONSTRAINT tipo_tarjeta_validos CHECK (VALUE IN ('Credito', 'Debito'));
+
 CREATE TABLE IF NOT EXISTS cuenta(
 	id_cuenta INT GENERATED ALWAYS AS IDENTITY,
-	nombre VARCHAR(64) NOT NULL,
-	apellido VARCHAR(64) NOT NULL,
+	nombre VARCHAR(32) NOT NULL,
+	apellido VARCHAR(32) NOT NULL,
 	fecha_nacimiento DATE NOT NULL,
 	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
 	email VARCHAR(255) UNIQUE NOT NULL,
@@ -46,11 +49,11 @@ CREATE TABLE IF NOT EXISTS pago(
 );
 
 CREATE TABLE IF NOT EXISTS tarjeta (
-    digitos_tarjeta VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
-	nombre_titular VARCHAR(32) NOT NULL,
+	digitos_tarjeta VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
+	nombre_titular VARCHAR(65) NOT NULL,
 	fecha_caducidad DATE NOT NULL,
 	codigo_cv VARCHAR(4) CHECK (codigo_cv ~ '^[0-9]{3,4}$'),
-	tipo VARCHAR(16) NOT NULL,
+	tipo tipo_tarjeta NOT NULL,
 	PRIMARY KEY(digitos_tarjeta)
 );
 
