@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS mensaje (
 );
 
 CREATE TABLE IF NOT EXISTS suscrita(
-    id_cuenta INT,
+    	id_cuenta INT,
 	nombre_tier tiers,
 	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL CHECK (EXTRACT(YEAR FROM fecha_inicio) > 2024),
 	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS suscrita(
 
 CREATE TABLE IF NOT EXISTS maneja(
     nombre_tier tiers,
-	nombre_permiso VARCHAR(100),
+    nombre_permiso VARCHAR(100),
     PRIMARY KEY (nombre_tier, nombre_permiso),
 	CONSTRAINT fk_nombre_tier_maneja
 		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS likes(
 	id_liker INT,  
 	id_liked INT,
 	super BOOLEAN DEFAULT FALSE NOT NULL,
-	fecha_like TIMESTAMP NOT NULL,
+	fecha_like TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
     PRIMARY KEY (id_liker, id_liked),
 	CONSTRAINT fk_id_liker_likes
 		FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
