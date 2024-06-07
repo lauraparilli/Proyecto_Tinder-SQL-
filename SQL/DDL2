@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS cuenta(
 	nombre VARCHAR(32) NOT NULL,
 	apellido VARCHAR(32) NOT NULL,
 	fecha_nacimiento DATE NOT NULL CHECK (EXTRACT(YEAR FROM fecha_nacimiento) > 1900),
-	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE CHECK (EXTRACT(YEAR FROM fecha_creacion) > 2024),
+	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
 	email VARCHAR(256) UNIQUE NOT NULL,
 	contrasena VARCHAR(128) NOT NULL,
 	telefono VARCHAR(16) NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS mensaje (
 CREATE TABLE IF NOT EXISTS suscrita(
     	id_cuenta INT,
 	nombre_tier tiers,
-	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL CHECK (EXTRACT(YEAR FROM fecha_inicio) > 2024),
+	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL,
 	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
     PRIMARY KEY (id_cuenta, nombre_tier),
 	CONSTRAINT fk_id_cuenta_suscrita
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS likes(
 	id_liker INT,  
 	id_liked INT,
 	super BOOLEAN DEFAULT FALSE NOT NULL,
-	fecha_like TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+	fecha_like TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_liker, id_liked),
 	CONSTRAINT fk_id_liker_likes
 		FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
