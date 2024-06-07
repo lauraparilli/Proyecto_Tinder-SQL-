@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS suscrita(
     id_cuenta INT,
 	nombre_tier tiers,
 	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL CHECK (EXTRACT(YEAR FROM fecha_inicio) > 2024),
-	fecha_caducidad DATE NOT NULL,
+	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
     PRIMARY KEY (id_cuenta, nombre_tier),
 	CONSTRAINT fk_id_cuenta_suscrita
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
