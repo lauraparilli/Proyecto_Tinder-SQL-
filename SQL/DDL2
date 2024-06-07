@@ -75,10 +75,10 @@ CREATE TABLE IF NOT EXISTS chat(
 );
 
 CREATE TABLE IF NOT EXISTS institucion (
-    dominio VARCHAR(64),
-    nombre VARCHAR(32) NOT NULL,
-    tipo tipo_instituciones NOT NULL,
-    ano_fundacion INT NOT NULL,
+	dominio VARCHAR(64),
+	nombre VARCHAR(32) NOT NULL,
+	tipo tipo_instituciones NOT NULL,
+	ano_fundacion INT NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
 	PRIMARY KEY(dominio)
@@ -93,24 +93,28 @@ CREATE TABLE IF NOT EXISTS empresa(
 );
 
 CREATE TABLE IF NOT EXISTS perfil(
-    id_cuenta INT,
-    id_perfil INT GENERATED ALWAYS AS IDENTITY,
-    sexo sexos NOT NULL,
-    descripcion VARCHAR(256),
-    verificado BOOLEAN DEFAULT FALSE NOT NULL,
-    coordenada VARCHAR(30) NOT NULL,
-    PRIMARY KEY (id_cuenta, id_perfil), 
-    CONSTRAINT fk_id_cuenta_perfil
-    	FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
-         	ON DELETE CASCADE	ON UPDATE CASCADE
+	id_cuenta INT,
+	id_perfil INT GENERATED ALWAYS AS IDENTITY,
+	sexo sexos NOT NULL,
+	descripcion VARCHAR(256),
+	verificado BOOLEAN DEFAULT FALSE NOT NULL,
+	latitud DECIMAL(10, 8) NOT NULL,
+	longitud DECIMAL(11, 8) NOT NULL,
+	PRIMARY KEY (id_cuenta, id_perfil), 
+	CONSTRAINT fk_id_cuenta_perfil
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE INDEX perfil_geo_index ON perfil USING GIST (ST_SetSRID(ST_MakePoint(latitud, longitud), 4326));
 
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
 	id_perfil INT,
 	id_pref INT GENERATED ALWAYS AS IDENTITY,
 	estudio estudios,
-	coordanada_origen VARCHAR(30) NOT NULL,
+	latitud_origen DECIMAL(10, 8) NOT NULL,
+	longitud_origen DECIMAL(11, 8) NOT NULL,
 	distancia_maxima INT DEFAULT 0 CHECK (distancia_maxima <= 3000) NOT NULL,
 	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
 	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
@@ -119,6 +123,8 @@ CREATE TABLE IF NOT EXISTS preferencias(
 		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
+
+CREATE INDEX pref_geo_index ON preferencias USING GIST (ST_SetSRID(ST_MakePoint(latitud_origen, longitud_origen), 4326));
 
 CREATE TABLE IF NOT EXISTS mensaje (
     id_chat INT,
