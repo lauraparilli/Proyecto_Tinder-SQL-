@@ -1,6 +1,10 @@
+-- IMPORTANTE!! Ejecutar esto primero.
+CREATE EXTENSION postgis;  
+
+-- Luego ejecutar esto por separado.
+
 SET search_path TO tinder_viejos_egresados, public;
 SET DATESTYLE TO 'European';
-CREATE EXTENSION postgis; 
 
 CREATE DOMAIN tiers AS VARCHAR(16)
 	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum', 'Otro'));
