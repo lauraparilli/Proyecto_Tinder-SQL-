@@ -266,66 +266,60 @@ CREATE TABLE IF NOT EXISTS realiza(
 
 CREATE TABLE IF NOT EXISTS esta_en_agrupacion (
 	id_cuenta INT,
-	id_perfil INT,
 	dominio VARCHAR(64),
 	agrupacion VARCHAR(64),
-	PRIMARY KEY(id_cuenta, id_perfil, dominio, agrupacion),
-	CONSTRAINT fk_id_cuenta_id_perfil_esta_en_agrupacion
-		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY(id_cuenta, dominio, agrupacion),
+	CONSTRAINT fk_id_cuenta_esta_en_agrupacion
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE 	ON UPDATE CASCADE,
-	CONSTRAINT fk_domino_esta_en_institucion
+	CONSTRAINT fk_domino_esta_en_agrupacion
 		FOREIGN KEY (dominio) REFERENCES institucion(dominio)
 			ON DELETE CASCADE 	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tiene_hobby (
     id_cuenta INT,
-    id_perfil INT,
     hobby VARCHAR(64),
-    PRIMARY KEY(id_cuenta, id_perfil, hobby),
-    CONSTRAINT fk_id_cuenta_id_perfil_tiene_hobby
-        FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+    PRIMARY KEY(id_cuenta, hobby),
+    CONSTRAINT fk_id_cuenta_tiene_hobby
+        FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
         ON DELETE CASCADE	ON UPDATE CASCADE 
 );
 
 
 CREATE TABLE IF NOT EXISTS tiene_habilidades(
 	id_cuenta INT,
-	id_perfil INT,
 	habilidades VARCHAR(256),
-	PRIMARY KEY (id_cuenta, id_perfil, habilidades),
-	CONSTRAINT fk_id_cuenta_id_perfil_tiene_habilidades
-		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY (id_cuenta, habilidades),
+	CONSTRAINT fk_id_cuenta_tiene_habilidades
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tiene_foto(
 	id_cuenta INT,
-	id_perfil INT,
 	foto BYTEA,
-	PRIMARY KEY(id_cuenta, id_perfil, foto),
-	CONSTRAINT fk_id_cuenta_id_perfil_tiene_foto
-		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY(id_cuenta, foto),
+	CONSTRAINT fk_id_cuenta_tiene_foto
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
 	id_cuenta INT,
-	id_perfil INT,
 	orientacion_sexual orientaciones ,
-	PRIMARY KEY (id_cuenta, id_perfil, orientacion_sexual),
-	CONSTRAINT fk_id_cuenta_id_perfil_tiene_orientacion_sexual
-		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY (id_cuenta, orientacion_sexual),
+	CONSTRAINT fk_id_cuenta_tiene_orientacion_sexual
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tiene_certificaciones(
 	id_cuenta INT,
-	id_perfil INT,
 	certificaciones VARCHAR(256),
-	PRIMARY KEY(id_cuenta, id_perfil, certificaciones),
-	CONSTRAINT fk_id_cuenta_id_perfil_tiene_certificaciones
-		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY(id_cuenta, certificaciones),
+	CONSTRAINT fk_id_cuenta_tiene_certificaciones
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
@@ -343,22 +337,18 @@ CREATE TABLE IF NOT EXISTS archivo (
 
 CREATE TABLE IF NOT EXISTS pref_orientacion_sexual(
 	id_cuenta INT,
-	id_perfil INT,
-	id_pref INT,
 	orientacion_sexual orientaciones,
-	PRIMARY KEY(id_cuenta, id_perfil, id_pref, orientacion_sexual),
-	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_orientacion_sexual
-		FOREIGN KEY(id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
+	PRIMARY KEY(id_cuenta, orientacion_sexual),
+	CONSTRAINT fk_id_cuenta_pref_orientacion_sexual
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS pref_sexo(
 	id_cuenta INT,
-	id_perfil INT,
-	id_pref INT,
 	sexo sexos,
-	PRIMARY KEY (id_cuenta, id_perfil, id_pref, sexo),
-	CONSTRAINT fk_id_cuenta_id_perfil_id_pref_pref_sexo
-		FOREIGN KEY (id_cuenta, id_perfil, id_pref) REFERENCES preferencias(id_cuenta, id_perfil, id_pref)
+	PRIMARY KEY (id_cuenta, sexo),
+	CONSTRAINT fk_id_cuenta_pref_sexo
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
