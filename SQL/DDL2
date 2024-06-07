@@ -219,14 +219,13 @@ CREATE TABLE IF NOT EXISTS trabaja_en (
 
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
-	id_perfil INT,
 	dominio VARCHAR(64),
 	titulo VARCHAR(64) NOT NULL, 
 	ano_ingreso INT NOT NULL,
 	ano_egreso INT NOT NULL,
-	PRIMARY KEY(id_cuenta, id_perfil, dominio),
-	CONSTRAINT fk_id_cuenta_id_perfil_estudio_en
-		FOREIGN KEY(id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY(id_cuenta, dominio),
+	CONSTRAINT fk_id_cuenta_estudio_en
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_dominio_estudio_en
 		FOREIGN KEY(dominio) REFERENCES institucion(dominio)
@@ -234,17 +233,15 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 );
 
 CREATE TABLE IF NOT EXISTS chatea_con(
-	id_cuenta1 INT,
-	id_perfil1 INT,
-	id_cuenta2 INT,
-	id_perfil2 INT,
-	id_chat INT UNIQUE NOT NULL,
-	PRIMARY KEY (id_cuenta1, id_perfil1, id_cuenta2, id_perfil2),
-	CONSTRAINT fk_id_cuenta1_id_perfil1_chatea_con
-		FOREIGN KEY (id_cuenta1, id_perfil1) REFERENCES perfil(id_cuenta, id_perfil)
+	id_cuenta1 INT NOT NULL,
+	id_cuenta2 INT NOT NULL,
+	id_chat INT,
+	PRIMARY KEY (id_chat),
+	CONSTRAINT fk_id_cuenta1_chatea_con
+		FOREIGN KEY (id_cuenta1) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
-	CONSTRAINT fk_id_cuenta2_id_perfil2_chatea_con
-		FOREIGN KEY (id_cuenta2, id_perfil2) REFERENCES perfil(id_cuenta, id_perfil)
+	CONSTRAINT fk_id_cuenta2_chatea_con
+		FOREIGN KEY (id_cuenta2) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_chat_chatea_con 
 		FOREIGN KEY (id_chat) REFERENCES chat(id_chat)
