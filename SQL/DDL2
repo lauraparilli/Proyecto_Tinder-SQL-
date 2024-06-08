@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS preferencias(
 	estudio estudios,
 	latitud_origen DECIMAL(10, 8) NOT NULL,
 	longitud_origen DECIMAL(11, 8) NOT NULL,
-	distancia_maxima INT DEFAULT 0 CHECK (distancia_maxima <= 3000) NOT NULL,
+	distancia_maxima INT DEFAULT 3000 CHECK (distancia_maxima <= 3000) NOT NULL,
 	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
 	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
 	PRIMARY KEY (id_cuenta, id_perfil, id_pref), 
