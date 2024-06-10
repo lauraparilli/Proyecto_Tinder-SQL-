@@ -30,6 +30,16 @@ CREATE DOMAIN tipo_tarjeta AS VARCHAR(16)
 CREATE DOMAIN idiomas_app AS CHAR(3)
 	CONSTRAINT idiomas_app_disponibles CHECK (VALUE IN ('ENG', 'ESP'));
 
+CREATE DOMAIN lista_hobbies AS CHAR(64)
+	CONSTRAINT hobbies_validos CHECK (VALUE IN ('Estudiar', 'Programar', 'Leer libros', 'Futbol', 'Escalar', 'Pescar', 'Fotografias',
+	'Trabajar como voluntario', 'Comedia', 'Cafe', 'Comer', 'Disney', 'Amante de los animales', 'Amante de los gatos', 
+	'Amante de los perros', 'Caminar', 'Cocinar', 'Al aire libre', 'Baile', 'Picnic', 'Juegos de mesa', 'Cantar',
+	'Compras', 'Hacer ejercicios', 'Deportes', 'Hornear', 'Jardineria', 'Lectura', 'Jugar videojuegos', 'Peliculas', 
+	'Arte', 'Blogs', 'Yoga', 'Correr', 'Golf', 'Espiritualidad', 'Tomar una copa', 'Viajar', 'Nadar', 'Manualidades', 'Senderismo',
+	'Astrologia', 'Redes sociales', 'Musica', 'Museo', 'Vino', 'Gastronomia', 'Escribir', 'Intercambio de idiomas', 'Vlogging', 
+	'Naturaleza', 'Netflix', 'Kpop', 'Surf', 'Ciclismo', 'Moda', 'Atleta', 'Politica', 
+	'Matematicas', 'Fisica', 'Cerveza artesanal', 'Ver series', 'Dormir', 'Voleibol'));
+
 -- Funcion para importar archivos a la base de datos.
 -- Su uso es el siguiente: insert into my_table(bytea_data) select bytea_import('/my/file.name');
 -- https://dba.stackexchange.com/questions/1742/how-to-insert-file-data-into-a-postgresql-bytea-column
