@@ -27,6 +27,9 @@ CREATE DOMAIN metodo_pago AS VARCHAR(16)
 CREATE DOMAIN tipo_tarjeta AS VARCHAR(16)
 	CONSTRAINT tipo_tarjeta_validos CHECK (VALUE IN ('Credito', 'Debito'));
 
+CREATE DOMAIN idiomas_app AS CHAR(3)
+	CONSTRAINT idiomas_app_disponibles CHECK (VALUE IN ('ENG', 'ESP'));
+
 -- Funcion para importar archivos a la base de datos.
 -- Su uso es el siguiente: insert into my_table(bytea_data) select bytea_import('/my/file.name');
 -- https://dba.stackexchange.com/questions/1742/how-to-insert-file-data-into-a-postgresql-bytea-column
@@ -48,7 +51,7 @@ CREATE TABLE IF NOT EXISTS cuenta(
 	email VARCHAR(256) UNIQUE NOT NULL,
 	contrasena VARCHAR(128) NOT NULL,
 	telefono VARCHAR(16) UNIQUE NOT NULL,
-	idioma CHAR(3) DEFAULT 'ESP' NOT NULL,
+	idioma idiomas_app DEFAULT 'ESP' NOT NULL,
 	notificaciones BOOLEAN DEFAULT TRUE NOT NULL, 
 	tema BOOLEAN DEFAULT TRUE NOT NULL,
 	PRIMARY KEY (id_cuenta)
@@ -116,7 +119,7 @@ CREATE TABLE IF NOT EXISTS perfil(
 	verificado BOOLEAN DEFAULT FALSE NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
-	PRIMARY KEY (id_cuenta, id_perfil), 
+	PRIMARY KEY (id_cuenta), 
 	CONSTRAINT fk_id_cuenta_perfil
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
@@ -126,7 +129,6 @@ CREATE INDEX perfil_geo_index ON perfil USING GIST (ST_SetSRID(ST_MakePoint(lati
 
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
-	id_perfil INT,
 	id_pref INT GENERATED ALWAYS AS IDENTITY,
 	estudio estudios,
 	latitud_origen DECIMAL(10, 8) NOT NULL,
@@ -134,9 +136,9 @@ CREATE TABLE IF NOT EXISTS preferencias(
 	distancia_maxima INT DEFAULT 5 CHECK (distancia_maxima <= 3000) NOT NULL,
 	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
 	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
-	PRIMARY KEY (id_cuenta, id_perfil, id_pref), 
-	CONSTRAINT fk_id_cuenta_id_perfil_preferencias
-		FOREIGN KEY (id_cuenta, id_perfil) REFERENCES perfil(id_cuenta, id_perfil)
+	PRIMARY KEY (id_cuenta), 
+	CONSTRAINT fk_id_cuenta_preferencias
+		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
@@ -165,7 +167,7 @@ CREATE TABLE IF NOT EXISTS suscrita(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_nombre_tier_suscrita
 		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE RESTRICT	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS maneja(
@@ -245,7 +247,7 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_dominio_estudio_en
 		FOREIGN KEY(dominio) REFERENCES institucion(dominio)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE RESTRICT	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS chatea_con(
@@ -345,7 +347,7 @@ CREATE TABLE IF NOT EXISTS archivo (
 	nombre VARCHAR(128),
 	tipo VARCHAR(16),
 	contenido BYTEA,
-	PRIMARY KEY(id_chat, numero_msj, nombre,tipo, contenido),
+	PRIMARY KEY(id_chat, numero_msj, nombre),
 	CONSTRAINT fk_id_chat_numero_msj_archivo
 		FOREIGN KEY(id_chat, numero_msj) REFERENCES mensaje(id_chat, numero_msj)
 			ON DELETE CASCADE 	ON UPDATE CASCADE
