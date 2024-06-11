@@ -152,13 +152,14 @@ CREATE TABLE IF NOT EXISTS perfil(
 	verificado BOOLEAN DEFAULT FALSE NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
+	coordenada geometry(POINT, 4326),
 	PRIMARY KEY (id_cuenta),
 	CONSTRAINT fk_id_cuenta_perfil
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX perfil_geo_index ON perfil USING GIST (ST_SetSRID(ST_MakePoint(longitud, latitud), 4326));
+CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
 
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
@@ -168,13 +169,14 @@ CREATE TABLE IF NOT EXISTS preferencias(
 	distancia_maxima INT DEFAULT 5 CHECK (distancia_maxima <= 3000) NOT NULL,
 	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
 	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
+	coordenada_origen geometry(POINT, 4326),
 	PRIMARY KEY (id_cuenta), 
 	CONSTRAINT fk_id_cuenta_preferencias
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX pref_geo_index ON preferencias USING GIST (ST_SetSRID(ST_MakePoint(latitud_origen, longitud_origen), 4326));
+CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen);
 
 CREATE TABLE IF NOT EXISTS institucion (
 	dominio VARCHAR(64),
@@ -183,10 +185,11 @@ CREATE TABLE IF NOT EXISTS institucion (
 	ano_fundacion INT NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
+	coordenada geometry(POINT, 4326),
 	PRIMARY KEY(dominio)
 );
 
-CREATE INDEX institucion_geo_index ON institucion USING GIST (ST_SetSRID(ST_MakePoint(latitud, longitud), 4326));
+CREATE INDEX institucion_geo_index ON institucion USING GIST (coordenada);
 
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
