@@ -158,6 +158,8 @@ CREATE TABLE IF NOT EXISTS perfil(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
+CREATE INDEX perfil_geo_index ON perfil USING GIST (ST_SetSRID(ST_MakePoint(longitud, latitud), 4326));
+
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
 	estudio estudios,
@@ -172,6 +174,8 @@ CREATE TABLE IF NOT EXISTS preferencias(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
+CREATE INDEX pref_geo_index ON preferencias USING GIST (ST_SetSRID(ST_MakePoint(latitud_origen, longitud_origen), 4326));
+
 CREATE TABLE IF NOT EXISTS institucion (
 	dominio VARCHAR(64),
 	nombre VARCHAR(32) NOT NULL,
@@ -181,6 +185,8 @@ CREATE TABLE IF NOT EXISTS institucion (
 	longitud DECIMAL(11, 8) NOT NULL,
 	PRIMARY KEY(dominio)
 );
+
+CREATE INDEX institucion_geo_index ON institucion USING GIST (ST_SetSRID(ST_MakePoint(latitud, longitud), 4326));
 
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
