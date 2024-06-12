@@ -13,8 +13,11 @@ CREATE OR REPLACE FUNCTION insert_coordenada_origen()
 RETURNS TRIGGER AS
 $$
 BEGIN
-	New.coordenada_origen = ST_SetSRID(ST_MakePoint(New.longitud_origen, New.latitud_origen), 4326);
+    IF New.longitud_origen IS NOT NULL AND New.latitud_origen IS NOT NULL THEN
+        New.coordenada_origen = ST_SetSRID(ST_MakePoint(New.longitud_origen, New.latitud_origen), 4326);
+    END IF;
     RETURN NEW;
 END;
 $$
- LANGUAGE plpgsql;
+
+LANGUAGE plpgsql;
