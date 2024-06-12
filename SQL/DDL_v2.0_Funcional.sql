@@ -6,6 +6,7 @@
 -- DDL_v2.0_Funcional.sql Archivo de creacion de tablas y funciones para la BD de Tinder para Viejos Egresados.
 
 -- IMPORTANTE!! Ejecutar esto primero.
+SET search_path TO tinder_viejos_egresados, public;
 CREATE EXTENSION postgis;
 -- Si no tenes postgis ve https://geoinnova.org/blog-territorio/como-instalar-postgis-3-0-en-windows/
 
