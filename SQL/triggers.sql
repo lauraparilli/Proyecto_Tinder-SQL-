@@ -8,7 +8,7 @@ BEFORE INSERT ON perfil
 FOR EACH ROW
 EXECUTE PROCEDURE insert_coordenada();
 
-CREATE TRIGGER pref_insert_coordenada_origen_trigger
+CREATE TRIGGER set_latitud_longitud_origen_trigger
 BEFORE INSERT ON preferencias
 FOR EACH ROW
-EXECUTE PROCEDURE insert_coordenada_origen();
+EXECUTE PROCEDURE set_latitud_longitud_origen();
