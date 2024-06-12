@@ -164,8 +164,8 @@ CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
 	estudio estudios,
-	latitud_origen DECIMAL(10, 8) NOT NULL,
-	longitud_origen DECIMAL(11, 8) NOT NULL,
+	latitud_origen DECIMAL(10, 8),
+	longitud_origen DECIMAL(11, 8),
 	distancia_maxima INT DEFAULT 5 CHECK (distancia_maxima <= 3000) NOT NULL,
 	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
 	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
