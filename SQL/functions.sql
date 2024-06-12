@@ -18,7 +18,7 @@ BEGIN
         FROM perfil p
         WHERE p.id_cuenta = NEW.id_cuenta;
     END IF;
-	New.coordenada_origen = ST_SetSRID(ST_MakePoint(New.longitud_origen, New.latitud_origen), 4326);
+    New.coordenada_origen = ST_SetSRID(ST_MakePoint(New.longitud_origen, New.latitud_origen), 4326);
     RETURN NEW;
 END;
 $$
