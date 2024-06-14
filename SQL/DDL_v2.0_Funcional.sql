@@ -15,7 +15,7 @@ SET search_path TO tinder_viejos_egresados, public;
 SET DATESTYLE TO 'European';
 
 CREATE DOMAIN tiers AS VARCHAR(16)
-	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum', 'Otro'));
+	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum'));
 
 CREATE DOMAIN sexos AS VARCHAR(4)
 	CONSTRAINT sexos_validos CHECK (VALUE IN ('M', 'F', 'Otro'));
@@ -39,7 +39,7 @@ CREATE DOMAIN idiomas_app AS CHAR(3)
 	CONSTRAINT idiomas_app_disponibles CHECK (VALUE IN ('ENG', 'ESP'));
 
 CREATE DOMAIN hobbies AS VARCHAR(64)
-	CONSTRAINT hobbies_validos CHECK (VALUE IN ('Estudiar', 'Programar', 'Leer libros', 'Futbol', 'Escalar', 'Pescar', 'Fotografias',
+	CONSTRAINT hobbies_validos CHECK (VALUE IN ('Estudiar', 'Programar', 'Futbol', 'Escalar', 'Pescar', 'Fotografias',
 	'Trabajar como voluntario', 'Comedia', 'Cafe', 'Comer', 'Disney', 'Amante de los animales', 'Amante de los gatos', 
 	'Amante de los perros', 'Caminar', 'Cocinar', 'Al aire libre', 'Baile', 'Picnic', 'Juegos de mesa', 'Cantar',
 	'Compras', 'Hacer ejercicios', 'Deportes', 'Hornear', 'Jardineria', 'Lectura', 'Jugar videojuegos', 'Peliculas', 
@@ -52,8 +52,8 @@ CREATE DOMAIN hobbies AS VARCHAR(64)
 
 CREATE DOMAIN habilidades AS VARCHAR(64)
 	CONSTRAINT habilidades_validas CHECK (VALUE IN ('Analítica', 'Artística', 'Atención al detalle', 'Autodisciplina', 
-	'Capacidad de aprendizaje', 'Capacidad de enseñanza', 'Capacidad de escucha', 'Capacidad de negociación', 
-	'Capacidad de organización', 'Capacidad de persuasión', 'Capacidad de planificación', 'Capacidad de toma de decisiones',
+	'Capacidad de aprendizaje', 'Enseñanza', 'Capacidad de escucha', 'Negociación', 
+	'Organización', 'Persuasión', 'Planificación', 'Toma de decisiones',
 	'Capacidad para trabajar bajo presión', 'Creatividad', 'Empatía', 'Energía', 'Flexibilidad', 'Habilidades de comunicación',
 	'Habilidades de liderazgo', 'Habilidades de venta', 'Habilidades interpersonales', 'Habilidades matemáticas', 
 	'Habilidades técnicas', 'Iniciativa', 'Inteligencia emocional', 'Motivación', 'Paciencia', 'Perseverancia', 
@@ -74,8 +74,8 @@ END;$$;
 
 CREATE TABLE IF NOT EXISTS cuenta(
 	id_cuenta INT GENERATED ALWAYS AS IDENTITY,
-	nombre VARCHAR(32) NOT NULL,
-	apellido VARCHAR(32) NOT NULL,
+	nombre VARCHAR(64) NOT NULL,
+	apellido VARCHAR(64) NOT NULL,
 	fecha_nacimiento DATE NOT NULL CHECK (EXTRACT(YEAR FROM age(CURRENT_DATE, fecha_nacimiento)) BETWEEN 30 AND 99),
 	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
 	email VARCHAR(256) UNIQUE NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS pago(
 
 CREATE TABLE IF NOT EXISTS tarjeta (
 	digitos_tarjeta VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
-	nombre_titular VARCHAR(65) NOT NULL,
+	nombre_titular VARCHAR(24) NOT NULL,
 	fecha_caducidad DATE NOT NULL,
 	codigo_cv VARCHAR(4) CHECK (codigo_cv ~ '^[0-9]{3,4}$'),
 	tipo tipo_tarjeta NOT NULL,
@@ -120,24 +120,24 @@ CREATE TABLE IF NOT EXISTS realiza(
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_digitos_tarjeta_realiza
 		FOREIGN KEY(digitos_tarjeta) REFERENCES tarjeta(digitos_tarjeta)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE SET NULL	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tier(
-    nombre_tier tiers,
-    PRIMARY KEY (nombre_tier)
+	nombre_tier tiers,
+	PRIMARY KEY (nombre_tier)
 );
 
 CREATE TABLE IF NOT EXISTS permiso(
-    nombre_permiso VARCHAR(100),
-    descripcion_permiso VARCHAR(256) NOT NULL,
-    PRIMARY KEY (nombre_permiso)
+	nombre_permiso VARCHAR(100),
+	descripcion_permiso VARCHAR(256) NOT NULL,
+	PRIMARY KEY (nombre_permiso)
 );
 
 CREATE TABLE IF NOT EXISTS maneja(
-    nombre_tier tiers,
-    nombre_permiso VARCHAR(100),
-    PRIMARY KEY (nombre_tier, nombre_permiso),
+	nombre_tier tiers,
+	nombre_permiso VARCHAR(100),
+	PRIMARY KEY (nombre_tier, nombre_permiso),
 	CONSTRAINT fk_nombre_tier_maneja
 		FOREIGN KEY (nombre_tier) REFERENCES tier(nombre_tier)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS maneja(
 CREATE TABLE IF NOT EXISTS perfil(
 	id_cuenta INT,
 	sexo sexos NOT NULL,
-	descripcion VARCHAR(256),
+	descripcion VARCHAR(1024),
 	verificado BOOLEAN DEFAULT FALSE NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 	titulo VARCHAR(64) NOT NULL, 
 	ano_ingreso INT NOT NULL,
 	ano_egreso INT NOT NULL,
-	PRIMARY KEY(id_cuenta, dominio),
+	PRIMARY KEY(id_cuenta, dominio, titulo),
 	CONSTRAINT fk_id_cuenta_estudio_en
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -208,31 +208,32 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 );
 
 CREATE TABLE IF NOT EXISTS empresa(
-    id_empresa INT GENERATED ALWAYS AS IDENTITY,
-    nombre_empresa VARCHAR(100) NOT NULL,
-    PRIMARY KEY(id_empresa)
+	id_empresa INT GENERATED ALWAYS AS IDENTITY,
+	nombre_empresa VARCHAR(100) NOT NULL,
+	url VARCHAR(2084) UNIQUE NOT NULL,
+	PRIMARY KEY(id_empresa)
 );
 
 CREATE TABLE IF NOT EXISTS trabaja_en(
-    id_cuenta INT,
-    id_empresa INT,
-    cargo VARCHAR(32) NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    PRIMARY KEY(id_cuenta, id_empresa),
-    CONSTRAINT fk_id_cuenta_trabaja_en
-        FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
-        	ON DELETE CASCADE	ON UPDATE CASCADE,
-    CONSTRAINT fk_id_empresa_trabaja_en
-        FOREIGN KEY(id_empresa) REFERENCES empresa(id_empresa)
-        	ON DELETE CASCADE	ON UPDATE CASCADE	
+	id_cuenta INT,
+	id_empresa INT,
+	cargo VARCHAR(64) NOT NULL,
+	fecha_inicio DATE NOT NULL,
+	PRIMARY KEY(id_cuenta, id_empresa),
+	CONSTRAINT fk_id_cuenta_trabaja_en
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_empresa_trabaja_en
+		FOREIGN KEY(id_empresa) REFERENCES empresa(id_empresa)
+			ON DELETE CASCADE	ON UPDATE CASCADE	
 );
 
 CREATE TABLE IF NOT EXISTS suscrita(
-    id_cuenta INT,
+	id_cuenta INT,
 	nombre_tier tiers,
 	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL,
 	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
-    PRIMARY KEY (id_cuenta, nombre_tier, fecha_inicio),
+	PRIMARY KEY (id_cuenta, nombre_tier, fecha_inicio),
 	CONSTRAINT fk_id_cuenta_suscrita
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -246,7 +247,7 @@ CREATE TABLE IF NOT EXISTS likes(
 	id_liked INT,
 	super BOOLEAN DEFAULT FALSE NOT NULL,
 	fecha_like TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_liker, id_liked),
+    	PRIMARY KEY (id_liker, id_liked),
 	CONSTRAINT fk_id_liker_likes
 		FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -256,15 +257,15 @@ CREATE TABLE IF NOT EXISTS likes(
 );
 
 CREATE TABLE IF NOT EXISTS swipes(
-    id_disliker INT,
-    id_disliked INT,
-    PRIMARY KEY (id_disliker, id_disliked),
-    CONSTRAINT fk_id_disliker_swipes
-    	FOREIGN KEY (id_disliker) REFERENCES cuenta(id_cuenta)
-		ON DELETE CASCADE	ON UPDATE CASCADE,
-    CONSTRAINT fk_id_disliked_swipes
-    	FOREIGN KEY (id_disliked) REFERENCES cuenta(id_cuenta)
-		ON DELETE CASCADE	ON UPDATE CASCADE
+	id_disliker INT,
+	id_disliked INT,
+	PRIMARY KEY (id_disliker, id_disliked),
+	CONSTRAINT fk_id_disliker_swipes
+		FOREIGN KEY (id_disliker) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE,
+	CONSTRAINT fk_id_disliked_swipes
+		FOREIGN KEY (id_disliked) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS match_with(
@@ -281,20 +282,21 @@ CREATE TABLE IF NOT EXISTS match_with(
 );
 
 CREATE TABLE IF NOT EXISTS chat(
-    id_chat INT GENERATED ALWAYS AS IDENTITY,
-    PRIMARY KEY(id_chat)
+	id_chat INT GENERATED ALWAYS AS IDENTITY,
+	PRIMARY KEY(id_chat)
 );
 
 CREATE TABLE IF NOT EXISTS mensaje(
-    id_chat INT,
-    numero_msj INT GENERATED ALWAYS AS IDENTITY,
-    id_remitente INT NOT NULL,
-    visto BOOLEAN DEFAULT FALSE,
-    texto TEXT DEFAULT '' NOT NULL,
-    fecha_msj TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY(id_chat, numero_msj),
-    CONSTRAINT fk_id_chat_mensaje
-        FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
+	id_chat INT,
+	numero_msj INT GENERATED ALWAYS AS IDENTITY,
+	id_remitente INT NOT NULL,
+	visto BOOLEAN DEFAULT FALSE,
+	texto TEXT DEFAULT '' NOT NULL,
+	fecha_msj TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(id_chat, numero_msj),
+	CONSTRAINT fk_id_chat_mensaje
+        	FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS archivo(
@@ -310,16 +312,16 @@ CREATE TABLE IF NOT EXISTS archivo(
 );
 
 CREATE TABLE IF NOT EXISTS chatea_con(
-	id_cuenta1 INT NOT NULL,
-	id_cuenta2 INT NOT NULL,
+	id_cuenta1 INT,
+	id_cuenta2 INT,
 	id_chat INT,
 	PRIMARY KEY (id_chat),
 	CONSTRAINT fk_id_cuenta1_chatea_con
 		FOREIGN KEY (id_cuenta1) REFERENCES cuenta(id_cuenta)
-			ON DELETE CASCADE	ON UPDATE CASCADE,
+			ON DELETE SET NULL	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_cuenta2_chatea_con
 		FOREIGN KEY (id_cuenta2) REFERENCES cuenta(id_cuenta)
-			ON DELETE CASCADE	ON UPDATE CASCADE,
+			ON DELETE SET NULL	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_chat_chatea_con 
 		FOREIGN KEY (id_chat) REFERENCES chat(id_chat)
 			ON DELETE CASCADE	ON UPDATE CASCADE
@@ -339,12 +341,12 @@ CREATE TABLE IF NOT EXISTS esta_en_agrupacion(
 );
 
 CREATE TABLE IF NOT EXISTS tiene_hobby(
-    id_cuenta INT,
-    hobby hobbies,
-    PRIMARY KEY(id_cuenta, hobby),
-    CONSTRAINT fk_id_cuenta_tiene_hobby
-        FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
-        ON DELETE CASCADE	ON UPDATE CASCADE 
+	id_cuenta INT,
+	hobby hobbies,
+	PRIMARY KEY(id_cuenta, hobby),
+	CONSTRAINT fk_id_cuenta_tiene_hobby
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
+        		ON DELETE CASCADE	ON UPDATE CASCADE 
 );
 
 
