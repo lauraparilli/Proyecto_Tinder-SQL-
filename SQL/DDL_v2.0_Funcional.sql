@@ -360,10 +360,11 @@ CREATE TABLE IF NOT EXISTS tiene_habilidades(
 );
 
 CREATE TABLE IF NOT EXISTS tiene_foto(
-	id_cuenta INT,
-	foto BYTEA,
-	PRIMARY KEY(id_cuenta, foto),
-	CONSTRAINT fk_id_cuenta_tiene_foto
+    id_foto INT GENERATED ALWAYS AS IDENTITY,
+    id_cuenta INT,
+    foto BYTEA NOT NULL,
+    PRIMARY KEY (id_cuenta, id_foto),
+    CONSTRAINT fk_id_cuenta_tiene_foto
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
