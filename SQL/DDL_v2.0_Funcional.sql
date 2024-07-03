@@ -181,7 +181,7 @@ CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen);
 
 CREATE TABLE IF NOT EXISTS institucion (
 	dominio VARCHAR(64),
-	nombre VARCHAR(32) NOT NULL,
+	nombre VARCHAR(256) NOT NULL,
 	tipo tipo_instituciones NOT NULL,
 	ano_fundacion INT NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
