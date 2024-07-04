@@ -140,6 +140,39 @@ $$ LANGUAGE plpgsql;
 
 
 /*
+* Funcion: insert_preferences
+*
+* Uso: Insertar las preferencias de un usuario en la tabla de preferencias.
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
+*  - p_estudio: (Opcional) TEXT del nivel de estudio del usuario.
+*  - p_latitud_origen: (Opcional) DECIMAL de la latitud de preferencia del usuario.
+*  - p_longitud_origen: (Opcional) DECIMAL de la longitud de preferencia del usuario.
+*  - p_distancia_maxima: (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
+*  - p_min_edad: (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
+*  - p_max_edad: (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_preferences(
+    p_id_cuenta INTEGER,
+    p_estudio TEXT DEFAULT NULL,
+    p_latitud_origen DECIMAL(10, 8) DEFAULT NULL,
+    p_longitud_origen DECIMAL(11, 8) DEFAULT NULL,
+    p_distancia_maxima INTEGER DEFAULT 5,
+    p_min_edad INTEGER DEFAULT 30,
+    p_max_edad INTEGER DEFAULT 99
+)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO preferencias(id_cuenta, estudio, latitud_origen, longitud_origen, distancia_maxima, min_edad, max_edad)
+    VALUES (p_id_cuenta, p_estudio, p_latitud_origen, p_longitud_origen, p_distancia_maxima, p_min_edad, p_max_edad);
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
 * Función: update_preferences
 *
 * Uso: Actualiza las preferencias de un usuario en la tabla de preferencias.
