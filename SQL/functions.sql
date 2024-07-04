@@ -199,9 +199,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT * from perfil;
-
-
+/*
+* Funcion: set_true_verificado
+*
+* Uso: Setea true cuando el usuario completo exitosamente el proceso de verificar perfil
+*
+* Parametros:
+*   - p_id_cuenta: Valor entero que representa el id de la cuenta
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION set_true_verificado(p_id_cuenta integer)
+RETURNS void AS
+$$
+BEGIN
+    UPDATE perfil
+    SET verificado = TRUE
+    WHERE id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
 
 /*
 * Funcion: insert_preferences
