@@ -57,10 +57,10 @@ LANGUAGE plpgsql;
  *   - telefono_u: Texto que representa el número de teléfono del usuario.
  *   - email_u: Texto que representa el correo electrónico del usuario.
  *   - password_hash: Texto que representa el hash de la contraseña del usuario.
- *   - idioma_u: 3 caracteres que representa el idioma preferido del usuario.
+ *   - idioma_u: Texto que representa el idioma preferido del usuario.
  *   - notificaciones_u: Valor booleano que indica si el usuario desea recibir notificaciones.
  *   - tema_u: Valor booleano que indica el tema preferido del usuario.
- *   - sexo_u: Carácter que representa el sexo del usuario.
+ *   - sexo_u: Texto que representa el sexo del usuario.
  *   - latitud_u: Valor decimal que representa la latitud de la ubicación del usuario.
  *   - longitud_u: Valor decimal que representa la longitud de la ubicación del usuario.
  *   - foto_u: Arreglo de textos en formato base64 que representa las fotos del usuario.
@@ -71,7 +71,7 @@ LANGUAGE plpgsql;
  *
  * Retorna: Nada.
  */
-CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u CHAR, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, titulo_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
+CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, titulo_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
 RETURNS VOID 
 LANGUAGE plpgsql
 AS $$
