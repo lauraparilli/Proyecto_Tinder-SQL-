@@ -178,6 +178,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: update_sexo_perfil
+*
+* Uso: Actualiza el sexo de un perfil de una cuenta
+*
+* Parametros:
+*   - p_id_cuenta: Valor entero que representa el id de la cuenta
+*   - p_sexo: Texto que representa el sexo del perfil a modificar
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_sexo_perfil(p_id_cuenta integer, p_sexo text)
+RETURNS void AS
+$$
+BEGIN
+    UPDATE perfil
+    SET sexo = p_sexo
+    WHERE id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * from perfil;
+
+
 
 /*
 * Funcion: insert_preferences
