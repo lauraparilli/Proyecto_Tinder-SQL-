@@ -57,13 +57,13 @@ LANGUAGE plpgsql;
  *   - telefono_u: Texto que representa el número de teléfono del usuario.
  *   - email_u: Texto que representa el correo electrónico del usuario.
  *   - password_hash: Texto que representa el hash de la contraseña del usuario.
- *   - idioma_u: Carácter que representa el idioma preferido del usuario.
+ *   - idioma_u: 3 caracteres que representa el idioma preferido del usuario.
  *   - notificaciones_u: Valor booleano que indica si el usuario desea recibir notificaciones.
  *   - tema_u: Valor booleano que indica el tema preferido del usuario.
- *   - sexo_u: Texto que representa el sexo del usuario.
+ *   - sexo_u: Carácter que representa el sexo del usuario.
  *   - latitud_u: Valor decimal que representa la latitud de la ubicación del usuario.
  *   - longitud_u: Valor decimal que representa la longitud de la ubicación del usuario.
- *   - foto_u: Arreglo de textos que representa las fotos del usuario en formato base64.
+ *   - foto_u: Arreglo de textos en formato base64 que representa las fotos del usuario.
  *   - dominio_institucion: Texto que representa el dominio de la institución a la que estudio el usuario.
  *   - titulo_u: Texto que representa el título académico del usuario.
  *   - anio_ingreso: Valor entero que representa el año de ingreso a la institución.
