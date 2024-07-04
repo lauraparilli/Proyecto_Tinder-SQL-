@@ -44,6 +44,25 @@ $$
 LANGUAGE plpgsql;
 
 
+/**
+ * Funcion: getAllInstitutions
+
+ * Parametros: Ninguna
+
+ * Uso: Retorna una tabla con los dominios y nombres de todas las instituciones registradas en la base de datos para que el usuario pueda seleccionar una de ellas al momento de registrarse
+
+ * Retorna: Tabla con los dominios y nombres de todas las instituciones
+ */
+CREATE OR REPLACE FUNCTION getAllInstitutions()
+RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) 
+AS $$
+BEGIN
+    RETURN QUERY SELECT i.dominio, i.nombre AS dominio_nombre FROM institucion i;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
 
 /*
  * Función: create_new_user
@@ -145,21 +164,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-/**
- * Funcion: getAllInstitutions
-
- * Parametros: Ninguna
-
- * Uso: Retorna una tabla con los dominios y nombres de todas las instituciones registradas en la base de datos para que el usuario pueda seleccionar una de ellas al momento de registrarse
-
- * Retorna: Tabla con los dominios y nombres de todas las instituciones
- */
-CREATE OR REPLACE FUNCTION getAllInstitutions()
-RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) 
-AS $$
+/*
+* Funcion: update_location_account
+*
+* Uso: Actualiza la ubicacion del usuario
+*
+* Parametros:
+*   - p_id_cuenta: Valor entero que representa el id de la cuenta
+*   - p_latitud: DECIMAL que representa la nueva latitud del usuario
+*   - p_longitud: DECIMAL que representa la nueva longitud del usuario
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_location_account(p_id_cuenta INTEGER, p_latitud DECIMAL, p_longitud DECIMAL) 
+RETURNS void AS
+$$
 BEGIN
-    RETURN QUERY SELECT i.dominio, i.nombre AS dominio_nombre FROM institucion i;
+    UPDATE perfil 
+    SET latitud = p_latitud, 
+        longitud = p_longitud 
+    WHERE id_cuenta = p_id_cuenta;
 END;
 $$ LANGUAGE plpgsql;
 
