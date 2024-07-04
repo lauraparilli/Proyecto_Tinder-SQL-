@@ -179,3 +179,22 @@ $$
  LANGUAGE plpgsql;
 
 -- Ejemplo de uso SELECT update_preferences(p_id_cuenta := 19, p_estudio := 'Doctorado', p_distancia_maxima := 50);
+
+/*
+* Función: insert_pref_sexo
+*
+* Uso: Inserta una nueva preferencia de sexo para un usuario en la tabla de pref_sexo
+* 
+* Parametros: 
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario
+*  - p_sexo: Texto que indica el nuevo sexo de preferencia del usuario
+* 
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_pref_sexo(p_id_cuenta INTEGER, p_sexo TEXT)
+RETURNS VOID
+AS $$
+BEGIN
+    INSERT INTO pref_sexo(id_cuenta, sexo) VALUES (p_id_cuenta, p_sexo);
+END;
+$$ LANGUAGE plpgsql;
