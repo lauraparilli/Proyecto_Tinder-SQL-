@@ -198,3 +198,24 @@ BEGIN
     INSERT INTO pref_sexo(id_cuenta, sexo) VALUES (p_id_cuenta, p_sexo);
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: insert_pref_orientacion_sexual
+*
+* Uso: Inserta una nueva preferencia de orientacion sexual para un usuario en la tabla de pref_orientacion_sexual
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario
+*  - p_orientacion_sexual: Texto que indica la nueva orientacion sexual de preferencia del usuario
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_pref_orientacion_sexual(p_id_cuenta INTEGER, p_orientacion_sexual TEXT)
+RETURNS VOID
+AS $$
+BEGIN
+    INSERT INTO pref_orientacion_sexual(id_cuenta, orientacion_sexual) VALUES (p_id_cuenta, p_orientacion_sexual);
+END;
+$$ LANGUAGE plpgsql;
+
