@@ -201,6 +201,27 @@ $$ LANGUAGE plpgsql;
 
 
 /*
+* Funcion: delete_pref_sexo
+*
+* Uso: Elimina una preferencia de sexo de un usuario en la tabla de pref_sexo
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario
+*  - p_sexo: Texto que indica el sexo a eliminar de las preferencias del usuario
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_pref_sexo(p_id_cuenta INTEGER, p_sexo TEXT)
+RETURNS VOID
+AS $$
+BEGIN
+    DELETE FROM pref_sexo WHERE id_cuenta = p_id_cuenta AND sexo = p_sexo;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+/*
 * Funcion: insert_pref_orientacion_sexual
 *
 * Uso: Inserta una nueva preferencia de orientacion sexual para un usuario en la tabla de pref_orientacion_sexual
@@ -219,3 +240,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: delete_pref_orientacion_sexual
+*
+* Uso: Elimina una preferencia de orientacion sexual de un usuario en la tabla de pref_orientacion_sexual
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario
+*  - p_orientacion_sexual: Texto que indica la orientacion sexual a eliminar de las preferencias del usuario
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_pref_orientacion_sexual(p_id_cuenta INTEGER, p_orientacion_sexual TEXT)
+RETURNS VOID
+AS $$
+BEGIN
+    DELETE FROM pref_orientacion_sexual WHERE id_cuenta = p_id_cuenta AND orientacion_sexual = p_orientacion_sexual;
+END;
+$$ LANGUAGE plpgsql;
