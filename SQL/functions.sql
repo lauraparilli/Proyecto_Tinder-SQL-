@@ -177,3 +177,5 @@ BEGIN
 END;
 $$
  LANGUAGE plpgsql;
+
+-- Ejemplo de uso SELECT update_preferences(p_id_cuenta := 19, p_estudio := 'Doctorado', p_distancia_maxima := 50);
