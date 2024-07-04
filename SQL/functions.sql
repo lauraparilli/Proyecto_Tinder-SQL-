@@ -137,3 +137,43 @@ BEGIN
     UPDATE perfil SET descripcion = new_descripcion WHERE id_cuenta = id_user;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+* Función: update_preferences
+*
+* Uso: Actualiza las preferencias de un usuario en la tabla de preferencias.
+*
+* Parámetros:
+*    - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
+*    - p_estudio: (Opcional) TEXT del nivel de estudio del usuario.
+*    - p_latitud_origen: (Opcional) DECIMAL de la latitud de preferencia del usuario.
+*    - p_longitud_origen: (Opcional) DECIMAL de la longitud de preferencia del usuario.
+*    - p_distancia_maxima: (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
+*    - p_min_edad: (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
+*    - p_max_edad: (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_preferences(
+    p_id_cuenta INTEGER,
+    p_estudio TEXT DEFAULT NULL,
+    p_latitud_origen DECIMAL(10, 8) DEFAULT NULL,
+    p_longitud_origen DECIMAL(11, 8) DEFAULT NULL,
+    p_distancia_maxima INTEGER DEFAULT NULL,
+    p_min_edad INTEGER DEFAULT NULL,
+    p_max_edad INTEGER DEFAULT NULL
+)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE preferencias
+    SET estudio = CASE WHEN p_estudio IS NOT NULL THEN p_estudio ELSE estudio END, 
+        latitud_origen = CASE WHEN p_latitud_origen IS NOT NULL THEN p_latitud_origen ELSE latitud_origen END,
+        longitud_origen = CASE WHEN p_longitud_origen IS NOT NULL THEN p_longitud_origen ELSE longitud_origen END,
+        distancia_maxima = CASE WHEN p_distancia_maxima IS NOT NULL THEN p_distancia_maxima ELSE distancia_maxima END,
+        min_edad = CASE WHEN p_min_edad IS NOT NULL THEN p_min_edad ELSE min_edad END,
+        max_edad = CASE WHEN p_max_edad IS NOT NULL THEN p_max_edad ELSE max_edad END
+    WHERE id_cuenta = p_id_cuenta;
+END;
+$$
+ LANGUAGE plpgsql;
