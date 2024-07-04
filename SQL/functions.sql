@@ -105,3 +105,20 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+/**
+ * Funcion: getAllInstitutions
+
+ * Parametros: Ninguna
+
+ * Uso: Retorna una tabla con los dominios y nombres de todas las instituciones registradas en la base de datos para que el usuario pueda seleccionar una de ellas al momento de registrarse
+
+ * Retorna: Tabla con los dominios y nombres de todas las instituciones
+ */
+CREATE OR REPLACE FUNCTION getAllInstitutions()
+RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) 
+AS $$
+BEGIN
+    RETURN QUERY SELECT i.dominio, i.nombre AS dominio_nombre FROM institucion i;
+END;
+$$ LANGUAGE plpgsql;
