@@ -122,3 +122,18 @@ BEGIN
     RETURN QUERY SELECT i.dominio, i.nombre AS dominio_nombre FROM institucion i;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: updateDescriptionOnPerfil
+* 
+* Parametros: 
+*  - id_cuenta: Valor entero del nombre del usuario a editar la descripcion del perfil
+*  - new_descripcion: Texto con la nueva descripcion del perfil
+*/
+CREATE OR REPLACE FUNCTION updateDescriptionOnPerfil(id_user INTEGER, new_descripcion TEXT)
+RETURNS VOID
+AS $$
+BEGIN
+    UPDATE perfil SET descripcion = new_descripcion WHERE id_cuenta = id_user;
+END;
+$$ LANGUAGE plpgsql;
