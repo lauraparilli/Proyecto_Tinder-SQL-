@@ -106,6 +106,46 @@ BEGIN
 END;
 $$;
 
+
+/*
+* Funcion: update_info_account
+*
+* Uso: Actualiza la informacion de la cuenta de un usuario en la tabla de cuenta. Recordar que el usuario no puede cambiar su nombre ni apellido.
+*
+* Parametros:
+*  - c_id_cuenta: Valor entero del ID de la cuenta del usuario
+*  - c_email: (OPCIONAL) Texto con el nuevo email del usuario
+*  - c_contrasena: (OPCIONAL) Texto con el nuevo hash de contrasena del usuario
+*  - c_telefono: (OPCIONAL) Texto con el nuevo telefono del usuario
+*  - c_idioma: (OPCIONAL) Texto con el nuevo idioma del usuario
+*  - c_tema: (OPCIONAL) Texto con el nuevo tema del usuario
+*  - c_notificaciones: (OPCIONAL) Valor booleano con el nuevo valor de notificaciones del usuario
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_info_account(
+    c_id_cuenta INTEGER,
+    c_email TEXT DEFAULT NULL,
+    c_contrasena TEXT DEFAULT NULL,
+    c_telefono TEXT DEFAULT NULL,
+    c_idioma TEXT DEFAULT NULL,
+    c_tema BOOLEAN DEFAULT NULL,
+    c_notificaciones BOOLEAN DEFAULT NULL
+)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE cuenta
+    SET email = CASE WHEN c_email IS NOT NULL THEN c_email ELSE email END,
+        contrasena = CASE WHEN c_contrasena IS NOT NULL THEN c_contrasena ELSE contrasena END,
+        telefono = CASE WHEN c_telefono IS NOT NULL THEN c_telefono ELSE telefono END,
+        idioma = CASE WHEN c_idioma IS NOT NULL THEN c_idioma ELSE idioma END,
+        tema = CASE WHEN c_tema IS NOT NULL THEN c_tema ELSE tema END,
+        notificaciones = CASE WHEN c_notificaciones IS NOT NULL THEN c_notificaciones ELSE notificaciones END
+    WHERE id_cuenta = c_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+
 /**
  * Funcion: getAllInstitutions
 
