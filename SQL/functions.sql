@@ -89,6 +89,11 @@ BEGIN
         RAISE EXCEPTION 'La institucion no existe';
     END IF;
 
+    /*verificar que el año de egreso sea mayor o igual al de ingreso */
+    IF anio_egreso <= anio_ingreso THEN
+        RAISE EXCEPTION 'El año de egreso debe ser mayor o igual al de ingreso';
+    END IF;
+
     INSERT INTO cuenta (nombre, apellido, fecha_nacimiento, telefono, email, contrasena, idioma, notificaciones, tema) VALUES (nombre_u, apellido_u, fecha_nacimiento_u, telefono_u, email_u, password_hash, idioma_u, notificaciones_u, tema_u) RETURNING id_cuenta INTO id_cuenta_u;
 
     INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
