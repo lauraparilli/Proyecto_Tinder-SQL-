@@ -40,7 +40,25 @@ BEGIN
     RETURN NEW;
 END;
 $$
+LANGUAGE plpgsql;
 
+/*
+ * Funcion: delete_due_card
+ *
+ * Uso: Eliminar tarjetas vencidas al momento de realizar una operacion en la tabla realiza 
+ *
+ * Parametros: Ninguna
+
+ * Retorna: La funcion trigger retorna la tarjeta que se elimino
+ */
+CREATE OR REPLACE FUNCTION delete_due_card()
+RETURNS TRIGGER 
+AS $$
+BEGIN
+    DELETE FROM tarjeta WHERE tarjeta.fecha_caducidad < CURRENT_DATE;
+    RETURN OLD;
+END;
+$$
 LANGUAGE plpgsql;
 
 
