@@ -701,3 +701,35 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+ * Funcion: insert_new_tier_with_old_permissions
+ * 
+ * Uso: Insertar una nueva tier a la base de datos con permisos ya existente en la base de datos
+ *
+ * Parametros:
+ *  - t_nombre: nombre de la nueva tier
+ *  - p_nombre_permisos[]: lista de TEXT de nombres de permisos 
+ *
+ * Retorno: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_new_tier_with_old_permissions(t_nombre TEXT, p_nombre_permisos TEXT[])
+RETURNS VOID AS $$
+DECLARE
+    nombre_permisos_size INT;
+    i INT;
+BEGIN
+    nombre_permisos_size := array_length(p_nombre_permisos, 1);
+
+    /* Insertar el nuevo tier a la bd */
+    INSERT INTO tier VALUES(t_nombre);
+
+    /* Insertar cada permiso con su tier en maneja  */
+    FOR i IN 1..nombre_permisos_size LOOP
+        /* Insertar el permiso en maneja */
+        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
+        
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
