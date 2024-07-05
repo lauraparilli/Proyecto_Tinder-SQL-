@@ -786,7 +786,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 /*
 * Funcion: insert_agrupation
 *
@@ -835,5 +834,26 @@ BEGIN
         FROM estudio_en
         WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio
     ) GROUP BY dominio;
+END;
+$$ LANGUAGE plpgsql;
+
+/* 
+* Funcion: get_all_info_about_a_user_trabaja_en
+* 
+* Uso: Obtener todos los datos de trabaja_en (cargo y fechas de inicio) de un usuario en una empresa
+*
+* Parametros: 
+*  - p_id_cuenta: Entero del id de la cuenta de un usuario
+*  - p_id_empresa: Entero del id de la empresa en que trabaja
+*
+* Retorna: Una tabla de una fila con los datos de trabaja_en asociados a la id_cuenta = p_id_cuenta y id_empresa = p_id_empresa
+*/
+CREATE OR REPLACE FUNCTION get_all_info_about_a_user_trabaja_en(p_id_cuenta integer, p_id_empresa integer)
+RETURNS TABLE(puesto CHARACTER VARYING, fecha_de_inicio DATE) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT cargo, fecha_inicio
+    FROM trabaja_en
+    WHERE id_cuenta = p_id_cuenta AND id_empresa = p_id_empresa;
 END;
 $$ LANGUAGE plpgsql;
