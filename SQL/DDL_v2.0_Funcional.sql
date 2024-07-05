@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS cuenta(
 
 CREATE TABLE IF NOT EXISTS pago(
 	id_pago INT GENERATED ALWAYS AS IDENTITY,
-	numero_factura INT NOT NULL,
+	numero_factura INT UNIQUE NOT NULL,
 	estado BOOLEAN NOT NULL,
 	metodo metodo_pago NOT NULL,
 	monto DECIMAL(10,2) DEFAULT 0 NOT NULL,
