@@ -438,7 +438,7 @@ $$ LANGUAGE plpgsql;
 * Parametros:
 *   - id_user: id de la cuenta del usuario
 *
-* Resultado: Devuelve todos los datos (mencionados en el Uso) del usuario con el id_cuenta
+* Resultado: Devuelve una tabla de una fila con todos los datos (mencionados en el Uso) del usuario con el id_cuenta
 */
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
@@ -455,7 +455,8 @@ RETURNS TABLE (
     r_hobbies hobbies[],
     r_certificaciones CHARACTER VARYING[],
     r_habilidades habilidades[],
-    r_fotos BYTEA[]
+    r_fotos BYTEA[],
+    r_orientacion_sexual orientaciones[]
 ) AS $$
 DECLARE
     edad INTEGER;
@@ -493,6 +494,11 @@ BEGIN
             SELECT f.foto
             FROM tiene_foto as f
             WHERE f.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT o.orientacion_sexual
+            FROM tiene_orientacion_sexual AS o
+            WHERE o.id_cuenta = id_user
         )
     FROM cuenta, perfil
     WHERE cuenta.id_cuenta = perfil.id_cuenta AND cuenta.id_cuenta = id_user;
