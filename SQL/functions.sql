@@ -753,3 +753,36 @@ BEGIN
     INSERT INTO maneja VALUES (p_nombre_tier, p_nombre_permiso);
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+ * Funcion: insert_trabaja_en
+ *
+ * Uso: cuando el usuario quiere agregar en que empresa trabaja actualmente, se inserta una nueva instancia de empresa (si es que no existe en la bd) y se inserta una nueva instancia de trabaja_en
+ * 
+ * Parametros: 
+ *      - id_user: Entero del id de la cuenta del usuario
+ *      - e_nombre_empresa: TEXT con el nombre de la empresa
+ *      - e_url_empresa: TEXT con el url de la empresa 
+ *      - e_puesto: TEXT con el cargo del usuario en la empresa
+ *      - e_fecha_inicio: DATE con la fecha de inicio en que trabaja en la empresa
+ *
+ * Retorna: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_trabaja_en(id_user INT, e_nombre_empresa TEXT, e_url_empresa TEXT, e_puesto TEXT, e_fecha_inicio DATE) RETURNS VOID AS $$
+DECLARE
+    e_id_empresa INT;
+BEGIN
+    -- Buscar si la empresa ya existe
+    SELECT id_empresa INTO e_id_empresa FROM empresa WHERE nombre_empresa = e_nombre_empresa AND url = e_url_empresa;
+    IF NOT FOUND THEN
+        -- Si no existe, insertar una nueva instancia de empresa
+        INSERT INTO empresa(nombre_empresa, url) VALUES(e_nombre_empresa, e_url_empresa);
+        SELECT id_empresa INTO e_id_empresa FROM empresa WHERE nombre_empresa = e_nombre_empresa AND url = e_url_empresa;
+    END IF;
+
+    -- Insertar una nueva instancia de trabaja_en
+    INSERT INTO trabaja_en VALUES(id_user, e_id_empresa, e_puesto, e_fecha_inicio);
+END;
+$$ LANGUAGE plpgsql;
+
