@@ -807,3 +807,33 @@ BEGIN
     VALUES (p_id_cuenta, p_id_dominio, p_agrupacion);
 END;
 $$ LANGUAGE plpgsql;
+
+
+/* 
+* Funcion: get_all_info_about_a_user_estudio_en
+* 
+* Uso: Obtener todos los datos de estudio_en dado por su id_dominio e id_cuenta
+*
+* Parametros: 
+*  - p_id_cuenta: Entero del id de la cuenta de un usuario
+*  - p_id_dominio: TEXT dominio de una institucion
+*
+* Retorna: Una tabla de una fila con los datos de estudio_en asociados a la id_cuenta = p_id_cuenta y dominio = p_id_dominio
+*/
+CREATE OR REPLACE FUNCTION get_all_info_about_a_user_estudio_en(p_id_cuenta integer, p_id_dominio TEXT)
+RETURNS TABLE(r_titulo CHARACTER VARYING[], r_ano_ingreso INTEGER[], r_ano_egreso INTEGER[], agrupaciones CHARACTER VARYING[]) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT array_agg(titulo), array_agg(ano_ingreso), array_agg(ano_egreso), 
+    ARRAY(
+        SELECT a.agrupacion 
+        FROM esta_en_agrupacion AS a
+        WHERE a.id_cuenta = p_id_cuenta AND a.dominio = p_id_dominio
+    )
+    FROM (
+        SELECT *
+        FROM estudio_en
+        WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio
+    ) GROUP BY dominio;
+END;
+$$ LANGUAGE plpgsql;
