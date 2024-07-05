@@ -627,7 +627,7 @@ RETURNS TABLE (
     r_hobbies hobbies[],
     r_certificaciones CHARACTER VARYING[],
     r_habilidades habilidades[],
-    r_fotos BYTEA[],
+    r_fotos TEXT[],
     r_orientacion_sexual orientaciones[]
 ) AS $$
 DECLARE
@@ -663,7 +663,7 @@ BEGIN
             WHERE h.id_cuenta = id_user
         ),
         ARRAY(
-            SELECT f.foto
+            SELECT encode(f.foto, 'base64')
             FROM tiene_foto as f
             WHERE f.id_cuenta = id_user
         ),
