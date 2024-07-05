@@ -933,3 +933,22 @@ BEGIN
     INSERT INTO tiene_foto (id_cuenta, foto) VALUES (p_user_id, decode(p_foto, 'base64'));
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: insert_certificacion
+*
+* Uso: Inserta un nuevo registro en la tabla tiene_certificaciones
+*
+* Parametros:
+*  - p_user_id: Entero del id de la cuenta
+*  - p_certificacion: TEXT de la certificacion
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_certificacion(p_user_id INTEGER, p_certificacion TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_certificaciones (id_cuenta, certificaciones) VALUES (p_user_id, p_certificacion);
+END;
+$$ LANGUAGE plpgsql;
