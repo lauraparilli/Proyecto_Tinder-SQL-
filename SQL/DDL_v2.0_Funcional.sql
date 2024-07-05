@@ -199,7 +199,6 @@ CREATE TABLE IF NOT EXISTS institucion (
 	PRIMARY KEY(dominio)
 );
 
-CREATE INDEX institucion_geo_index ON institucion USING GIST (coordenada);
 
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
