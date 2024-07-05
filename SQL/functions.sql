@@ -428,3 +428,73 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: get_all_public_info_about_user
+*
+* Uso: Obtener todos los datos que sean considerados como publico de un usuario con su id_cuenta (nombre, apellido, fecha de nacimiento, sexo, descripcion, verificado, latitud y longitud para mostrar la ciudad y pais, dominios de las instituciones en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones y fotos) para mostrarlo en su perfil
+*
+* Parametros:
+*   - id_user: id de la cuenta del usuario
+*
+* Resultado: Devuelve todos los datos del usuario con el id_cuenta
+*/
+
+DROP function get_all_public_info_about_user(integer);
+
+CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
+RETURNS TABLE (
+    r_nombre CHARACTER VARYING,
+    r_apellido CHARACTER VARYING,
+    r_fecha_nacimiento DATE,
+    r_sexo sexos,
+    r_descripcion CHARACTER VARYING,
+    r_verificado BOOLEAN,
+    r_latitud DECIMAL,
+    r_longitud DECIMAL,
+    r_instituciones CHARACTER VARYING[],
+    r_empresas INTEGER[],
+    r_hobbies hobbies[],
+    r_certificaciones CHARACTER VARYING[],
+    r_habilidades habilidades[],
+    r_fotos BYTEA[]
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        nombre, apellido, fecha_nacimiento, 
+        sexo, descripcion, verificado, latitud, longitud,
+        ARRAY(
+            SELECT e.dominio
+            FROM estudio_en AS e
+            WHERE e.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT t.id_empresa
+            FROM trabaja_en AS t
+            WHERE t.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT h.hobby
+            FROM tiene_hobby AS h
+            WHERE h.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT c.certificaciones
+            FROM tiene_certificaciones AS c
+            WHERE c.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT h.habilidad
+            FROM tiene_habilidades AS h
+            WHERE h.id_cuenta = id_user
+        ),
+        ARRAY(
+            SELECT f.foto
+            FROM tiene_foto as f
+            WHERE f.id_cuenta = id_user
+        )
+    FROM cuenta, perfil
+    WHERE cuenta.id_cuenta = perfil.id_cuenta AND cuenta.id_cuenta = id_user;
+END;
+$$ LANGUAGE plpgsql;
