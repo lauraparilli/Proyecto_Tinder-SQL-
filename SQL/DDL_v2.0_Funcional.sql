@@ -14,9 +14,6 @@ CREATE EXTENSION postgis;
 SET search_path TO tinder_viejos_egresados, public;
 SET DATESTYLE TO 'European';
 
-CREATE DOMAIN tiers AS VARCHAR(16)
-	CONSTRAINT tiers_validos CHECK (VALUE IN ('Plus', 'Gold', 'Platinum'));
-
 CREATE DOMAIN sexos AS VARCHAR(4)
 	CONSTRAINT sexos_validos CHECK (VALUE IN ('M', 'F', 'Otro'));
 
@@ -136,7 +133,7 @@ CREATE TABLE IF NOT EXISTS realiza(
 );
 
 CREATE TABLE IF NOT EXISTS tier(
-	nombre_tier tiers,
+	nombre_tier VARCHAR(16),
 	PRIMARY KEY (nombre_tier)
 );
 
@@ -147,7 +144,7 @@ CREATE TABLE IF NOT EXISTS permiso(
 );
 
 CREATE TABLE IF NOT EXISTS maneja(
-	nombre_tier tiers,
+	nombre_tier VARCHAR(16),
 	nombre_permiso VARCHAR(100),
 	PRIMARY KEY (nombre_tier, nombre_permiso),
 	CONSTRAINT fk_nombre_tier_maneja
@@ -242,7 +239,7 @@ CREATE TABLE IF NOT EXISTS trabaja_en(
 
 CREATE TABLE IF NOT EXISTS suscrita(
 	id_cuenta INT,
-	nombre_tier tiers,
+	nombre_tier VARCHAR(16),
 	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL,
 	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
 	PRIMARY KEY (id_cuenta, nombre_tier, fecha_inicio),
