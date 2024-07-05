@@ -812,7 +812,7 @@ $$ LANGUAGE plpgsql;
 /* 
 * Funcion: get_all_info_about_a_user_estudio_en
 * 
-* Uso: Obtener todos los datos de estudio_en dado por su id_dominio e id_cuenta
+* Uso: Obtener todos los datos de estudio_en dado por su id_dominio e id_cuenta (datos como titulos, años de ingreso y egreso, y agrupaciones)
 *
 * Parametros: 
 *  - p_id_cuenta: Entero del id de la cuenta de un usuario
