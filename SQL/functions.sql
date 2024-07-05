@@ -61,6 +61,29 @@ END;
 $$
 LANGUAGE plpgsql;
 
+/*
+ * Funcion: insert_institution
+ * 
+ * Uso: Insertar una institucion a la base de datos
+ *
+ * Parametros:
+ *  - i_dominio: dominio de la institucion
+ *  - i_nombre: nombre de la institucion
+ *  - i_tipo: tipo de la institucion
+ *  - i_ano_fundacion: año de fundacion de la institucion
+ *  - i_latitud: latitud de la institucion
+ *  - i_longitud: longitud de la institucion
+ *
+ * Retorno: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_institution(i_dominio TEXT, i_nombre TEXT, i_tipo TEXT, i_ano_fundacion INTEGER, i_latitud DECIMAL, i_longitud DECIMAL) 
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO institucion VALUES (i_dominio, i_nombre, i_tipo, i_ano_fundacion, i_latitud, i_longitud);
+END;
+
+$$ LANGUAGE plpgsql;
+
 
 /**
  * Funcion: getAllInstitutions
