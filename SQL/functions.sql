@@ -482,6 +482,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: delete_instance_registra
+*
+* Uso: Elimina una instancia de la tabla registra
+* 
+* Parametros:
+* 	- user_id: Valor entero que indica el id del usuario
+* 	- card_number: TEXT numero de la tarjeta
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_instance_registra(user_id INTEGER, card_number TEXT) 
+RETURNS VOID 
+AS $$
+BEGIN
+    DELETE FROM registra WHERE id_cuenta = user_id AND digitos_tarjeta = card_number;
+END;
+$$ LANGUAGE plpgsql;
+
+
 
 /*
 * Funcion: get_all_public_info_about_user
