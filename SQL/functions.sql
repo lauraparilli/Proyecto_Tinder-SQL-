@@ -562,6 +562,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+ * Funcion: insert_empresa
+ * 
+ * Uso: Insertar una empresa a la base de datos
+ *
+ * Parametros:
+ *  - e_nombre: nombre de la empresa
+ *  - e_url: url de la empresa
+ *
+ * Retorno: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_empresa(e_nombre TEXT, e_url TEXT) 
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO empresa(nombre_empresa, url)
+    VALUES(e_nombre, e_url);
+END;
+
+$$ LANGUAGE plpgsql;
+
 
 
 /*
