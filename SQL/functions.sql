@@ -438,7 +438,7 @@ $$ LANGUAGE plpgsql;
 * Parametros:
 *   - id_user: id de la cuenta del usuario
 *
-* Resultado: Devuelve todos los datos del usuario con el id_cuenta
+* Resultado: Devuelve todos los datos (mencionados en el Uso) del usuario con el id_cuenta
 */
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
