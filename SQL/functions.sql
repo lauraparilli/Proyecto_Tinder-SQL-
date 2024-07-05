@@ -952,3 +952,22 @@ BEGIN
     INSERT INTO tiene_certificaciones (id_cuenta, certificaciones) VALUES (p_user_id, p_certificacion);
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: insert_orientacion_sexual_perfil
+*
+* Uso: Inserta un nuevo registro en la tabla tiene_orientacion_sexual
+*
+* Parametros:
+*  - p_user_id: Entero del id de la cuenta
+*  - p_orientacion_sexual: TEXT de la orientacion sexual
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_orientacion_sexual_perfil(p_user_id INTEGER, p_orientacion_sexual TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_orientacion_sexual (id_cuenta, orientacion_sexual) VALUES (p_user_id, p_orientacion_sexual);
+END;
+$$ LANGUAGE plpgsql;
+
