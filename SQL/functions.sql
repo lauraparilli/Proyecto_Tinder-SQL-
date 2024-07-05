@@ -1117,3 +1117,31 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: insert_pago()
+*
+* Uso: Insertar un pago en la tabla pago
+*
+* Parametros: 
+*    - p_nro_factura: Valor entero de la factura del pago
+*    - p_estado: BOOLEAN que indica el estado del pago (TRUE si es aprobado y False si es fallido)
+*    - p_metodo: TEXT metodo del pago
+*    - p_monto: DECIMAL Monto del pago 
+*    - p_doc_factura: TEXT documento de la factura en formato base64
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_pago(
+    p_nro_factura INTEGER,
+    p_estado BOOLEAN,
+    p_metodo TEXT, 
+    p_monto DECIMAL, 
+    p_doc_factura TEXT
+)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO pago(numero_factura, estado, metodo, monto, documento_factura)
+    VALUES (p_nro_factura, p_estado, p_metodo, p_monto, decode(p_doc_factura, 'base64'));
+END;
+$$ LANGUAGE plpgsql;
