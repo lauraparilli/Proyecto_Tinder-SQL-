@@ -915,3 +915,21 @@ BEGIN
     VALUES (p_user_id, p_habilidades);
 END;
 $$ LANGUAGE plpgsql;
+
+/* 
+* Funcion: insert_foto
+*
+* Uso: Inserta un nuevo registro en la tabla tiene_foto
+*
+* Parametros:
+*  - p_user_id: Entero del id de la cuenta
+*  - p_foto: BYTEA de la foto en formato base64
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_foto(p_user_id INTEGER, p_foto BYTEA)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_foto (id_cuenta, foto) VALUES (p_user_id, decode(p_foto, 'base64'));
+END;
+$$ LANGUAGE plpgsql;
