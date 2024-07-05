@@ -451,6 +451,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: insert_user_tarjeta
+*
+* Uso: cuando el usuario registra una tarjeta, se inserta una instancia en la tabla tarjeta (si es que aun no existen en la base de datos), y se asocia a la cuenta del usuario creando una instancia en la tabla registra
+* 
+* Parametros:
+* 	- user_id: Valor entero que indica el id del usuario
+* 	- card_number: TEXT numero de la tarjeta
+*   - titular: TEXT nombre del titular de la tarjeta
+*   - due_date: DATE fecha de vencimiento de la tarjeta
+*   - cvv: TEXT codigo de seguridad de la tarjeta
+*   - type_card: TEXT tipo de tarjeta
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_user_tarjeta(user_id INT, card_number TEXT, titular TEXT, due_date DATE, cvv TEXT, type_card TEXT) 
+RETURNS VOID 
+AS $$
+BEGIN
+    /*chequear que no este vencida la tarjeta*/
+    IF due_date < current_date THEN
+        RAISE EXCEPTION 'La tarjeta esta vencida';
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM tarjeta WHERE digitos_tarjeta = card_number) THEN
+        INSERT INTO tarjeta VALUES (card_number, titular, due_date, cvv, type_card);
+    END IF;
+    INSERT INTO registra VALUES (user_id, card_number);
+END;
+$$ LANGUAGE plpgsql;
+
 
 /*
 * Funcion: get_all_public_info_about_user
