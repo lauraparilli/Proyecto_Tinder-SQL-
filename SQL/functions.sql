@@ -878,3 +878,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/* 
+* Funcion: insert_hobbies
+*
+* Uso: Inserta un nuevo registro en la tabla tiene_hobby
+*
+* Parametros:
+*  - p_user_id: Entero del id de la cuenta
+*  - p_hobby: TEXT del hobby
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_hobbies(p_user_id INTEGER, p_hobby TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_hobby (id_cuenta, hobby)
+    VALUES (p_user_id, p_hobby);
+END;
+$$ LANGUAGE plpgsql;
+
