@@ -519,6 +519,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+ * Funcion: update_due_date_card
+ *
+ * Uso: Actualizar la fecha de vencimiento de una tarjeta
+ *
+ * Parametros: 
+ *     - card_number: TEXT indica los numeros de la tarjeta a modificar fecha de caducidad
+ *     - new_due_date: DATE indica la nueva fecha de vencimiento de la tarjeta
+ *
+ * Retorna: Ninguna
+ */
+CREATE OR REPLACE FUNCTION update_due_date_card(card_number TEXT, new_due_date DATE)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE tarjeta
+    SET fecha_caducidad = new_due_date
+    WHERE digitos_tarjeta = card_number;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 /*
