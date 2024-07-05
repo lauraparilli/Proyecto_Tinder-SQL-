@@ -857,3 +857,24 @@ BEGIN
     WHERE id_cuenta = p_id_cuenta AND id_empresa = p_id_empresa;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/* 
+* Funcion: update_visto_msj
+* 
+* Uso: Actualizar el true del visto de un mensaje en la tabla mensaje
+*
+* Parametros: 
+*  - p_id_chat: entero que representa el id del chat
+*  - p_nro_mensaje: entero que representa el nro del mensaje en el chat
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_visto_msj(p_id_chat integer, p_nro_mensaje integer) RETURNS void AS $$
+BEGIN
+    UPDATE mensaje
+    SET visto = TRUE
+    WHERE id_chat = p_id_chat AND numero_msj = p_nro_mensaje;
+END;
+$$ LANGUAGE plpgsql;
+
