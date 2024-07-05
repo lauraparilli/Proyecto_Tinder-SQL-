@@ -786,3 +786,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+/*
+* Funcion: insert_agrupation
+*
+* Uso: Insertar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion
+*
+* Parametros:
+*  - p_id_cuenta: Entero del id de la cuenta de un usuario
+*  - p_id_dominio: TEXT dominio de una institucion
+*  - p_agrupacion: TEXT de la agrupacion a insertar
+*
+* Retorna: Nada
+*/
+
+CREATE OR REPLACE FUNCTION insert_agrupation(p_id_cuenta integer, p_id_dominio TEXT, p_agrupacion TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO esta_en_agrupacion(id_cuenta, dominio, agrupacion)
+    VALUES (p_id_cuenta, p_id_dominio, p_agrupacion);
+END;
+$$ LANGUAGE plpgsql;
