@@ -1,4 +1,22 @@
 /*
+* Funcion: prevent_delete_any_row
+*
+* Uso: Prohibir eliminar una fila de una tabla (ejemplo una institucion)
+*
+* Parametros: Ninguna
+*
+* Resultado: Funcion trigger que evita que se elimine una fila de una tabla
+*/
+CREATE OR REPLACE FUNCTION prevent_delete_any_row()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Prohibido eliminar una fila de esta tabla';
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
  * Funcion: set_coordenada()
  *
  * Uso: Cuando una fila se hace update o se inserta en una tabla que contenga las columnas de latitud y longitud se ejecuta automaticamente este trigger. Se setea la columna 'coordenada' creando un punto con los valores de 'longitud' y 'latitud'. El punto se asigna el SRID 4326.      
