@@ -661,19 +661,43 @@ $$ LANGUAGE plpgsql;
 
 
 /*
- * Funcion: insert_tier
+ * Funcion: insert_new_tier_with_new_permissions
  * 
- * Uso: Insertar una tier a la base de datos
+ * Uso: Insertar una nueva tier a la base de datos con sus nuevos permisos
  *
  * Parametros:
- *  - t_nombre: nombre de la tier
+ *  - t_nombre: nombre de la nueva tier
+ *  - p_nombre_permisos[]: lista de TEXT de nombres de nuevos permisos 
+ *  - p_descripcion_permisos[]: Lista de TEXT de descripciones de nuevos permisos
  *
  * Retorno: Nada
  */
-CREATE OR REPLACE FUNCTION insert_tier(t_nombre TEXT) 
+CREATE OR REPLACE FUNCTION insert_new_tier_with_new_permissions(t_nombre TEXT, p_nombre_permisos TEXT[], p_descripcion_permisos TEXT[])
 RETURNS VOID AS $$
+DECLARE
+    nombre_permisos_size INT;
+    descripcion_permisos_size INT;
+    i INT;
 BEGIN
-    INSERT INTO tier VALUES(t_nombre);
-END;
+    /* verificar que el size de las listas sean iguales */
+    nombre_permisos_size := array_length(p_nombre_permisos, 1);
+    descripcion_permisos_size := array_length(p_descripcion_permisos, 1);
 
+    IF nombre_permisos_size != descripcion_permisos_size THEN
+        RAISE EXCEPTION 'El tamaño de las listas de permisos y descripciones no son iguales';
+    END IF;
+
+    /* Insertar el nuevo tier a la bd */
+    INSERT INTO tier VALUES(t_nombre);
+
+    /* Insertar cada permiso con su tier en maneja  */
+    FOR i IN 1..nombre_permisos_size LOOP
+        /* Insertar el permiso en permiso */
+        INSERT INTO permiso VALUES(p_nombre_permisos[i], p_descripcion_permisos[i]);
+
+        /* Insertar el permiso en maneja */
+        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
+        
+    END LOOP;
+END;
 $$ LANGUAGE plpgsql;
