@@ -439,9 +439,6 @@ $$ LANGUAGE plpgsql;
 *
 * Resultado: Devuelve todos los datos del usuario con el id_cuenta
 */
-
-DROP function get_all_public_info_about_user(integer);
-
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
     r_nombre CHARACTER VARYING,
