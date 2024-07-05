@@ -1071,3 +1071,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+/*
+* Funcion: update_institution
+*
+* Uso: modificar el nombre, tipo o año de fundacion de una institucion
+*
+* Parametros:
+*   - p_dominio: TEXT dominio de la institucion a modificar
+*   - p_nombre: (OPCIONAL) TEXT nombre de la institucion
+*   - p_tipo: (OPCIONAL) TEXT tipo de la institucion
+*   - p_ano_fundacion: (OPCIONAL) entero del año de fundacion de la institucion (por si se equivoco al principio colocarlo)
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION update_institution( p_dominio TEXT, p_nombre TEXT DEFAULT NULL, p_tipo TEXT DEFAULT NULL, p_ano_fundacion INTEGER DEFAULT NULL) 
+RETURNS VOID AS $$
+BEGIN
+    IF p_nombre IS NOT NULL THEN
+        UPDATE institucion SET nombre = p_nombre WHERE dominio = p_dominio;
+    END IF;
+    IF p_tipo IS NOT NULL THEN
+        UPDATE institucion SET tipo = p_tipo WHERE dominio = p_dominio;
+    END IF;
+    IF p_ano_fundacion IS NOT NULL THEN
+        UPDATE institucion SET ano_fundacion = p_ano_fundacion WHERE dominio = p_dominio;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
