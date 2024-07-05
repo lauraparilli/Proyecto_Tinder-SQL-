@@ -733,3 +733,23 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+ * Funcion: insert_new_permission
+ *
+ * Uso: insertar un nuevo permiso a la base de datos y asociarlo con un tier
+ * 
+ * Parametros: 
+ *      - p_nombre_permiso: nombre del permiso
+ *      - p_descripcion_permiso: descripcion del permiso
+ *      - p_nombre_tier: nombre del tier asociado
+ *
+ * Retorna: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_new_permission(p_nombre_permiso TEXT, p_descripcion_permiso TEXT, p_nombre_tier TEXT) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO permiso VALUES (p_nombre_permiso, p_descripcion_permiso);
+    INSERT INTO maneja VALUES (p_nombre_tier, p_nombre_permiso);
+END;
+$$ LANGUAGE plpgsql;
