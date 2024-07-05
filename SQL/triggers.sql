@@ -12,3 +12,8 @@ CREATE TRIGGER set_latitud_longitud_origen_trigger
 BEFORE INSERT OR UPDATE ON preferencias 
 FOR EACH ROW
 EXECUTE PROCEDURE set_latitud_longitud_origen();
+
+CREATE TRIGGER delete_due_card
+AFTER INSERT OR UPDATE OR DELETE ON realiza
+FOR EACH ROW
+EXECUTE PROCEDURE delete_due_card();
