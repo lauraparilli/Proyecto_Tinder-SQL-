@@ -107,6 +107,18 @@ CREATE TABLE IF NOT EXISTS tarjeta (
 	PRIMARY KEY(digitos_tarjeta)
 );
 
+CREATE TABLE IF NOT EXISTS registra(
+    id_cuenta INT,
+    digitos_tarjeta VARCHAR(19),
+    PRIMARY KEY (id_cuenta, digitos_tarjeta),
+    CONSTRAINT fk_id_cuenta_registra
+        FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
+            ON DELETE CASCADE   ON UPDATE CASCADE,
+    CONSTRAINT fk_digitos_tarjeta_registra
+        FOREIGN KEY (digitos_tarjeta) REFERENCES tarjeta(digitos_tarjeta)
+            ON DELETE CASCADE   ON UPDATE CASCADE
+); 
+
 CREATE TABLE IF NOT EXISTS realiza(
 	id_cuenta INT NOT NULL,
 	id_pago INT,
