@@ -398,6 +398,54 @@ $$
 
 -- Ejemplo de uso SELECT update_preferences(p_id_cuenta := 19, p_estudio := 'Doctorado', p_distancia_maxima := 50);
 
+
+/*
+* Funcion: get_preferencias()
+*
+* Uso: Obtener las preferencias de un usuario
+*
+* Parametros: 
+*    - p_id_cuenta: Valor entero del ID de la cuenta del usuario
+*
+* Resultado: Devuelve todos los datos de preferencias de un usuario
+*/
+CREATE OR REPLACE FUNCTION get_preferencias(p_id_cuenta integer)
+RETURNS TABLE(
+    r_estudio estudios,
+    r_latitud_origen NUMERIC,
+    r_longitud_origen NUMERIC,
+    r_distancia_max INTEGER,
+    r_min_edad INTEGER,
+    r_max_edad INTEGER,
+    r_pref_orientaciones_sexuales orientaciones[],
+    r_pref_sexos sexos[]
+)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.estudio,
+        p.latitud_origen,
+        p.longitud_origen,
+        p.distancia_maxima,
+        p.min_edad,
+        p.max_edad,
+        ARRAY(
+            SELECT pref.orientacion_sexual 
+            FROM pref_orientacion_sexual AS pref 
+            WHERE pref.id_cuenta = p.id_cuenta
+        ),
+        ARRAY(
+            SELECT pref.sexo 
+            FROM pref_sexo AS pref 
+            WHERE pref.id_cuenta = p.id_cuenta
+        )
+    FROM preferencias AS p
+    WHERE p.id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+
 /*
 * Función: insert_pref_sexo
 *
