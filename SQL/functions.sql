@@ -971,3 +971,103 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/* 
+* Funcion: delete_hobby
+*
+* Uso: eliminar una instancia en tiene_hobby dado el id_cuenta de un usuario
+*
+* Parametros:
+*   - p_user_id: Entero del id de la cuenta
+*   - p_hobby: TEXT del hobby
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_hobby(p_user_id INTEGER, p_hobby TEXT) RETURNS VOID AS $$
+BEGIN
+    DELETE FROM tiene_hobby
+    WHERE id_cuenta = p_user_id AND hobby = p_hobby;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: delete_habilidad
+*
+* Uso: eliminar una instancia en tiene_habilidades dado el id_cuenta de un usuario
+*
+* Parametros:
+*   - p_user_id: Entero del id de la cuenta
+*   - p_habilidad: TEXT de la habilidad
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_habilidad(p_user_id INTEGER, p_habilidad TEXT) RETURNS VOID AS $$
+BEGIN
+    DELETE FROM tiene_habilidades
+    WHERE id_cuenta = p_user_id AND habilidad = p_habilidad;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: delete_foto
+*
+* Uso: eliminar una instancia en tiene_foto dado el id_cuenta de un usuario, pero si es la unica foto que queda no se elimina
+*
+* Parametros:
+*   - p_user_id: Entero del id de la cuenta
+*   - p_id_foto: Entero del id de la foto a eliminar
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_foto(p_user_id INTEGER, p_id_foto INTEGER) RETURNS VOID AS $$
+DECLARE
+    cant_fotos INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO cant_fotos
+    FROM tiene_foto
+    WHERE id_cuenta = p_user_id;
+
+    IF cant_fotos > 1 THEN
+        DELETE FROM tiene_foto
+        WHERE id_cuenta = p_user_id AND id_foto = p_id_foto;
+    ELSE
+        RAISE EXCEPTION 'No se puede eliminar la unica foto';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: delete_certificacion
+*
+* Uso: eliminar una instancia en tiene_certificacion dado el id_cuenta de un usuario
+*
+* Parametros:
+*   - p_user_id: Entero del id de la cuenta
+*   - p_certificacion: TEXT de la certificacion
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_certificacion(p_user_id INTEGER, p_certificacion TEXT) RETURNS VOID AS $$
+BEGIN
+    DELETE FROM tiene_certificaciones
+    WHERE id_cuenta = p_user_id AND certificaciones = p_certificacion;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: delete_orientacion_sexual_perfil
+*
+* Uso: eliminar una instancia en tiene_orientacion_sexual dado el id_cuenta de un usuario
+*
+* Parametros:
+*   - p_user_id: Entero del id de la cuenta
+*   - p_orientacion_sexual: TEXT de la orientacion sexual
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_orientacion_sexual_perfil(p_user_id INTEGER, p_orientacion_sexual TEXT) RETURNS VOID AS $$
+BEGIN
+    DELETE FROM tiene_orientacion_sexual
+    WHERE id_cuenta = p_user_id AND orientacion_sexual = p_orientacion_sexual;
+END;
+$$ LANGUAGE plpgsql;
+
