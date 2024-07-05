@@ -897,3 +897,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/* 
+* Funcion: insert_habilidades
+*
+* Uso: Inserta un nuevo registro en la tabla tiene_habilidades
+*
+* Parametros:
+*  - p_user_id: Entero del id de la cuenta
+*  - p_habilidades: TEXT del habilidades
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_habilidades(p_user_id INTEGER, p_habilidades TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_habilidades (id_cuenta, habilidad)
+    VALUES (p_user_id, p_habilidades);
+END;
+$$ LANGUAGE plpgsql;
