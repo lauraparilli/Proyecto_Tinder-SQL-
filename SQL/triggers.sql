@@ -17,3 +17,8 @@ CREATE TRIGGER delete_due_card
 AFTER INSERT OR UPDATE OR DELETE ON realiza
 FOR EACH ROW
 EXECUTE PROCEDURE delete_due_card();
+
+CREATE TRIGGER prevent_delete_any_row
+BEFORE DELETE ON institucion
+FOR EACH ROW
+EXECUTE FUNCTION prevent_delete_any_row();
