@@ -658,3 +658,22 @@ BEGIN
     WHERE cuenta.id_cuenta = perfil.id_cuenta AND cuenta.id_cuenta = id_user;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+ * Funcion: insert_tier
+ * 
+ * Uso: Insertar una tier a la base de datos
+ *
+ * Parametros:
+ *  - t_nombre: nombre de la tier
+ *
+ * Retorno: Nada
+ */
+CREATE OR REPLACE FUNCTION insert_tier(t_nombre TEXT) 
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tier VALUES(t_nombre);
+END;
+
+$$ LANGUAGE plpgsql;
