@@ -429,21 +429,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 /*
 * Funcion: get_all_public_info_about_user
 *
-* Uso: Obtener todos los datos que sean considerados como publico de un usuario con su id_cuenta (nombre, apellido, fecha de nacimiento, sexo, descripcion, verificado, latitud y longitud para mostrar la ciudad y pais, dominios de las instituciones en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones y fotos) para mostrarlo en su perfil
+* Uso: Obtener todos los datos que sean considerados como publico de un usuario con su id_cuenta (nombre, apellido, edad, sexo, descripcion, verificado, latitud y longitud para mostrar la ciudad y pais con Nominatim, dominios de las instituciones en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones, fotos, orientaciones sexuales) para mostrarse en el perfil
 *
 * Parametros:
 *   - id_user: id de la cuenta del usuario
 *
 * Resultado: Devuelve todos los datos del usuario con el id_cuenta
 */
+
+DROP function get_all_public_info_about_user(integer);
+
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
     r_nombre CHARACTER VARYING,
     r_apellido CHARACTER VARYING,
-    r_fecha_nacimiento DATE,
+    r_edad INTEGER,
     r_sexo sexos,
     r_descripcion CHARACTER VARYING,
     r_verificado BOOLEAN,
@@ -456,10 +460,12 @@ RETURNS TABLE (
     r_habilidades habilidades[],
     r_fotos BYTEA[]
 ) AS $$
+DECLARE
+    edad INTEGER;
 BEGIN
     RETURN QUERY
     SELECT
-        nombre, apellido, fecha_nacimiento, 
+        nombre, apellido, EXTRACT(YEAR FROM AGE(fecha_nacimiento))::INTEGER as edad,
         sexo, descripcion, verificado, latitud, longitud,
         ARRAY(
             SELECT e.dominio
