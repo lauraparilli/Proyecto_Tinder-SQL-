@@ -1145,3 +1145,38 @@ BEGIN
     VALUES (p_nro_factura, p_estado, p_metodo, p_monto, decode(p_doc_factura, 'base64'));
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: get_data_pago()
+*
+* Uso: Obtener todos los datos de un pago 
+*
+* Parametros: 
+*    - p_id_pago: Entero ID del pago
+*
+* Resultado: Devuelve un registro con todos los datos del pago
+*/
+CREATE OR REPLACE FUNCTION get_data_pago(p_id_pago integer)
+RETURNS TABLE(
+    r_id_pago INTEGER,
+    r_numero_factura INTEGER,
+    r_estado BOOLEAN,
+    r_metodo metodo_pago,
+    r_monto NUMERIC,
+    r_fecha DATE,
+    r_documento_factura TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        id_pago,
+        numero_factura,
+        estado,
+        metodo,
+        monto,
+        fecha,
+        encode(documento_factura, 'base64')
+    FROM pago
+    WHERE id_pago = p_id_pago;
+END;
+$$ LANGUAGE plpgsql;
