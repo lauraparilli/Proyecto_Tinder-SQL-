@@ -1259,3 +1259,27 @@ BEGIN
     RETURN permission_exists;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: get_all_users_by_city
+*
+* Uso: Obtener todos los IDs de los usuarios que se encuentren alrededor de 10 km de una coordenada de origen dada
+*
+* Parametros:
+*  - user_id: Valor entero del Id de la cuenta del usuario que desea encontrar a las otras personas por su coordenada origen de preferencias
+*
+* Retorno: Retorna una tabla con los IDs de los usuarios que se encuentren en esa coordenada de origen dada y dentro de 10 km de radio.
+*/
+CREATE OR REPLACE FUNCTION get_all_users_by_city(user_id integer)
+RETURNS TABLE(r_id_cuenta integer) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta FROM perfil
+    WHERE ST_DistanceSphere(
+        coordenada,
+        (SELECT coordenada_origen FROM preferencias WHERE id_cuenta = user_id)
+    ) / 1000 <= 10 -- 10 km in meters
+    AND id_cuenta != user_id
+    ORDER BY ST_DISTANCE(coordenada, (SELECT coordenada_origen FROM preferencias WHERE id_cuenta = user_id));
+END;
+$$ LANGUAGE plpgsql;
