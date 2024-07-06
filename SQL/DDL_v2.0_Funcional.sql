@@ -195,7 +195,6 @@ CREATE TABLE IF NOT EXISTS institucion (
 	ano_fundacion INT NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
-	coordenada geometry(POINT, 4326),
 	PRIMARY KEY(dominio)
 );
 
