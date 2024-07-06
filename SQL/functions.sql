@@ -1700,7 +1700,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/*
+* Funcion: check_match_exists
+*
+* Uso: Chequear si dos personas dieron like el uno al otro
+*
+* Parametros: Ninguna
+*
+* Resultado: Funcion trigger que crea un match y un chat entre dos usuarios que dieron likes el uno al otro
+*/
 CREATE OR REPLACE FUNCTION check_match_exists()
 RETURNS TRIGGER AS $$
 BEGIN
