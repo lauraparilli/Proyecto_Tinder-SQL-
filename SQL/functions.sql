@@ -1636,7 +1636,7 @@ $$ LANGUAGE plpgsql;
 * Function delete_like()
 *
 * Uso: para que un usuario elimine un like que dio anteriormente
-*	   con la condicion de que dicho usuario debe estar suscrito a un tier
+*	   con la condicion de que dicho usuario debe estar suscrito a un tier 
 *
 * Parametros: 
 *	id_user: id de quien elimina el like
@@ -1648,7 +1648,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION delete_like(id_user INT, disliked INT)
 	RETURNS VOID AS $$
 BEGIN
-	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user) THEN
+	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user AND fecha_caducidad > CURRENT_DATE ) THEN
 		DELETE FROM likes WHERE id_liker = id_user AND id_liked = disliked ;
 	ELSE
 		RAISE EXCEPTION 'El usuario no está suscrito a ningún tier.';
