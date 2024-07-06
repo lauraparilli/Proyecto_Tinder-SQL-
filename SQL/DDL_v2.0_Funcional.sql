@@ -305,6 +305,9 @@ CREATE TABLE IF NOT EXISTS mensaje(
 	CONSTRAINT fk_id_chat_mensaje
         	FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
 			ON DELETE CASCADE	ON UPDATE CASCADE
+	CONSTRAINT fk_id_cuenta_mensaje
+		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
+			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS archivo(
