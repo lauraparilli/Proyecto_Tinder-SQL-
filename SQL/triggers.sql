@@ -22,3 +22,8 @@ CREATE TRIGGER prevent_delete_any_row
 BEFORE DELETE ON institucion
 FOR EACH ROW
 EXECUTE FUNCTION prevent_delete_any_row();
+
+CREATE TRIGGER check_if_a_match_with_exists
+AFTER INSERT ON likes
+FOR EACH ROW
+EXECUTE FUNCTION check_match_exists();
