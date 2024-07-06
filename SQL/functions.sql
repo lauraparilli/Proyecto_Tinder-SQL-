@@ -561,7 +561,7 @@ $$ LANGUAGE plpgsql;
 */
 CREATE OR REPLACE FUNCTION get_users_by_orientation_sexual(orientation_sexual TEXT)
 RETURNS TABLE(
-    id_user INTEGER
+    r_id_cuenta INTEGER
 )
 AS $$
 BEGIN
