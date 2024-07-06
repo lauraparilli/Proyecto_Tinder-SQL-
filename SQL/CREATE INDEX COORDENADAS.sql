@@ -10,3 +10,4 @@ CREATE INDEX perfil_sexo_index ON perfil (sexo); -- para buscar personas por pre
 
 CREATE INDEX perfil_sexo_index ON perfil (sexo); -- para buscar personas por genero.
 
+CREATE INDEX institucion_nombre_index ON institucion (nombre); -- por si existen miles de instituciones, y el usuario quiere buscar la institucion por su nombre al momento de llenar el registro de la cuenta
