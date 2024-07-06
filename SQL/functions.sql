@@ -1454,7 +1454,7 @@ DECLARE
 BEGIN
     split_words_to_search := REPLACE(words_to_search, ' ', ' & ');
     RETURN QUERY
-    SELECT *
+    SELECT numero_msj, id_remitente, visto, texto, fecha_msj
     FROM mensaje as m
     WHERE id_chat = p_id_chat AND
     (to_tsvector('spanish', m.texto) @@ to_tsquery('spanish', split_words_to_search)
@@ -1462,3 +1462,4 @@ BEGIN
     ORDER BY m.fecha_msj DESC;
 END;
 $$ LANGUAGE plpgsql;
+
