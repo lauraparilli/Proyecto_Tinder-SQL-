@@ -1,8 +1,3 @@
-CREATE TRIGGER institucion_set_coordenada_trigger
-BEFORE INSERT OR UPDATE ON institucion
-FOR EACH ROW
-EXECUTE PROCEDURE set_coordenada();
-
 CREATE TRIGGER perfil_set_coordenada_trigger
 BEFORE INSERT OR UPDATE ON perfil
 FOR EACH ROW
