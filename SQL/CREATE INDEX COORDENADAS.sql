@@ -18,6 +18,6 @@ CREATE INDEX mensaje_texto_spanish_index ON mensaje USING GIN (to_tsvector('span
 
 CREATE INDEX mensaje_texto_english_index ON mensaje USING GIN (to_tsvector('english', texto));  -- cuando un usuario quiere buscar alguna palabra en los mensajes (en inglés)
 
-CREATE INDEX cuenta_nombre_index_for_chat ON cuenta (nombre, apellido); -- para buscar los chats o mensajes por el nombre de la persona 
+-- no se crea un index para buscar los chats o mensajes por el nombre de la persona, eso se puede hacer con el front
 
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual); -- para buscar personas por preferencia en orientacion sexual
