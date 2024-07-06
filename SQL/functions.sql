@@ -1493,6 +1493,53 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+* Funcion: get_users_by_preferences_passport_user
+*
+* Descripcion: Obtener los ids cuentas de los usuarios que se encuentra en una ciudad (por coordenada origen en preferencias)
+* y que cumplen con las preferencias de estudio, min y max edad, sexos y orientaciones sexuales de otro usuario
+*
+* Parametros:
+*  - user_id: id del usuario que tiene las preferencias y con permiso passport
+*
+* Retorno: Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias
+*/
+CREATE OR REPLACE FUNCTION get_users_by_preferences_passport_user(user_id integer)
+RETURNS TABLE(pref_id_cuentas integer) AS $$
+DECLARE
+    pref_estudio TEXT;
+    pref_min_age INTEGER;
+    pref_max_age INTEGER;
+    pref_genre TEXT[];
+    pref_orientation TEXT[];
+BEGIN
+    SELECT min_edad, max_edad, estudio
+    INTO pref_min_age, pref_max_age, pref_estudio
+    FROM preferencias
+    WHERE id_cuenta = user_id;
+
+    SELECT array_agg(sexo)
+    INTO pref_genre
+    FROM pref_sexo
+    WHERE id_cuenta = user_id;
+
+    SELECT array_agg(orientacion_sexual)
+    INTO pref_orientation
+    FROM pref_orientacion_sexual
+    WHERE id_cuenta = user_id;
+
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM cuenta
+    WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
+    AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_city(user_id));
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Funcion: search_words_msj
 *
 * Uso: Buscar mensajes que contengan las palabras dadas en un chat
