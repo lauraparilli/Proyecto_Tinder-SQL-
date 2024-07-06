@@ -1050,6 +1050,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: get_all_info_about_a_empresa
+*
+* Uso: Obtener toda la informacion de una empresa (url y nombre) 
+*
+* Parametros:
+*   - idEmpresa: Entero del id de la empresa
+*
+* Resultado: Tabla de una fila con el nombre y url de la empresa
+*/
+CREATE OR REPLACE FUNCTION get_all_info_about_a_empresa(idEmpresa integer)
+RETURNS TABLE(nombreEmpresa CHARACTER VARYING, urlEmpresa CHARACTER VARYING) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT nombre_empresa, url
+    FROM empresa
+    WHERE id_empresa = idEmpresa;
+END;
+$$ LANGUAGE plpgsql;
+
 
 /* 
 * Funcion: update_visto_msj
