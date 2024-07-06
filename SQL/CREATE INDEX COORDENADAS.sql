@@ -3,3 +3,5 @@ CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);  -- para buscar
 CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen); -- para buscar personas por coordenada origen
 
 CREATE INDEX pref_age_index ON cuenta (fecha_nacimiento); -- para buscar personas por max o min edad
+
+CREATE INDEX tarjeta_fecha_caducidad_index ON tarjeta(fecha_caducidad); -- identificar rápidamente tarjetas caducadas.
