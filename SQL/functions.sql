@@ -550,6 +550,29 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+* Funcion: get_users_by_orientation_sexual
+*
+* Uso: Obtener los usuarios por preferencias en orientacion sexual
+*
+* Parametros:
+*   - orientation_sexual: Orientacion sexual del usuario
+*
+* Resultado: Tabla con los IDs de usuarios que tienen la orientacion sexual especificada
+*/
+CREATE OR REPLACE FUNCTION get_users_by_orientation_sexual(orientation_sexual TEXT)
+RETURNS TABLE(
+    id_user INTEGER
+)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM tiene_orientacion_sexual
+    WHERE orientacion_sexual = orientation_sexual;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Función: insert_pref_sexo
 *
 * Uso: Inserta una nueva preferencia de sexo para un usuario en la tabla de pref_sexo
