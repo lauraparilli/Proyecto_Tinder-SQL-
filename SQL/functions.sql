@@ -1593,3 +1593,110 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Function insert_like()
+*
+* Uso: para agregar un nuevo like a la tabla de likes
+*
+* Parametros: 
+*	liker: id de quien da like
+*	liked: id de quien recibe el like
+*	superlike: true si fue un superlike, false en caso contrario
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION insert_like(liker INT, liked INT, superlike BOOL) 
+	RETURNS VOID AS $$
+BEGIN
+	INSERT INTO likes(id_liker, id_liked, super) VALUES (liker, liked, superlike);
+END; 
+$$ LANGUAGE plpgsql;
+
+/*
+* Function insert_swipe()
+*
+* Uso: para agregar un nuevo dislike a la tabla de swipes
+*
+* Parametros: 
+*	disliker: id de quien da dislike
+*	disliked: id de quien recibe el dislike
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION insert_swipe(disliker INT, disliked INT)
+	RETURNS VOID AS $$
+BEGIN
+	INSERT INTO swipes(id_disliker, id_disliked) VALUES (disliker, disliked);
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Function delete_like()
+*
+* Uso: para que un usuario elimine un like que dio anteriormente
+*	   con la condicion de que dicho usuario debe estar suscrito a un tier
+*
+* Parametros: 
+*	id_user: id de quien elimina el like
+*	disliked: id de quien se borra el like
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION delete_like(id_user INT, disliked INT)
+	RETURNS VOID AS $$
+BEGIN
+	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user) THEN
+		DELETE FROM likes WHERE id_liker = id_user AND id_liked = disliked ;
+	ELSE
+		RAISE EXCEPTION 'El usuario no está suscrito a ningún tier.';
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Function insert_match()
+*
+* Uso: agregar un match en caso de que dos usuarios se den like mutuamente
+*	y crear un chat entre ambos
+* Parametros: 
+*	id_user1: id de uno de los dos usuarios del match
+*	id_user2: id de uno de los dos usuarios del match
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION insert_match(id_user1 INT, id_user2 INT)
+	RETURNS VOID AS $$
+DECLARE
+	fecha_user1 TIMESTAMP;
+	fecha_user2 TIMESTAMP;
+	new_chat_id INT;
+BEGIN 	
+	IF EXISTS (SELECT 1 FROM likes WHERE id_liker = id_user1 AND id_liked = id_user2) AND
+	EXISTS (SELECT 1 FROM likes WHERE  id_liker= id_user2 AND id_liked = id_user1) THEN
+		SELECT fecha_like INTO fecha_user1
+		FROM likes 
+		WHERE id_liker = id_user1 AND id_liked = id_user2;
+
+		SELECT fecha_like INTO fecha_user2
+		FROM likes
+		WHERE id_liker= id_user2 AND id_liked = id_user1;
+
+		IF fecha_user1< fecha_user2 THEN 
+			INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user1, id_user2);
+		ELSIF fecha_user1 > fecha_user2 THEN
+			INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user2, id_user1);
+		END IF;
+		INSERT INTO chat DEFAULT VALUES RETURNING id_chat INTO new_chat_id;
+		INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user1, id_user2, new_chat_id);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+	 
+
+
+
+
