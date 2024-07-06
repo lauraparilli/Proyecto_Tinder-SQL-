@@ -14,7 +14,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE set_latitud_longitud_origen();
 
 CREATE TRIGGER delete_due_card
-AFTER INSERT OR UPDATE OR DELETE ON realiza
+BEFORE INSERT OR UPDATE OR DELETE ON realiza
 FOR EACH ROW
 EXECUTE PROCEDURE delete_due_card();
 
