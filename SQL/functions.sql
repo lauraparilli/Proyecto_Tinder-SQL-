@@ -1441,7 +1441,7 @@ $$ LANGUAGE plpgsql;
 *
 * Retorna: Tabla con los mensajes del chat que contienen las palabras dadas
 */
-CREATE OR REPLACE FUNCTION search_words_msj(words_to_search TEXT)
+CREATE OR REPLACE FUNCTION search_words_msj(words_to_search TEXT, p_id_chat INTEGER)
 RETURNS TABLE (
     r_numero_msj INTEGER,
     r_id_remitente INTEGER,
