@@ -492,11 +492,11 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener usuarios por preferencias en genero
 *
 * Parametros:
-*   - genre: genero
+*   - genre: TEXT del genero a buscar
 *
 * Retorna: Una tabla con los usuarios que cumplen con el genero
 */
-CREATE OR REPLACE FUNCTION get_users_by_genre(genre VARCHAR)
+CREATE OR REPLACE FUNCTION get_users_by_genre(genre TEXT)
 RETURNS TABLE (r_id_cuenta INTEGER)
 AS $$
 BEGIN
@@ -513,7 +513,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener usuarios por preferencias en min edad
 *
 * Parametros: 
-*   - min_age: edad minima
+*   - min_age: Entero edad minima
 *
 * Retorna: Una tabla con los usuarios que cumplen con el min edad
 */
@@ -534,7 +534,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener usuarios por preferencias en max edad
 *
 * Parametros:
-*   - max_age: edad maxima
+*   - max_age: Entero edad maxima
 *
 * Retorna: Una tabla con los usuarios que cumplen con el max edad
 */
@@ -555,7 +555,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener los usuarios por preferencias en orientacion sexual
 *
 * Parametros:
-*   - orientation_sexual: Orientacion sexual del usuario
+*   - orientation_sexual: TEXT Orientacion sexual a buscar
 *
 * Resultado: Tabla con los IDs de usuarios que tienen la orientacion sexual especificada
 */
