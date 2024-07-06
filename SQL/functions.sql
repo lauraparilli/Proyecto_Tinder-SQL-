@@ -1463,3 +1463,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+/*
+* Funcion: get_chats_by_user
+*
+* Descripcion: Obtener los ids chats que participa un usuario
+*
+* Parametros:
+*  - user_id: id del usuario
+*
+* Retorno: Tabla con los ids de los chats
+*/
+CREATE OR REPLACE FUNCTION get_chats_by_user(user_id integer)
+RETURNS TABLE (r_id_chat integer) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_chat 
+    FROM chatea_con
+    WHERE id_cuenta1 = user_id OR id_cuenta2 = user_id;
+END;
+$$ LANGUAGE plpgsql;
+
