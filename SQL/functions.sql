@@ -487,6 +487,27 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+* Funcion: get_users_by_genre
+*
+* Uso: Obtener usuarios por preferencias en genero
+*
+* Parametros:
+*   - genre: genero
+*
+* Retorna: Una tabla con los usuarios que cumplen con el genero
+*/
+CREATE OR REPLACE FUNCTION get_users_by_genre(genre VARCHAR)
+RETURNS TABLE (r_id_cuenta INTEGER)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM perfil
+    WHERE sexo = genre;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Funcion: get_users_by_min_age
 *
 * Uso: Obtener usuarios por preferencias en min edad
