@@ -1429,3 +1429,35 @@ BEGIN
     ORDER BY ST_DISTANCE(coordenada, (SELECT coordenada_origen FROM preferencias WHERE id_cuenta = user_id));
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: search_words_msj
+*
+* Uso: Buscar mensajes que contengan las palabras dadas
+* 
+* Parametros:
+*   - words_to_search: Texto con las palabras a buscar
+*
+* Retorna: Tabla con los mensajes que contienen las palabras dadas
+*/
+CREATE OR REPLACE FUNCTION search_words_msj(words_to_search TEXT)
+RETURNS TABLE (
+    r_id_chat INTEGER,
+    r_numero_msj INTEGER,
+    r_id_remitente INTEGER,
+    r_visto BOOLEAN,
+    r_texto TEXT,
+    r_fecha_msj TIMESTAMP WITHOUT TIME ZONE
+) AS $$
+DECLARE
+    split_words_to_search TEXT;
+BEGIN
+    split_words_to_search := REPLACE(words_to_search, ' ', ' & ');
+    RETURN QUERY
+    SELECT *
+    FROM mensaje as m
+    WHERE to_tsvector('spanish', m.texto) @@ to_tsquery('spanish', split_words_to_search)
+    OR to_tsvector('english', m.texto) @@ to_tsquery('english', split_words_to_search)
+    ORDER BY m.fecha_msj DESC;
+END;
+$$ LANGUAGE plpgsql;
