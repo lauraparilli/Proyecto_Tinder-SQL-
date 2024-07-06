@@ -465,6 +465,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: get_users_by_min_age
+*
+* Uso: Obtener usuarios por preferencias en min edad
+*
+* Parametros: 
+*   - min_age: edad minima
+*
+* Retorna: Una tabla con los usuarios que cumplen con el min edad
+*/
+CREATE OR REPLACE FUNCTION get_users_by_min_max_age(min_age INTEGER)
+RETURNS TABLE (r_id_cuenta INTEGER)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM cuenta
+    WHERE (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) >= min_age);
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: get_users_by_max_age
+*
+* Uso: Obtener usuarios por preferencias en max edad
+*
+* Parametros:
+*   - max_age: edad maxima
+*
+* Retorna: Una tabla con los usuarios que cumplen con el max edad
+*/
+CREATE OR REPLACE FUNCTION get_users_by_max_age(max_age INTEGER)
+RETURNS TABLE (r_id_cuenta INTEGER)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM cuenta
+    WHERE (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) <= max_age);
+END;
+$$ LANGUAGE plpgsql;
 
 /*
 * Función: insert_pref_sexo
