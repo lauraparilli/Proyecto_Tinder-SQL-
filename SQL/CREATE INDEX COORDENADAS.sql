@@ -17,3 +17,6 @@ CREATE INDEX suscrita_fecha_caducidad_index ON suscrita(fecha_caducidad); -- par
 CREATE INDEX mensaje_texto_spanish_index ON mensaje USING GIN (to_tsvector('spanish', texto)); -- cuando un usuario quiere buscar alguna palabra en los mensajes (en español)
 
 CREATE INDEX mensaje_texto_english_index ON mensaje USING GIN (to_tsvector('english', texto));  -- cuando un usuario quiere buscar alguna palabra en los mensajes (en inglés)
+
+CREATE INDEX cuenta_nombre_index_for_chat ON cuenta (nombre); -- para buscar los chats o mensajes por el nombre de la persona 
+
