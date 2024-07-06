@@ -1690,6 +1690,7 @@ BEGIN
 		ELSIF fecha_user1 > fecha_user2 THEN
 			INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user2, id_user1);
 		END IF;
+		
 		INSERT INTO chat DEFAULT VALUES RETURNING id_chat INTO new_chat_id;
 		INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user1, id_user2, new_chat_id);
 	END IF;
