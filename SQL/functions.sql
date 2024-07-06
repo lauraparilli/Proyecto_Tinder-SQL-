@@ -1228,3 +1228,34 @@ BEGIN
     WHERE id_pago = p_id_pago;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: check_if_user_has_a_permission
+*
+* Uso: Verificar si un usuario tiene un permiso en particular
+*
+* Parametros:
+*  - user_id: Valor entero del Id de la cuenta del usuario
+*  - permission_name: Valor texto del nombre del permiso que se desea verificar
+*
+* Retorno: Retorna un valor booleano que indica si el usuario tiene el permiso o no
+*/
+CREATE OR REPLACE FUNCTION check_if_user_has_a_permission(user_id integer, permission_name TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    permission_exists BOOLEAN;
+BEGIN
+    SELECT EXISTS(
+        SELECT 1 FROM maneja
+        WHERE nombre_permiso = permission_name
+        AND nombre_tier IN (
+            SELECT nombre_tier FROM suscrita
+            WHERE id_cuenta = user_id
+            AND fecha_caducidad > CURRENT_DATE
+        )
+    ) INTO permission_exists;
+
+    RETURN permission_exists;
+END;
+$$ LANGUAGE plpgsql;
