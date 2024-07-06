@@ -1719,3 +1719,36 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: cancel_match
+*
+* Uso: Eliminar el match entre dos usuarios, eliminando tambien el chat y los likes 
+*      que se hayan dado entre ellos. Ademas, ya al eliminar el chat se elimina los mensajes y la instancia
+*      de chatea_con.
+*
+* Parametros:
+*    id_user_canceling: INT del usuario que cancela el match
+*    id_user_canceled: INT del usuario que se cancela el match
+*
+* Retorno: Nada
+*/
+CREATE OR REPLACE FUNCTION cancel_match(id_user_canceling INT, id_user_canceled INT)
+RETURNS VOID AS $$
+DECLARE 
+    id_their_chat INTEGER;
+BEGIN
+    DELETE FROM match_with WHERE id_matcher = id_user_canceling AND id_matched = id_user_canceled;
+    DELETE FROM match_with WHERE id_matcher = id_user_canceled AND id_matched = id_user_canceling;
+    id_their_chat := (
+        SELECT id_chat FROM chatea_con WHERE 
+        (id_cuenta1 = id_user_canceling AND id_cuenta2 = id_user_canceled) OR 
+        (id_cuenta1 = id_user_canceled AND id_cuenta2 = id_user_canceling)
+    );
+    DELETE FROM chat WHERE id_chat = id_their_chat;
+
+    DELETE FROM likes WHERE id_liker = id_user_canceling AND id_liked = id_user_canceled;
+    DELETE FROM likes WHERE id_liker = id_user_canceled AND id_liked = id_user_canceling;
+END;
+$$ LANGUAGE plpgsql;
+
