@@ -184,6 +184,26 @@ BEGIN
 END;
 $$;
 
+/*
+* Funcion: get_email_and_hashpassword_user
+*
+* Uso: obtener el correo y el hash de la contrasena del usuario (para logins y cambios de contrasenas)
+*
+* Parametros:
+*   - id_user: valor entero del id del usuario
+*
+* Retorna: El email y el hash de la contrasena del usuario
+*/
+CREATE OR REPLACE FUNCTION get_email_and_hashpassword_user(id_user integer)
+RETURNS TABLE(r_email CHARACTER VARYING, r_contrasena CHARACTER VARYING) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT email, contrasena
+    FROM cuenta
+    WHERE id_cuenta = id_user;
+END;
+$$ LANGUAGE plpgsql;
+
 
 /*
 * Funcion: update_info_account
