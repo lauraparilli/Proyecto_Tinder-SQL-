@@ -204,6 +204,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: get_settings_app_user
+*
+* Uso: Obtener el idioma, notificaciones y tema del app que tiene un usuario 
+*
+* Parametros:
+*   - id_user: Entero del id de la cuenta
+*
+* Retorna: Una tabla con el idioma, notificaciones y tema del app que tiene un usuario
+*/
+CREATE OR REPLACE FUNCTION get_settings_app_user(id_user INTEGER)
+RETURNS TABLE (r_idioma idiomas_app, r_notificaciones BOOLEAN, r_tema BOOLEAN)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT idioma, notificaciones, tema
+    FROM cuenta
+    WHERE id_cuenta = id_user;
+END;
+$$ LANGUAGE plpgsql;
+
 
 /*
 * Funcion: update_info_account
