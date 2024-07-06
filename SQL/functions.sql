@@ -489,21 +489,29 @@ $$ LANGUAGE plpgsql;
 /*
 * Funcion: get_users_by_genre
 *
-* Uso: Obtener usuarios por preferencias en genero
+* Uso: Obtener usuarios por preferencias en generos
 *
 * Parametros:
-*   - genre: TEXT del genero a buscar
+*   - genre: Arreglo de TEXT de generos
 *
-* Retorna: Una tabla con los usuarios que cumplen con el genero
+* Retorna: Una tabla con los usuarios que cumplen con alguno de los generos especificados
 */
-CREATE OR REPLACE FUNCTION get_users_by_genre(genre TEXT)
+
+CREATE OR REPLACE FUNCTION get_users_by_genre(genre TEXT[])
 RETURNS TABLE (r_id_cuenta INTEGER)
 AS $$
 BEGIN
+    /* si el usuario no seteo el genero de preferencia */
+    IF genre IS NULL THEN
+        RETURN QUERY
+        SELECT id_cuenta
+        FROM cuenta;
+    END IF;
+
     RETURN QUERY
     SELECT id_cuenta
     FROM perfil
-    WHERE sexo = genre;
+    WHERE sexo = ANY(genre);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -513,7 +521,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener usuarios por preferencias en min edad
 *
 * Parametros: 
-*   - min_age: Entero edad minima
+*   - min_age: Entero de la edad minima
 *
 * Retorna: Una tabla con los usuarios que cumplen con el min edad
 */
@@ -534,7 +542,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener usuarios por preferencias en max edad
 *
 * Parametros:
-*   - max_age: Entero edad maxima
+*   - max_age: Entero de la edad maxima
 *
 * Retorna: Una tabla con los usuarios que cumplen con el max edad
 */
@@ -552,23 +560,77 @@ $$ LANGUAGE plpgsql;
 /*
 * Funcion: get_users_by_orientation_sexual
 *
-* Uso: Obtener los usuarios por preferencias en orientacion sexual
+* Uso: Obtener los usuarios por preferencias de un arreglo de TEXT de orientaciones sexuales
 *
 * Parametros:
-*   - orientation_sexual: TEXT Orientacion sexual a buscar
+*   - orientation_sexual: Arreglo de TEXT con las orientaciones sexuales
 *
-* Resultado: Tabla con los IDs de usuarios que tienen la orientacion sexual especificada
+* Resultado: Tabla con los IDs de usuarios que tienen alguna de las orientaciones sexuales especificadas
 */
-CREATE OR REPLACE FUNCTION get_users_by_orientation_sexual(orientation_sexual TEXT)
+CREATE OR REPLACE FUNCTION get_users_by_orientation_sexual(orientation_sexual TEXT[])
 RETURNS TABLE(
     r_id_cuenta INTEGER
 )
 AS $$
 BEGIN
+    /* si el usuario no seteo la orientacion sexual de preferencia */
+    IF orientation_sexual IS NULL THEN
+        RETURN QUERY
+        SELECT id_cuenta
+        FROM cuenta;
+    END IF;
+
     RETURN QUERY
     SELECT id_cuenta
     FROM tiene_orientacion_sexual
-    WHERE orientacion_sexual = orientation_sexual;
+    WHERE orientacion_sexual = ANY(orientation_sexual);
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: get_users_by_preferences_free_user
+*
+* Descripcion: Obtener los ids cuentas de los usuarios que cumplen con las preferencias de otro usuario que no tiene suscripcion con passport
+*
+* Parametros:
+*  - user_id: id del usuario que tiene las preferencias
+*
+* Retorno: Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias
+*/
+CREATE OR REPLACE FUNCTION get_users_by_preferences_free_user(user_id integer)
+RETURNS TABLE(pref_id_cuentas integer) AS $$
+DECLARE
+    pref_estudio TEXT;
+    pref_min_age INTEGER;
+    pref_max_age INTEGER;
+    pref_genre TEXT[];
+    pref_orientation TEXT[];
+BEGIN
+    SELECT min_edad, max_edad, estudio
+    INTO pref_min_age, pref_max_age, pref_estudio
+    FROM preferencias
+    WHERE id_cuenta = user_id;
+
+    SELECT array_agg(sexo)
+    INTO pref_genre
+    FROM pref_sexo
+    WHERE id_cuenta = user_id;
+
+    SELECT array_agg(orientacion_sexual)
+    INTO pref_orientation
+    FROM pref_orientacion_sexual
+    WHERE id_cuenta = user_id;
+
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM cuenta
+    WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
+    AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_max_distance(user_id));
 END;
 $$ LANGUAGE plpgsql;
 
