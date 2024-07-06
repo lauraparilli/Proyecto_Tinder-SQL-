@@ -1699,3 +1699,15 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION check_match_exists()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM likes WHERE id_liker = NEW.id_liker AND id_liked = NEW.id_liked) AND
+    EXISTS (SELECT 1 FROM likes WHERE  id_liker= NEW.id_liked AND id_liked = NEW.id_liker) THEN
+        PERFORM insert_match(NEW.id_liker, NEW.id_liked);   
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
