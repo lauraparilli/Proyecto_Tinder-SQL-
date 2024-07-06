@@ -13,3 +13,5 @@ CREATE INDEX perfil_sexo_index ON perfil (sexo); -- para buscar personas por gen
 CREATE INDEX institucion_nombre_index ON institucion (nombre); -- por si existen miles de instituciones, y el usuario quiere buscar la institucion por su nombre al momento de llenar el registro de la cuenta
 
 CREATE INDEX empresa_nombre_url_index ON empresa (nombre_empresa, url); -- para buscar si la empresa ya existe en la base de datos o no (se usa en la funcion insert_trabaja_en)
+
+CREATE INDEX suscrita_fecha_caducidad_index ON suscrita(fecha_caducidad); -- para buscar rapidamente las suscripciones expiradas y quitarle los permisos a los usuarios xD
