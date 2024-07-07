@@ -169,8 +169,6 @@ CREATE TABLE IF NOT EXISTS perfil(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
-
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
 	estudio estudios,
@@ -186,7 +184,6 @@ CREATE TABLE IF NOT EXISTS preferencias(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen);
 
 CREATE TABLE IF NOT EXISTS institucion (
 	dominio VARCHAR(64),
