@@ -1066,7 +1066,7 @@ $$ LANGUAGE plpgsql;
 /* 
 * Funcion: get_all_info_about_a_user_estudio_en
 * 
-* Uso: Obtener todos los datos  (titulos, años de ingreso y egreso, y agrupaciones) de estudio_en dado por su dominio de institucion e id_cuenta
+* Uso: Obtener todos los datos  (grados academicos con sus especialidades, años de ingreso y egreso, y agrupaciones) de estudio_en dado por su dominio de institucion e id_cuenta
 *
 * Parametros: 
 *  - p_id_cuenta: Entero del id de la cuenta de un usuario
@@ -1075,10 +1075,10 @@ $$ LANGUAGE plpgsql;
 * Retorna: Una tabla de una fila con los datos de estudio_en asociados a la id_cuenta = p_id_cuenta y dominio = p_id_dominio
 */
 CREATE OR REPLACE FUNCTION get_all_info_about_a_user_estudio_en(p_id_cuenta integer, p_id_dominio TEXT)
-RETURNS TABLE(r_titulo CHARACTER VARYING[], r_ano_ingreso INTEGER[], r_ano_egreso INTEGER[], agrupaciones CHARACTER VARYING[]) AS $$
+RETURNS TABLE(r_grado CHARACTER VARYING[], r_especialidad CHARACTER VARYING[], r_ano_ingreso INTEGER[], r_ano_egreso INTEGER[], agrupaciones CHARACTER VARYING[]) AS $$
 BEGIN
     RETURN QUERY
-    SELECT array_agg(titulo), array_agg(ano_ingreso), array_agg(ano_egreso), 
+    SELECT array_agg(grado), array_agg(especialidad), array_agg(ano_ingreso), array_agg(ano_egreso), 
     ARRAY(
         SELECT a.agrupacion 
         FROM esta_en_agrupacion AS a
