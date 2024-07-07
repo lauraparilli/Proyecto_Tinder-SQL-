@@ -1837,4 +1837,60 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: insert_file
+*
+* Uso: Crear instancia en la tabla archivo
+* Parametros: 
+*			- chat_id: id del chat correspondiente
+*			- name_file: nombre del archivo a obtener
+*			- type_file: tipo del archivo
+*			- content_file: contenido del archivo
+*			- remitente_id: id del remitente
+* Retorna: nada 
+*/
+
+CREATE OR REPLACE FUNCTION insert_file(chat_id INT, name_file TEXT, type_file TEXT,
+			content_file  BYTEA, remitente_id INT)
+RETURNS VOID AS $$
+	
+DECLARE 
+	new_msg_num INT;
+
+BEGIN
+	INSERT INTO mensaje (id_remitente) 
+	VALUES (remitente_id)
+	RETURNING numero_msj INTO new_msg_num;
+
+	INSERT INTO archivo (id_chat, numero_msj, nombre, tipo, contenido )
+	VALUES (chat_id, new_msg_num, name_file, type_file, content_file );
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: get_file
+*
+* Uso: Obtener archivos
+* Parametros: 
+*			- chat_id: id del chat correspondiente
+*			- message: numero del mensaje correspondiente
+*			- name_file : nombre del archivo a obtener
+* Resultado: 
+*/
+
+CREATE OR REPLACE FUNCTION get_file(chat_id INT, message_num INT, name_file TEXT)
+RETURNS TABLE(
+	msg_num INT,
+	file_name CHARACTER VARYING,
+	tipo_archivo CHARACTER VARYING,
+	contenido_archivo BYTEA
+	) AS $$
+BEGIN
+	RETURN QUERY
+	SELECT numero_msj, nombre, tipo, contenido
+	FROM archivo
+	WHERE id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
+END;
+$$ LANGUAGE plpgsql;
 
