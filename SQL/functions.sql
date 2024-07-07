@@ -1786,7 +1786,7 @@ $$LANGUAGE plpgsql;
 *	id_user: id del usuario a calcular
 *	from_day: fecha a buscar
 *
-* Retorna: numero de likes del dia
+* Retorna: entero que representa el numero de likes dados en un dia
 */
 
 CREATE OR REPLACE FUNCTION get_likes_per_day(id_user INTEGER, from_day DATE)
