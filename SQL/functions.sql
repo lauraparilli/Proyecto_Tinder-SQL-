@@ -2000,10 +2000,10 @@ $$ LANGUAGE plpgsql;
 /*
 * Function add_tier_with_permission()
 *
-* Uso: Agrega un nuevo tier a la tabla de tier y le asigna al menos un permiso en la tabla maneja.
+* Uso: Agrega un nuevo tier a la tabla de tier y le asigna al menos un permiso existente en la tabla maneja.
 * Parametros: 
 *   nombre_nuevo_tier: Nombre del nuevo tier a agregar
-*   nombre_permisos: Lista de nombres de permisos a asignar al nuevo tier
+*   nombre_permisos: Lista de nombres de permisos existentes a asignar al nuevo tier
 *
 * Retorna: nada
 */
