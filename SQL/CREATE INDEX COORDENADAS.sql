@@ -20,7 +20,7 @@ CREATE INDEX maneja_nombre_permiso ON maneja (nombre_permiso); -- para buscar si
 
 -- para obtener los chats de un usuario cada vez que inicie sesión (el usuario puede ser o id_cuenta1 o id_cuenta2)
 CREATE INDEX chatea_con_id_cuenta1 ON chatea_con (id_cuenta1); 
-CREATE INDEX chatea_con_id_cuenta1 ON chatea_con (id_cuenta1); 
+CREATE INDEX chatea_con_id_cuenta2 ON chatea_con (id_cuenta2); 
 
 -- Nota: Segun internet, en PostgreSQL, cuando se define una clave primaria (PRIMARY KEY) sobre una columna de una tabla, este campo se constituye automáticamente como un índice de tipo B-tree.
 
