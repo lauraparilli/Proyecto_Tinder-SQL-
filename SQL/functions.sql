@@ -969,6 +969,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+<<<<<<< HEAD
 
 /*
 * Función: insert_new_tier_with_old_permissions
@@ -1001,6 +1002,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+=======
+>>>>>>> 9802789c4fbdd153ba10d5f3a81febb3374d6cb4
 /*
 * Función: insert_new_permission
 *
@@ -1759,6 +1762,7 @@ $$ LANGUAGE plpgsql;
 * Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION subscribe_user(
+<<<<<<< HEAD
     id_cuenta_usuario         INT,
     nombre_tier_usuario       TEXT,
     caducidad                 TIMESTAMP,
@@ -1769,6 +1773,19 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     monto_pago                DECIMAL(10,2),
     documento_factura_usuario BYTEA
 ) RETURNS VOID AS $$
+=======
+    id_cuenta_usuario INT,
+    nombre_tier_usuario TEXT,
+    caducidad TIMESTAMP,
+    digitos_tarjeta_usario TEXT,
+    numero_factura_actual INT,
+    estado_pago BOOLEAN,
+    metodo_pago_usuario TEXT,
+    monto_pago DECIMAL(10,2),
+    documento_factura_usuario TEXT
+)
+RETURNS VOID AS $$
+>>>>>>> 9802789c4fbdd153ba10d5f3a81febb3374d6cb4
 DECLARE
     new_id_pago INT;
 BEGIN
@@ -1801,7 +1818,7 @@ BEGIN
 
     -- Insertar el pago
     INSERT INTO pago (numero_factura, estado, metodo, monto, documento_factura)
-    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario,'base64'))
     RETURNING id_pago INTO new_id_pago;
 
     -- Insertar en realiza
@@ -1815,7 +1832,10 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9802789c4fbdd153ba10d5f3a81febb3374d6cb4
 
 /*    
 * Función: check_match_exists
@@ -2006,7 +2026,7 @@ BEGIN
     IF (cantidad_nueva_de_permisos > cantidad_vieja_de_permisos) THEN
        
         INSERT INTO pago (numero_factura, estado, metodo_pago, monto, documento_factura)
-        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario,'base64'))
         RETURNING id_pago INTO new_id_pago;
 
         INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
@@ -2024,8 +2044,12 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+<<<<<<< HEAD
 
 
+=======
+    
+>>>>>>> 9802789c4fbdd153ba10d5f3a81febb3374d6cb4
 /*    
 * Función: prohibir_101_likes
 *
@@ -2052,11 +2076,18 @@ $$ LANGUAGE plpgsql;
 /*
 * Function add_tier_with_permission()
 *
+<<<<<<< HEAD
 * Uso: Agrega un nuevo tier a la tabla de tier y le asigna al menos un permiso en la tabla maneja.
 * 
 * Parámetros: 
 *   - nombre_nuevo_tier : Nombre del nuevo tier a agregar.
 *   - nombre_permisos   : Lista de nombres de permisos a asignar al nuevo tier.
+=======
+* Uso: Agrega un nuevo tier a la tabla de tier y le asigna al menos un permiso existente en la tabla maneja.
+* Parametros: 
+*   nombre_nuevo_tier: Nombre del nuevo tier a agregar
+*   nombre_permisos: Lista de nombres de permisos existentes a asignar al nuevo tier
+>>>>>>> 9802789c4fbdd153ba10d5f3a81febb3374d6cb4
 *
 * Retorna: Nada.
 */
