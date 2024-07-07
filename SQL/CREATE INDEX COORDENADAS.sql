@@ -24,3 +24,21 @@ CREATE INDEX mensaje_texto_english_index ON mensaje USING GIN (to_tsvector('engl
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual); -- para buscar personas por preferencia en orientacion sexual
 
 CREATE INDEX estudio_en_grado ON estudio_en (grado); -- para buscar personas por su estudio
+
+CREATE INDEX maneja_nombre_permiso ON maneja (nombre_permiso); -- para buscar si un usuario tiene un permiso en particular segun su tier suscrita
+
+-- Nota: Segun internet, en PostgreSQL, cuando se define una clave primaria (PRIMARY KEY) sobre una columna de una tabla, este campo se constituye automáticamente como un índice de tipo B-tree.
+
+/*
+Razones de por que no colocamos indices en una tabla
+- cuenta: Solo se hace uso del id_cuenta para buscar usuarios, pero como id_cuenta ya es primary key, no hace falta indexarla.  
+- pago: por la funcionalidad del app, no necesitamos buscar algun pago en particular. 
+- tarjeta: tampoco es necesario buscar alguna tarjeta en particular. Puede que se necesite buscar si existe una tarjeta en la bd antes de insertar una nueva, 
+pero se puede hacer con el PK de digitos_tarjeta
+- registra: tampoco es necesario buscar si alguien tiene registrada una tarjeta en particular
+- realiza: puede que necesitemos buscar un pago por la persona quien lo realizo en caso de reclamos, pero rara vez ocurren los reclamos asi que no hace falta indexar el id_cuenta
+- tier: solamente tiene la columna nombre_tier que ya es PK
+- permiso: solamente se necesita el nombre_permiso (PK) para buscar algun permiso en particular
+- maneja: hay veces en que se necesita chequear si un usuario tiene un permiso en particular, entonces, en estos casos hay que buscar 
+- 
+*/
