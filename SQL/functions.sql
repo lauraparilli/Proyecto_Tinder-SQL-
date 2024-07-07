@@ -1989,7 +1989,7 @@ BEGIN
     IF (cantidad_nueva_de_permisos > cantidad_vieja_de_permisos) THEN
        
         INSERT INTO pago (numero_factura, estado, metodo_pago, monto, documento_factura)
-        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario,'base64'))
         RETURNING id_pago INTO new_id_pago;
 
         INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
