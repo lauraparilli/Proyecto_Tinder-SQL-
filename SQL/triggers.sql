@@ -1,29 +1,34 @@
-CREATE TRIGGER perfil_set_coordenada_trigger
+CREATE OR REPLACE TRIGGER perfil_set_coordenada_trigger
 BEFORE INSERT OR UPDATE ON perfil
 FOR EACH ROW
 EXECUTE PROCEDURE set_coordenada();
 
-CREATE TRIGGER set_latitud_longitud_origen_trigger
+CREATE OR REPLACE TRIGGER set_latitud_longitud_origen_trigger
 BEFORE INSERT OR UPDATE ON preferencias 
 FOR EACH ROW
 EXECUTE PROCEDURE set_latitud_longitud_origen();
 
-CREATE TRIGGER delete_due_card
+CREATE OR REPLACE TRIGGER delete_due_card
 BEFORE INSERT OR UPDATE OR DELETE ON realiza
 FOR EACH ROW
 EXECUTE PROCEDURE delete_due_card();
 
-CREATE TRIGGER prevent_delete_any_row_institucion
+CREATE OR REPLACE TRIGGER prevent_delete_any_row_institucion
 BEFORE DELETE ON institucion
 FOR EACH ROW
 EXECUTE FUNCTION prevent_delete_any_row();
 
-CREATE TRIGGER check_if_a_match_with_exists
+CREATE OR REPLACE TRIGGER check_if_a_match_with_exists
 AFTER INSERT ON likes
 FOR EACH ROW
 EXECUTE FUNCTION check_match_exists();
 
-CREATE TRIGGER prevent_delete_any_row_pago
+CREATE OR REPLACE TRIGGER prevent_delete_any_row_pago
 BEFORE DELETE ON pago
 FOR EACH ROW
 EXECUTE FUNCTION prevent_delete_any_row();
+
+CREATE OR REPLACE TRIGGER prohibir_more_than_100_likes_a_day
+BEFORE INSERT ON likes
+FOR EACH ROW
+EXECUTE FUNCTION prohibir_101_likes();
