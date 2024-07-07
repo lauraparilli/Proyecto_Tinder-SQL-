@@ -11,7 +11,7 @@ SELECT insert_new_permission('incognite', 'Activar incognito', 'Plus');
 SELECT insert_new_permission('semSuperlikes', 'Super Likes semanales', 'Gold');
 SELECT insert_new_permission('1freeBoost', '1 Boost gratis al mes', 'Gold');
 SELECT insert_new_permission('whoLikesU', 'Descubre a quien le gustas', 'Gold');
-SELECT insert_new_permission('Nuevos Top Picks todos los dias', 'Activar incognito', 'Gold');
+SELECT insert_new_permission('newTopPicks', 'Nuevos Top Picks todos los dias', 'Gold');
 
 SELECT 
 
