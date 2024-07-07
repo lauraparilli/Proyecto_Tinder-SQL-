@@ -12,9 +12,6 @@ CREATE INDEX empresa_nombre_url_index ON empresa (nombre_empresa, url); -- para 
 
 CREATE INDEX suscrita_fecha_caducidad_index ON suscrita(fecha_caducidad); -- para buscar rapidamente las suscripciones expiradas y quitarle los permisos a los usuarios con suscripciones expiradas xD
 
--- no se crea un index para buscar los chats o mensajes por el nombre de la persona, eso se puede hacer con el front
--- tambien se puede buscar una palabra en un mensaje por el front
-
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual); -- para buscar personas por preferencia en orientacion sexual
 
 CREATE INDEX estudio_en_grado ON estudio_en (grado); -- para buscar personas por su estudio
@@ -36,5 +33,16 @@ pero se puede hacer con el PK de digitos_tarjeta
 - maneja: hay veces en que se necesita chequear si un usuario tiene un permiso en particular, entonces, en estos casos hay que buscar 
 - preferencias: en preferencias, solo necesita buscar la preferencia de un usuario por su id_cuenta (PK)
 - institucion: solo se busca las instituciones por su dominio (PK)
-- trabaja_en: 
+- trabaja_en: solo se busca que empresas trabaja un usuario, por lo tanto, con poner en el PK el id_cuenta antes de id_empresa es suficiente.
+- likes, dislikes: solo nos interesa ver si un usuario dio like al otro o no para crear el match 
+o chequear si uno dio dislike a otro para que no pueda darle like. Pero con el PK en id_liker + id_liked basta, igual con el id_disliker + id_disliked en PK de swipes.
+- match_with: no hace falta realizar ninguna búsqueda de una instancia en particular en ninguna de sus columnas.
+- chat: su unica columna es el id_chat que ya está como PK
+- mensaje: El usuario puede querer buscar una palabra en un mensaje, pero eso se puede hacer con el front
+- archivo: Puede que necesitemos buscar por nombre de un archivo, pero como el nombre del archivo está incluido en el PK no hace falta.
+- chatea_con:
+- esta_en_agrupacion, tiene_hobby, tiene_habilidades, tiene_foto, tiene_orientacion_sexual, tiene_certificaciones, pref_orientacion_sexual y pref_sexo: 
+estas tablas no se requiere hacer una busqueda de algun elemento en particular. Solo se realiza operaciones de insert y delete sobre estas tablas mediante el id_cuenta
 */
+
+-- NOTA: no se crea un index para buscar los chats o mensajes por el nombre de la persona, eso se puede hacer con el front
