@@ -1748,7 +1748,7 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     estado_pago BOOLEAN,
     metodo_pago_usuario TEXT,
     monto_pago DECIMAL(10,2),
-    documento_factura_usuario BYTEA
+    documento_factura_usuario TEXT
 )
 RETURNS VOID AS $$
 DECLARE
@@ -1783,7 +1783,7 @@ BEGIN
 
     -- Insertar el pago
     INSERT INTO pago (numero_factura, estado, metodo, monto, documento_factura)
-    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario,'base64'))
     RETURNING id_pago INTO new_id_pago;
 
     -- Insertar en realiza
