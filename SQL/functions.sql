@@ -2158,3 +2158,29 @@ BEGIN
 	WHERE  id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: insert_old_tier_old_permissions
+*
+* Uso: Insertar unos permisos existentes a un tier existente en la bd
+*
+* Parametros: 
+*    - old_nombre_tier: nombre de un tier existente
+*    - old_permissions: lista de nombre de permisos existentes
+*
+* Returna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_old_tier_old_permissions (
+	old_nombre_tier TEXT, 
+	old_permissions TEXT[]
+)
+RETURNS VOID AS $$
+DECLARE
+    i integer;
+BEGIN
+    FOR i IN 1..array_length(old_permissions, 1) LOOP
+        INSERT INTO maneja (nombre_tier, nombre_permiso)
+        VALUES (old_nombre_tier, old_permissions[i]);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
