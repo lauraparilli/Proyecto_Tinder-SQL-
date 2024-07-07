@@ -202,10 +202,11 @@ CREATE TABLE IF NOT EXISTS institucion (
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
 	dominio VARCHAR(64),
-	titulo VARCHAR(64) NOT NULL, 
+	grado estudios,
+	especialidad VARCHAR(64), 
 	ano_ingreso INT NOT NULL,
 	ano_egreso INT NOT NULL,
-	PRIMARY KEY(id_cuenta, dominio, titulo),
+	PRIMARY KEY(id_cuenta, dominio, grado, especialidad),
 	CONSTRAINT fk_id_cuenta_estudio_en
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
