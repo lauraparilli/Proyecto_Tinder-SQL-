@@ -1816,3 +1816,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Funcion: prohibir_101_likes
+*
+* Uso: prohibir dar mas de 100 likes al dia si no tiene el permiso infLikes
+*
+* Parametros: Ninguna
+*
+* Resultado: Funcion trigger que no permite dar mas de 100 likes al dia si no tiene el permiso infLikes
+*/
+CREATE OR REPLACE FUNCTION prohibir_101_likes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (get_likes_per_day(New.id_liker, CURRENT_DATE)) = 100 THEN
+        IF (check_if_user_has_a_permission(New.id_liker, 'infLikes')) = FALSE THEN
+            RAISE EXCEPTION 'No puedes dar mas de 100 likes al dia';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
