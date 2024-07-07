@@ -1908,11 +1908,11 @@ RETURNS TABLE(
 	msg_num INT,
 	file_name CHARACTER VARYING,
 	tipo_archivo CHARACTER VARYING,
-	contenido_archivo BYTEA
+	contenido_archivo TEXT
 	) AS $$
 BEGIN
 	RETURN QUERY
-	SELECT numero_msj, nombre, tipo, contenido
+	SELECT numero_msj, nombre, tipo, encode(contenido, 'base64')
 	FROM archivo
 	WHERE id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
 END;
