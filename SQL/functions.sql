@@ -1753,3 +1753,54 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+* Function get_number_of_likes()
+*
+* Uso: calcular el numero de likes que ha recibido una persona
+*	
+* Parametros: 
+*	id_user: id de uno del usuario
+*	
+* Retorna: entero que representa el total de likes
+*/
+
+CREATE OR REPLACE FUNCTION get_number_of_likes(id_user INT)
+RETURNS INTEGER AS $$
+DECLARE
+	num_likes INTEGER;
+BEGIN
+	SELECT COUNT(*) INTO num_likes
+	FROM likes
+	WHERE id_liked = id_user;
+
+	RETURN num_likes;
+END;
+$$LANGUAGE plpgsql;
+
+
+/*
+* Function get_likes_per_day()
+*
+* Uso: calcular el numero de likes que da un usuario al dia
+* Parametros: 
+*	id_user: id del usuario a calcular
+*	from_day: fecha a buscar
+*
+* Retorna: numero de likes del dia
+*/
+
+CREATE OR REPLACE FUNCTION get_likes_per_day(id_user INTEGER, from_day DATE)
+RETURNS INTEGER AS $$
+DECLARE
+	likes_per_day INTEGER;
+BEGIN
+	SELECT COUNT(*) INTO likes_per_day
+	FROM likes 
+	WHERE id_liker = id_user AND DATE(fecha_like) = from_day;
+
+	RETURN likes_per_day;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
