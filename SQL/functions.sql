@@ -1798,5 +1798,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/*
+* Funcion: delete_cuenta
+*
+* Uso: Elimina una cuenta
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario a eliminar
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION delete_cuenta(p_id_cuenta INT)
+RETURNS VOID
+AS $$
+BEGIN
+    DELETE FROM cuenta WHERE id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
 
