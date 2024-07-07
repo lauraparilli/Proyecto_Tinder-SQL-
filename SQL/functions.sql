@@ -1795,6 +1795,8 @@ BEGIN
         INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, fecha_caducidad)
         VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, caducidad);
     END IF;
+END;
+$$ LANGUAGE plpgsql;
 
 /*    
 * Funcion: check_match_exists
