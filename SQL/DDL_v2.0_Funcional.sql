@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS realiza(
 	PRIMARY KEY(id_pago),
 	CONSTRAINT fk_id_cuenta_realiza
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
-			ON DELETE CASCADE	ON UPDATE CASCADE,
+			ON DELETE SET NULL	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_pago_realiza
 		FOREIGN KEY(id_pago) REFERENCES pago(id_pago)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -169,8 +169,6 @@ CREATE TABLE IF NOT EXISTS perfil(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
-
 CREATE TABLE IF NOT EXISTS preferencias(
 	id_cuenta INT, 
 	estudio estudios,
@@ -186,7 +184,6 @@ CREATE TABLE IF NOT EXISTS preferencias(
 			ON DELETE CASCADE	ON UPDATE CASCADE
 );
 
-CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen);
 
 CREATE TABLE IF NOT EXISTS institucion (
 	dominio VARCHAR(64),
@@ -195,7 +192,6 @@ CREATE TABLE IF NOT EXISTS institucion (
 	ano_fundacion INT NOT NULL,
 	latitud DECIMAL(10, 8) NOT NULL,
 	longitud DECIMAL(11, 8) NOT NULL,
-	coordenada geometry(POINT, 4326),
 	PRIMARY KEY(dominio)
 );
 
@@ -203,10 +199,11 @@ CREATE TABLE IF NOT EXISTS institucion (
 CREATE TABLE IF NOT EXISTS estudio_en(
 	id_cuenta INT,
 	dominio VARCHAR(64),
-	titulo VARCHAR(64) NOT NULL, 
+	grado estudios,
+	especialidad VARCHAR(64), 
 	ano_ingreso INT NOT NULL,
 	ano_egreso INT NOT NULL,
-	PRIMARY KEY(id_cuenta, dominio, titulo),
+	PRIMARY KEY(id_cuenta, dominio, grado, especialidad),
 	CONSTRAINT fk_id_cuenta_estudio_en
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -304,7 +301,7 @@ CREATE TABLE IF NOT EXISTS mensaje(
 	PRIMARY KEY(id_chat, numero_msj),
 	CONSTRAINT fk_id_chat_mensaje
         	FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
-			ON DELETE CASCADE	ON UPDATE CASCADE
+			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_cuenta_mensaje
 		FOREIGN KEY(id_remitente) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE

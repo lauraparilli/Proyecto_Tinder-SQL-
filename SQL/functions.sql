@@ -143,13 +143,14 @@ $$ LANGUAGE plpgsql;
  *   - longitud_u: Valor decimal que representa la longitud de la ubicación del usuario.
  *   - foto_u: Arreglo de textos en formato base64 que representa las fotos del usuario.
  *   - dominio_institucion: Texto que representa el dominio de la institución a la que estudio el usuario.
- *   - titulo_u: Texto que representa el título académico del usuario.
+ *   - grado_u: Texto que representa el grado académico en el titulo del usuario.
+ *   - especialidad_u: Texto que representa la especialidad en el titulo del usuario.
  *   - anio_ingreso: Valor entero que representa el año de ingreso a la institución.
  *   - anio_egreso: Valor entero que representa el año de egreso de la institución.
  *
  * Retorna: Nada.
  */
-CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, titulo_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
+CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, grado_u TEXT, especialidad_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
 RETURNS VOID 
 LANGUAGE plpgsql
 AS $$
@@ -176,7 +177,7 @@ BEGIN
 
     INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
 
-    INSERT INTO estudio_en(id_cuenta, dominio, titulo, ano_ingreso, ano_egreso) VALUES (id_cuenta_u, dominio_institucion, titulo_u, anio_ingreso, anio_egreso);
+    INSERT INTO estudio_en(id_cuenta, dominio, grado, especialidad, ano_ingreso, ano_egreso) VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
 
     FOR i IN 1..array_length(foto_u, 1) LOOP
         INSERT INTO tiene_foto (id_cuenta, foto) VALUES (id_cuenta_u, decode(foto_u[i], 'base64'));
@@ -487,6 +488,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+* Funcion: get_users_by_estudio
+*
+* Uso: Obtener usuarios por preferencias en estudio
+*
+* Parametros:
+*   - estudio: TEXT de estudio
+*
+* Retorna: Una tabla con los usuarios que cumplen con el estudio especificado
+*/
+
+CREATE OR REPLACE FUNCTION get_users_by_estudio(p_estudio TEXT)
+RETURNS TABLE (r_id_cuenta INTEGER)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM estudio_en
+    WHERE grado = p_estudio;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Funcion: get_users_by_genre
 *
 * Uso: Obtener usuarios por preferencias en generos
@@ -626,6 +649,7 @@ BEGIN
     SELECT id_cuenta
     FROM cuenta
     WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
@@ -1065,7 +1089,7 @@ $$ LANGUAGE plpgsql;
 /* 
 * Funcion: get_all_info_about_a_user_estudio_en
 * 
-* Uso: Obtener todos los datos  (titulos, años de ingreso y egreso, y agrupaciones) de estudio_en dado por su dominio de institucion e id_cuenta
+* Uso: Obtener todos los datos  (grados academicos con sus especialidades, años de ingreso y egreso, y agrupaciones) de estudio_en dado por su dominio de institucion e id_cuenta
 *
 * Parametros: 
 *  - p_id_cuenta: Entero del id de la cuenta de un usuario
@@ -1074,10 +1098,10 @@ $$ LANGUAGE plpgsql;
 * Retorna: Una tabla de una fila con los datos de estudio_en asociados a la id_cuenta = p_id_cuenta y dominio = p_id_dominio
 */
 CREATE OR REPLACE FUNCTION get_all_info_about_a_user_estudio_en(p_id_cuenta integer, p_id_dominio TEXT)
-RETURNS TABLE(r_titulo CHARACTER VARYING[], r_ano_ingreso INTEGER[], r_ano_egreso INTEGER[], agrupaciones CHARACTER VARYING[]) AS $$
+RETURNS TABLE(r_grado CHARACTER VARYING[], r_especialidad CHARACTER VARYING[], r_ano_ingreso INTEGER[], r_ano_egreso INTEGER[], agrupaciones CHARACTER VARYING[]) AS $$
 BEGIN
     RETURN QUERY
-    SELECT array_agg(titulo), array_agg(ano_ingreso), array_agg(ano_egreso), 
+    SELECT array_agg(grado), array_agg(especialidad), array_agg(ano_ingreso), array_agg(ano_egreso), 
     ARRAY(
         SELECT a.agrupacion 
         FROM esta_en_agrupacion AS a
@@ -1531,6 +1555,7 @@ BEGIN
     SELECT id_cuenta
     FROM cuenta
     WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
@@ -1636,7 +1661,7 @@ $$ LANGUAGE plpgsql;
 * Function delete_like()
 *
 * Uso: para que un usuario elimine un like que dio anteriormente
-*	   con la condicion de que dicho usuario debe estar suscrito a un tier
+*	   con la condicion de que dicho usuario debe estar suscrito a un tier 
 *
 * Parametros: 
 *	id_user: id de quien elimina el like
@@ -1648,7 +1673,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION delete_like(id_user INT, disliked INT)
 	RETURNS VOID AS $$
 BEGIN
-	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user) THEN
+	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user AND fecha_caducidad > CURRENT_DATE ) THEN
 		DELETE FROM likes WHERE id_liker = id_user AND id_liked = disliked ;
 	ELSE
 		RAISE EXCEPTION 'El usuario no está suscrito a ningún tier.';
@@ -1675,28 +1700,24 @@ DECLARE
 	fecha_user2 TIMESTAMP;
 	new_chat_id INT;
 BEGIN 	
-	IF EXISTS (SELECT 1 FROM likes WHERE id_liker = id_user1 AND id_liked = id_user2) AND
-	EXISTS (SELECT 1 FROM likes WHERE  id_liker= id_user2 AND id_liked = id_user1) THEN
-		SELECT fecha_like INTO fecha_user1
-		FROM likes 
-		WHERE id_liker = id_user1 AND id_liked = id_user2;
+	SELECT fecha_like INTO fecha_user1
+	FROM likes 
+	WHERE id_liker = id_user1 AND id_liked = id_user2;
 
-		SELECT fecha_like INTO fecha_user2
-		FROM likes
-		WHERE id_liker= id_user2 AND id_liked = id_user1;
+	SELECT fecha_like INTO fecha_user2
+	FROM likes
+	WHERE id_liker= id_user2 AND id_liked = id_user1;
 
-		INSERT INTO chat DEFAULT VALUES RETURNING id_chat INTO new_chat_id;
+	INSERT INTO chat DEFAULT VALUES RETURNING id_chat INTO new_chat_id;
 
-		IF fecha_user1< fecha_user2 THEN 
-			INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user1, id_user2);
-			INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user1, id_user2, new_chat_id);
-		ELSIF fecha_user1 > fecha_user2 THEN
-			INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user2, id_user1);
-			INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user2, id_user1, new_chat_id);
-		END IF;
-		
-		
+	IF fecha_user1 < fecha_user2 THEN 
+		INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user1, id_user2);
+		INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user1, id_user2, new_chat_id);
+	ELSIF fecha_user1 > fecha_user2 THEN
+		INSERT INTO match_with(id_matcher, id_matched) VALUES (id_user2, id_user1);
+		INSERT INTO chatea_con(id_cuenta1, id_cuenta2, id_chat) VALUES (id_user2, id_user1, new_chat_id);
 	END IF;
+		
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1774,6 +1795,126 @@ BEGIN
         INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, fecha_caducidad)
         VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, caducidad);
     END IF;
+
+/*    
+* Funcion: check_match_exists
+*
+* Uso: Chequear si dos personas dieron like el uno al otro
+*
+* Parametros: Ninguna
+*
+* Resultado: Funcion trigger que crea un match y un chat entre dos usuarios que dieron likes el uno al otro
+*/
+
+CREATE OR REPLACE FUNCTION check_match_exists()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM likes WHERE id_liker = NEW.id_liker AND id_liked = NEW.id_liked) AND
+    EXISTS (SELECT 1 FROM likes WHERE  id_liker= NEW.id_liked AND id_liked = NEW.id_liker) THEN
+        PERFORM insert_match(NEW.id_liker, NEW.id_liked);   
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: cancel_match
+*
+* Uso: Eliminar el match entre dos usuarios, eliminando tambien el chat y los likes 
+*      que se hayan dado entre ellos. Ademas, ya al eliminar el chat se elimina los mensajes y la instancia
+*      de chatea_con.
+*
+* Parametros:
+*    id_user_canceling: INT del usuario que cancela el match
+*    id_user_canceled: INT del usuario que se cancela el match
+*
+* Retorno: Nada
+*/
+
+CREATE OR REPLACE FUNCTION cancel_match(id_user_canceling INT, id_user_canceled INT)
+RETURNS VOID AS $$
+DECLARE 
+    id_their_chat INTEGER;
+BEGIN
+    DELETE FROM match_with WHERE id_matcher = id_user_canceling AND id_matched = id_user_canceled;
+    DELETE FROM match_with WHERE id_matcher = id_user_canceled AND id_matched = id_user_canceling;
+    id_their_chat := (
+        SELECT id_chat FROM chatea_con WHERE 
+        (id_cuenta1 = id_user_canceling AND id_cuenta2 = id_user_canceled) OR 
+        (id_cuenta1 = id_user_canceled AND id_cuenta2 = id_user_canceling)
+    );
+    DELETE FROM chat WHERE id_chat = id_their_chat;
+
+    DELETE FROM likes WHERE id_liker = id_user_canceling AND id_liked = id_user_canceled;
+    DELETE FROM likes WHERE id_liker = id_user_canceled AND id_liked = id_user_canceling;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Function get_number_of_likes()
+*
+* Uso: calcular el numero de likes que ha recibido una persona
+*	
+* Parametros: 
+*	id_user: id de uno del usuario
+*	
+* Retorna: entero que representa el total de likes
+*/
+
+CREATE OR REPLACE FUNCTION get_number_of_likes(id_user INT)
+RETURNS INTEGER AS $$
+DECLARE
+	num_likes INTEGER;
+BEGIN
+	SELECT COUNT(*) INTO num_likes
+	FROM likes
+	WHERE id_liked = id_user;
+
+	RETURN num_likes;
+END;
+$$LANGUAGE plpgsql;
+
+
+/*
+* Function get_likes_per_day()
+*
+* Uso: calcular el numero de likes que da un usuario al dia
+* Parametros: 
+*	id_user: id del usuario a calcular
+*	from_day: fecha a buscar
+*
+* Retorna: entero que representa el numero de likes dados en un dia
+*/
+
+CREATE OR REPLACE FUNCTION get_likes_per_day(id_user INTEGER, from_day DATE)
+RETURNS INTEGER AS $$
+DECLARE
+	likes_per_day INTEGER;
+BEGIN
+	SELECT COUNT(*) INTO likes_per_day
+	FROM likes 
+	WHERE id_liker = id_user AND DATE(fecha_like) = from_day;
+
+	RETURN likes_per_day;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: delete_cuenta
+*
+* Uso: Elimina una cuenta
+*
+* Parametros:
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario a eliminar
+*
+* Retorna: Nada
+*/
+
+CREATE OR REPLACE FUNCTION delete_cuenta(p_id_cuenta INT)
+RETURNS VOID
+AS $$
+BEGIN
+    DELETE FROM cuenta WHERE id_cuenta = p_id_cuenta;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1862,6 +2003,26 @@ BEGIN
     ELSE
         RAISE EXCEPTION 'El nuevo tier % no es superior al tier actual %', nueva_tier_usuario, current_tier;
     END IF;
+    
+/*    
+* Funcion: prohibir_101_likes
+*
+* Uso: prohibir dar mas de 100 likes al dia si no tiene el permiso infLikes
+*
+* Parametros: Ninguna
+*
+* Resultado: Funcion trigger que no permite dar mas de 100 likes al dia si no tiene el permiso infLikes
+*/
+
+CREATE OR REPLACE FUNCTION prohibir_101_likes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (get_likes_per_day(New.id_liker, CURRENT_DATE)) = 100 THEN
+        IF (check_if_user_has_a_permission(New.id_liker, 'infLikes')) = FALSE THEN
+            RAISE EXCEPTION 'No puedes dar mas de 100 likes al dia';
+        END IF;
+    END IF;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1908,3 +2069,61 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: insert_file
+*
+* Uso: Crear instancia en la tabla archivo
+* Parametros: 
+*			- chat_id: id del chat correspondiente
+*			- name_file: nombre del archivo a obtener
+*			- type_file: tipo del archivo
+*			- content_file: contenido del archivo
+*			- remitente_id: id del remitente
+* Retorna: nada 
+*/
+
+CREATE OR REPLACE FUNCTION insert_file(chat_id INT, name_file TEXT, type_file TEXT,
+			content_file  TEXT, remitente_id INT)
+RETURNS VOID AS $$
+	
+DECLARE 
+	new_msg_num INT;
+
+BEGIN
+	INSERT INTO mensaje (id_remitente) 
+	VALUES (remitente_id)
+	RETURNING numero_msj INTO new_msg_num;
+
+	INSERT INTO archivo (id_chat, numero_msj, nombre, tipo, contenido )
+	VALUES (chat_id, new_msg_num, name_file, type_file, decode(content_file, 'base64'));
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
+* Funcion: get_file
+*
+* Uso: Obtener archivos
+* Parametros: 
+*			- chat_id: id del chat correspondiente
+*			- message: numero del mensaje correspondiente
+*			- name_file : nombre del archivo a obtener
+* Resultado: 
+*/
+
+CREATE OR REPLACE FUNCTION get_file(chat_id INT, message_num INT, name_file TEXT)
+RETURNS TABLE(
+	msg_num INT,
+	file_name CHARACTER VARYING,
+	tipo_archivo CHARACTER VARYING,
+	contenido_archivo TEXT
+	) AS $$
+BEGIN
+	RETURN QUERY
+	SELECT numero_msj, nombre, tipo, encode(contenido, 'base64')
+	FROM archivo
+	WHERE id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
+END;
+$$ LANGUAGE plpgsql;
+
