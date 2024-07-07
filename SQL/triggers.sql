@@ -13,7 +13,7 @@ BEFORE INSERT OR UPDATE OR DELETE ON realiza
 FOR EACH ROW
 EXECUTE PROCEDURE delete_due_card();
 
-CREATE TRIGGER prevent_delete_any_row
+CREATE TRIGGER prevent_delete_any_row_institucion
 BEFORE DELETE ON institucion
 FOR EACH ROW
 EXECUTE FUNCTION prevent_delete_any_row();
@@ -22,3 +22,8 @@ CREATE TRIGGER check_if_a_match_with_exists
 AFTER INSERT ON likes
 FOR EACH ROW
 EXECUTE FUNCTION check_match_exists();
+
+CREATE TRIGGER prevent_delete_any_row_pago
+BEFORE DELETE ON pago
+FOR EACH ROW
+EXECUTE FUNCTION prevent_delete_any_row();
