@@ -1875,7 +1875,7 @@ $$ LANGUAGE plpgsql;
 */
 
 CREATE OR REPLACE FUNCTION insert_file(chat_id INT, name_file TEXT, type_file TEXT,
-			content_file  BYTEA, remitente_id INT)
+			content_file  TEXT, remitente_id INT)
 RETURNS VOID AS $$
 	
 DECLARE 
@@ -1887,7 +1887,7 @@ BEGIN
 	RETURNING numero_msj INTO new_msg_num;
 
 	INSERT INTO archivo (id_chat, numero_msj, nombre, tipo, contenido )
-	VALUES (chat_id, new_msg_num, name_file, type_file, content_file );
+	VALUES (chat_id, new_msg_num, name_file, type_file, decode(content_file, 'base64'));
 END;
 $$ LANGUAGE plpgsql;
 
