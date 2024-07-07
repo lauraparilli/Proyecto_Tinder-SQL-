@@ -2005,6 +2005,8 @@ BEGIN
     ELSE
         RAISE EXCEPTION 'El nuevo tier % no es superior al tier actual %', nueva_tier_usuario, current_tier;
     END IF;
+END;
+$$ LANGUAGE plpgsql;
     
 /*    
 * Funcion: prohibir_101_likes
