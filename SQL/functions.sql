@@ -2184,3 +2184,42 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: set_null_estudio
+*
+* Uso: Si el usuario ya no quiere buscar personas por su estudio, se setea null a este atributo en la tabla preferencias
+*
+* Parametros: 
+*    - p_id_cuenta: id de la cuenta del usuario
+*
+* Returna: Nada
+*/
+CREATE OR REPLACE FUNCTION set_null_estudio(p_id_cuenta integer)
+RETURNS void AS $$
+BEGIN
+    UPDATE preferencias
+    SET estudio = NULL
+    WHERE id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Funcion: set_default_latitud_longitud_origen
+*
+* Uso: Si el usuario ya no quiere buscar personas por un punto de coordenada o se termina su suscripcion a un tier con permiso passport, se setea la coordenada origen al valor defecto (que es la coordenada donde esta el usuario) en la tabla preferencias
+*
+* Parametros: 
+*    - p_id_cuenta: id de la cuenta del usuario
+*
+* Returna: Nada
+*/
+CREATE OR REPLACE FUNCTION set_default_latitud_longitud_origen(p_id_cuenta integer)
+RETURNS void AS $$
+BEGIN
+    /* se setea null, ya que hay un trigger que setea por default a las coordenadas del usuario */
+    UPDATE preferencias
+    SET latitud_origen = NULL, longitud_origen = NULL
+    WHERE id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
