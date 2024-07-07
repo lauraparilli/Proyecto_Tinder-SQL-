@@ -18,6 +18,10 @@ CREATE INDEX estudio_en_grado ON estudio_en (grado); -- para buscar personas por
 
 CREATE INDEX maneja_nombre_permiso ON maneja (nombre_permiso); -- para buscar si un usuario tiene un permiso en particular segun su tier suscrita
 
+-- para obtener los chats de un usuario cada vez que inicie sesión (el usuario puede ser o id_cuenta1 o id_cuenta2)
+CREATE INDEX chatea_con_id_cuenta1 ON chatea_con (id_cuenta1); 
+CREATE INDEX chatea_con_id_cuenta1 ON chatea_con (id_cuenta1); 
+
 -- Nota: Segun internet, en PostgreSQL, cuando se define una clave primaria (PRIMARY KEY) sobre una columna de una tabla, este campo se constituye automáticamente como un índice de tipo B-tree.
 
 /*
@@ -40,7 +44,6 @@ o chequear si uno dio dislike a otro para que no pueda darle like. Pero con el P
 - chat: su unica columna es el id_chat que ya está como PK
 - mensaje: El usuario puede querer buscar una palabra en un mensaje, pero eso se puede hacer con el front
 - archivo: Puede que necesitemos buscar por nombre de un archivo, pero como el nombre del archivo está incluido en el PK no hace falta.
-- chatea_con:
 - esta_en_agrupacion, tiene_hobby, tiene_habilidades, tiene_foto, tiene_orientacion_sexual, tiene_certificaciones, pref_orientacion_sexual y pref_sexo: 
 estas tablas no se requiere hacer una busqueda de algun elemento en particular. Solo se realiza operaciones de insert y delete sobre estas tablas mediante el id_cuenta
 */
