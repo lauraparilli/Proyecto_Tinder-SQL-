@@ -2134,9 +2134,9 @@ $$ LANGUAGE plpgsql;
 * Uso: Obtener archivos.
 *
 * Parámetros: 
-*			- chat_id   : Id del chat correspondiente.
-*			- message   : Numero del mensaje correspondiente.
-*			- name_file : Nombre del archivo a obtener.
+*	- chat_id   : Id del chat correspondiente.
+*	- message   : Numero del mensaje correspondiente.
+*	- name_file : Nombre del archivo a obtener.
 *
 * Returno: Tabla con los datos del archivo.
 */
