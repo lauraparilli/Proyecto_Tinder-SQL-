@@ -1699,3 +1699,212 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Function subscribe_user()
+*
+* Uso: Realiza la suscripción de un usuario a un tier y gestiona el proceso de pago
+* Parametros: 
+*   id_cuenta_usuario: ID de la cuenta del usuario que desea suscribirse
+*   nombre_tier_usuario: Nombre del tier al que desea suscribirse el usuario
+*   caducidad: Fecha de caducidad de la suscripción
+*   digitos_tarjeta_usario: Dígitos de la tarjeta de crédito del usuario para el pago
+*   numero_factura_actual: Número de factura del pago
+*   estado_pago: Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado)
+*   metodo_pago_usuario: Método de pago utilizado por el usuario (ej. Tarjeta de Crédito)
+*   monto_pago: Monto del pago realizado
+*   documento_factura_usuario: Documento de la factura en formato BYTEA
+*
+* Retorna: Nada
+*/
+
+CREATE OR REPLACE FUNCTION subscribe_user(
+    id_cuenta_usuario INT,
+    nombre_tier_usuario TEXT,
+    caducidad TIMESTAMP,
+    digitos_tarjeta_usario TEXT,
+    numero_factura_actual INT,
+    estado_pago BOOLEAN,
+    metodo_pago_usuario TEXT,
+    monto_pago DECIMAL(10,2),
+    documento_factura_usuario BYTEA
+)
+RETURNS VOID AS $$
+DECLARE
+    new_id_pago INT;
+BEGIN
+    -- Verificar si la cuenta y la tarjeta existen y si el tier está disponible
+    IF NOT EXISTS (SELECT 1 FROM cuenta WHERE id_cuenta = id_cuenta_usuario) THEN
+        RAISE EXCEPTION 'La cuenta con id % no existe', id_cuenta_usuario;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM tarjeta WHERE digitos_tarjeta = digitos_tarjeta_usario) THEN
+        RAISE EXCEPTION 'La tarjeta con dígitos % no existe', digitos_tarjeta_usario;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nombre_tier_usuario) THEN
+        RAISE EXCEPTION 'El tier % no existe', nombre_tier_usuario;
+    END IF;
+
+    -- Verificar si el usuario ya está suscrito a un tier activo
+    IF EXISTS (
+        SELECT 1 FROM suscrita
+        WHERE id_cuenta = id_cuenta_usuario
+          AND fecha_caducidad > CURRENT_TIMESTAMP
+    ) THEN
+        RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo';
+    END IF;
+
+    -- Verificar que la fecha de caducidad sea mayor que la fecha actual
+    IF caducidad <= CURRENT_TIMESTAMP THEN
+        RAISE EXCEPTION 'La fecha de caducidad debe ser en el futuro';
+    END IF;
+
+    -- Insertar el pago
+    INSERT INTO pago (numero_factura, estado, metodo, monto, documento_factura)
+    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+    RETURNING id_pago INTO new_id_pago;
+
+    -- Insertar en realiza
+    INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
+    VALUES (id_cuenta_usuario, new_id_pago, digitos_tarjeta_usario);
+
+    -- Si el pago está aprobado, insertar en suscrita
+    IF estado_pago THEN
+        INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, fecha_caducidad)
+        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, caducidad);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Function update_tier_of_user()
+*
+* Uso: Actualiza el tier de un usuario en función de una nueva suscripción y registra el pago asociado.
+* Parametros: 
+*   id_cuenta_usuario: ID de la cuenta del usuario.
+*   nueva_tier_usuario: Nombre del nuevo tier al que se quiere suscribir al usuario.
+*   digitos_tarjeta_usario: Últimos dígitos de la tarjeta del usuario.
+*   numero_factura_actual: Número de la factura actual.
+*   estado_pago: Estado del pago (TRUE si el pago fue exitoso, FALSE en caso contrario).
+*   metodo_pago_usuario: Método de pago utilizado.
+*   monto_pago: Monto del pago.
+*   documento_factura_usuario: Documento de la factura en formato BYTEA.
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION update_tier_of_user(
+    id_cuenta_usuario INT,
+    nueva_tier_usuario TEXT,
+    digitos_tarjeta_usario TEXT,
+    numero_factura_actual INT,
+    estado_pago BOOLEAN,
+    metodo_pago_usuario TEXT,
+    monto_pago DECIMAL(10,2),
+    documento_factura_usuario BYTEA
+)
+RETURNS VOID AS $$
+DECLARE
+    new_id_pago INT;
+    current_tier TEXT;
+    cantidad_vieja_de_permisos INT;
+    cantidad_nueva_de_permisos INT;
+BEGIN
+    -- Verificar si la cuenta y la tarjeta existen y si el tier está disponible
+    IF NOT EXISTS (SELECT 1 FROM cuenta WHERE id_cuenta = id_cuenta_usuario) THEN
+        RAISE EXCEPTION 'La cuenta con id % no existe', id_cuenta_usuario;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM tarjeta WHERE digitos_tarjeta = digitos_tarjeta_usario) THEN
+        RAISE EXCEPTION 'La tarjeta con dígitos % no existe', digitos_tarjeta_usario;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nueva_tier_usuario) THEN
+        RAISE EXCEPTION 'El tier % no existe', nueva_tier_usuario;
+    END IF;
+
+    -- Verificar si el usuario está suscrito a un tier activo
+    IF NOT EXISTS (
+        SELECT tier INTO current_tier FROM suscrita
+        WHERE id_cuenta = id_cuenta_usuario
+          AND fecha_caducidad > CURRENT_TIMESTAMP
+    ) THEN
+        RAISE EXCEPTION 'El usuario no está suscrito a un tier activo';
+    END IF;
+
+    SELECT COUNT(*) INTO cantidad_vieja_de_permisos
+    FROM maneja
+    WHERE nombre_tier = current_tier;
+
+    SELECT COUNT(*) INTO cantidad_nueva_de_permisos
+    FROM maneja
+    WHERE nombre_tier = nueva_tier_usuario;    
+
+
+    -- Definir el orden de los tiers
+    IF (cantidad_nueva_de_permisos > cantidad_vieja_de_permisos) THEN
+       
+        INSERT INTO pago (numero_factura, estado, metodo_pago, monto, documento_factura)
+        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+        RETURNING id_pago INTO new_id_pago;
+
+        INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
+        VALUES (id_cuenta_usuario, new_id_pago, digitos_tarjeta_usario);
+
+        IF estado_pago THEN
+            UPDATE suscrita
+            SET tier = nueva_tier_usuario
+            WHERE id_cuenta = id_cuenta_usuario
+            AND fecha_caducidad > CURRENT_TIMESTAMP;
+        END IF;
+
+    ELSE
+        RAISE EXCEPTION 'El nuevo tier % no es superior al tier actual %', nueva_tier_usuario, current_tier;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+* Function add_tier_with_permission()
+*
+* Uso: Agrega un nuevo tier a la tabla de tier y le asigna al menos un permiso en la tabla maneja.
+* Parametros: 
+*   nombre_nuevo_tier: Nombre del nuevo tier a agregar
+*   nombre_permisos: Lista de nombres de permisos a asignar al nuevo tier
+*
+* Retorna: nada
+*/
+
+CREATE OR REPLACE FUNCTION add_tier_with_permission(
+    nombre_nuevo_tier VARCHAR(16),
+    nombre_permisos TEXT[]
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Verificar si el tier ya existe
+    IF EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nombre_nuevo_tier) THEN
+        RAISE EXCEPTION 'El tier % ya existe', nombre_nuevo_tier;
+    END IF;
+
+    -- Insertar el nuevo tier
+    INSERT INTO tier (nombre_tier) VALUES (nombre_nuevo_tier);
+
+    -- Verificar que se haya proporcionado al menos un permiso
+    IF array_length(nombre_permisos, 1) IS NULL OR array_length(nombre_permisos, 1) = 0 THEN
+        RAISE EXCEPTION 'Debe proporcionar al menos un permiso para el tier %', nombre_nuevo_tier;
+    END IF;
+
+    -- Asignar los permisos al nuevo tier
+    FOR i IN 1..array_length(nombre_permisos, 1) LOOP
+        -- Verificar si el permiso existe
+        IF NOT EXISTS (SELECT 1 FROM permiso WHERE nombre_permiso = nombre_permisos[i]) THEN
+            RAISE EXCEPTION 'El permiso % no existe', nombre_permisos[i];
+        END IF;
+
+        -- Insertar el permiso en la tabla maneja
+        INSERT INTO maneja (nombre_tier, nombre_permiso)
+        VALUES (nombre_nuevo_tier, nombre_permisos[i]);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;

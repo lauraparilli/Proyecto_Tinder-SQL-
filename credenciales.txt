@@ -1,4 +1,6 @@
-PGHOST='ep-ancient-block-a5e0v69s.us-east-2.aws.neon.tech'
-PGDATABASE='main'
-PGUSER='main_owner'
-PGPASSWORD='5gvz0EKJGWAI'
+PG_HOST=ep-withered-snowflake-a5w8vkan.us-east-2.aws.neon.tech
+PG_PORT=5432
+PG_USER=db_owner
+PG_PASSWORD=ed93ryEzvCai
+PG_DATABASE=robleaffinity
+PG_CONNECTION_STRING=postgresql://db_owner:ed93ryEzvCai@ep-withered-snowflake-a5w8vkan.us-east-2.aws.neon.tech/robleaffinity?sslmode=require
