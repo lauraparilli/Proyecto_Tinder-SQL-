@@ -548,7 +548,7 @@ $$ LANGUAGE plpgsql;
 *
 * Retorna: Una tabla con los usuarios que cumplen con el min edad
 */
-CREATE OR REPLACE FUNCTION get_users_by_min_max_age(min_age INTEGER)
+CREATE OR REPLACE FUNCTION get_users_by_min_age(min_age INTEGER)
 RETURNS TABLE (r_id_cuenta INTEGER)
 AS $$
 BEGIN
