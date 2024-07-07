@@ -143,13 +143,14 @@ $$ LANGUAGE plpgsql;
  *   - longitud_u: Valor decimal que representa la longitud de la ubicación del usuario.
  *   - foto_u: Arreglo de textos en formato base64 que representa las fotos del usuario.
  *   - dominio_institucion: Texto que representa el dominio de la institución a la que estudio el usuario.
- *   - titulo_u: Texto que representa el título académico del usuario.
+ *   - grado_u: Texto que representa el grado académico en el titulo del usuario.
+ *   - especialidad_u: Texto que representa la especialidad en el titulo del usuario.
  *   - anio_ingreso: Valor entero que representa el año de ingreso a la institución.
  *   - anio_egreso: Valor entero que representa el año de egreso de la institución.
  *
  * Retorna: Nada.
  */
-CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, titulo_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
+CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, grado_u TEXT, especialidad_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
 RETURNS VOID 
 LANGUAGE plpgsql
 AS $$
@@ -176,7 +177,7 @@ BEGIN
 
     INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
 
-    INSERT INTO estudio_en(id_cuenta, dominio, titulo, ano_ingreso, ano_egreso) VALUES (id_cuenta_u, dominio_institucion, titulo_u, anio_ingreso, anio_egreso);
+    INSERT INTO estudio_en(id_cuenta, dominio, grado, especialidad, ano_ingreso, ano_egreso) VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
 
     FOR i IN 1..array_length(foto_u, 1) LOOP
         INSERT INTO tiene_foto (id_cuenta, foto) VALUES (id_cuenta_u, decode(foto_u[i], 'base64'));
