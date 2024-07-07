@@ -8,18 +8,12 @@ CREATE INDEX tarjeta_fecha_caducidad_index ON tarjeta(fecha_caducidad); -- ident
 
 CREATE INDEX perfil_sexo_index ON perfil (sexo); -- para buscar personas por preferencias en genero.
 
-CREATE INDEX institucion_nombre_index ON institucion (nombre); -- por si existen miles de instituciones, y el usuario quiere buscar la institucion por su nombre al momento de llenar el registro de la cuenta
-
 CREATE INDEX empresa_nombre_url_index ON empresa (nombre_empresa, url); -- para buscar si la empresa ya existe en la base de datos o no (se usa en la funcion insert_trabaja_en)
 
 CREATE INDEX suscrita_fecha_caducidad_index ON suscrita(fecha_caducidad); -- para buscar rapidamente las suscripciones expiradas y quitarle los permisos a los usuarios con suscripciones expiradas xD
 
-CREATE INDEX mensaje_texto_spanish_index ON mensaje USING GIN (to_tsvector('spanish', texto)); -- cuando un usuario quiere buscar alguna palabra en los mensajes (en español)
-
-CREATE INDEX mensaje_texto_english_index ON mensaje USING GIN (to_tsvector('english', texto));  -- cuando un usuario quiere buscar alguna palabra en los mensajes (en inglés)
-
 -- no se crea un index para buscar los chats o mensajes por el nombre de la persona, eso se puede hacer con el front
--- se crea un index para buscar alguna palabra en los mensajes por si son muchos mensajes y solo se muestra una parte de los mensajes de un chat en el front
+-- tambien se puede buscar una palabra en un mensaje por el front
 
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual); -- para buscar personas por preferencia en orientacion sexual
 
@@ -40,5 +34,7 @@ pero se puede hacer con el PK de digitos_tarjeta
 - tier: solamente tiene la columna nombre_tier que ya es PK
 - permiso: solamente se necesita el nombre_permiso (PK) para buscar algun permiso en particular
 - maneja: hay veces en que se necesita chequear si un usuario tiene un permiso en particular, entonces, en estos casos hay que buscar 
-- 
+- preferencias: en preferencias, solo necesita buscar la preferencia de un usuario por su id_cuenta (PK)
+- institucion: solo se busca las instituciones por su dominio (PK)
+- trabaja_en: 
 */
