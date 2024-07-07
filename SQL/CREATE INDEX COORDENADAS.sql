@@ -22,3 +22,5 @@ CREATE INDEX mensaje_texto_english_index ON mensaje USING GIN (to_tsvector('engl
 -- se crea un index para buscar alguna palabra en los mensajes por si son muchos mensajes y solo se muestra una parte de los mensajes de un chat en el front
 
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual); -- para buscar personas por preferencia en orientacion sexual
+
+CREATE INDEX estudio_en_grado ON estudio_en (grado); -- para buscar personas por su estudio
