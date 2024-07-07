@@ -650,7 +650,7 @@ BEGIN
     FROM cuenta
     WHERE id_cuenta != user_id
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
-    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
@@ -1556,7 +1556,7 @@ BEGIN
     FROM cuenta
     WHERE id_cuenta != user_id
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
-    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
