@@ -488,6 +488,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+* Funcion: get_users_by_estudio
+*
+* Uso: Obtener usuarios por preferencias en estudio
+*
+* Parametros:
+*   - estudio: TEXT de estudio
+*
+* Retorna: Una tabla con los usuarios que cumplen con el estudio especificado
+*/
+
+CREATE OR REPLACE FUNCTION get_users_by_estudio(p_estudio TEXT)
+RETURNS TABLE (r_id_cuenta INTEGER)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id_cuenta
+    FROM estudio_en
+    WHERE grado = p_estudio;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Funcion: get_users_by_genre
 *
 * Uso: Obtener usuarios por preferencias en generos
@@ -627,6 +649,7 @@ BEGIN
     SELECT id_cuenta
     FROM cuenta
     WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
@@ -1532,6 +1555,7 @@ BEGIN
     SELECT id_cuenta
     FROM cuenta
     WHERE id_cuenta != user_id
+    AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_estudio(pref_estudio))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_min_max_age(pref_min_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
     AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
