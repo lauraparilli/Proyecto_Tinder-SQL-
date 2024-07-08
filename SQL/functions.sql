@@ -590,6 +590,35 @@ $$ LANGUAGE plpgsql;
 
 
 /*
+* Función: get_all_users_by_max_distance
+*
+* Uso: Obtener todos los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado (no se considera en el resultado el usuario dado).
+*
+* Parámetros:
+*  - user_id : Valor entero del Id de la cuenta del usuario a partir del cual se calculará la distancia..
+*
+* Retorno: Una tabla con los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado.
+*/
+CREATE OR REPLACE FUNCTION get_all_users_by_max_distance(user_id INTEGER)
+RETURNS TABLE (id_cuenta_at_max_distance INTEGER) AS $$
+DECLARE 
+    max_distance INTEGER := 5;  -- DEFAULT VALUE 5 km
+BEGIN
+    /* Verificar si existe una instancia de preferencias del usuario */
+    IF EXISTS (SELECT * FROM preferencias WHERE id_cuenta = user_id) THEN
+        SELECT distancia_maxima FROM preferencias WHERE id_cuenta = user_id INTO max_distance;
+    END IF;
+
+    RETURN QUERY SELECT id_cuenta
+    FROM perfil
+    WHERE ST_DistanceSphere(
+        coordenada,
+        (SELECT coordenada FROM perfil WHERE id_cuenta = user_id)
+    ) / 1000 <= max_distance AND id_cuenta != user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
 * Función: get_users_by_preferences_free_user
 *
 * Uso: Obtener los ids cuentas de los usuarios que cumplen con las preferencias de otro usuario que no tiene suscripcion con passport.
@@ -711,37 +740,6 @@ BEGIN
     DELETE FROM pref_orientacion_sexual WHERE id_cuenta = p_id_cuenta AND orientacion_sexual = p_orientacion_sexual;
 END;
 $$ LANGUAGE plpgsql;
-
-
-/*
-* Función: get_all_users_by_max_distance
-*
-* Uso: Obtener todos los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado (no se considera en el resultado el usuario dado).
-*
-* Parámetros:
-*  - user_id : Valor entero del Id de la cuenta del usuario a partir del cual se calculará la distancia..
-*
-* Retorno: Una tabla con los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado.
-*/
-CREATE OR REPLACE FUNCTION get_all_users_by_max_distance(user_id INTEGER)
-RETURNS TABLE (id_cuenta_at_max_distance INTEGER) AS $$
-DECLARE 
-    max_distance INTEGER := 5;  -- DEFAULT VALUE 5 km
-BEGIN
-    /* Verificar si existe una instancia de preferencias del usuario */
-    IF EXISTS (SELECT * FROM preferencias WHERE id_cuenta = user_id) THEN
-        SELECT distancia_maxima FROM preferencias WHERE id_cuenta = user_id INTO max_distance;
-    END IF;
-
-    RETURN QUERY SELECT id_cuenta
-    FROM perfil
-    WHERE ST_DistanceSphere(
-        coordenada,
-        (SELECT coordenada FROM perfil WHERE id_cuenta = user_id)
-    ) / 1000 <= max_distance AND id_cuenta != user_id;
-END;
-$$ LANGUAGE plpgsql;
-
 
 /*
 * Función: insert_user_tarjeta
