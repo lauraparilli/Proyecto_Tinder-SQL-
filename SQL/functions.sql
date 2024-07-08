@@ -92,7 +92,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_all_Institutions()
 RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) AS $$
 BEGIN
-    RETURN QUERY SELECT i.dominio, i.nombre AS dominio_nombre FROM institucion i;
+    RETURN QUERY SELECT dominio, nombre FROM institucion;
 END;
 $$ LANGUAGE plpgsql;
 
