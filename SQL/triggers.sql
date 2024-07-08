@@ -8,11 +8,6 @@ BEFORE INSERT OR UPDATE ON preferencias
 FOR EACH ROW
 EXECUTE PROCEDURE set_latitud_longitud_origen();
 
-CREATE OR REPLACE TRIGGER delete_due_card
-BEFORE INSERT OR UPDATE OR DELETE ON realiza
-FOR EACH ROW
-EXECUTE PROCEDURE delete_due_card();
-
 CREATE OR REPLACE TRIGGER prevent_delete_any_row_institucion
 BEFORE DELETE ON institucion
 FOR EACH ROW
