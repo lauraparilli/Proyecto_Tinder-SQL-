@@ -2101,3 +2101,44 @@ BEGIN
     WHERE id_cuenta = p_id_cuenta;
 END;
 $$ LANGUAGE plpgsql;
+
+/*
+* Funcion: insert_new_estudio_en
+*
+* Uso: insertar una nueva instancia en estudio_en y en esta_en_agrupacion
+*
+* Parametros:
+*  - id_user: id de la cuenta del usuario
+*  - p_dominio: dominio de la institucion
+*  - p_nombre_institucion: nombre de la institucion
+*  - p_grado: grado academico 
+*  - p_especialidad: especialidad
+*  - p_ano_inicio: año de ingreso
+*  - p_ano_fin: año de egreso
+*  - p_agrupaciones: OPCIONAL, arreglo de nombre de agrupaciones
+*
+* Retorna: Nada
+*/
+CREATE OR REPLACE FUNCTION insert_new_estudio_en(
+    id_user integer,
+    p_dominio TEXT,
+    p_grado TEXT,
+    p_especialidad TEXT,
+    p_ano_inicio integer,
+    p_ano_fin integer,
+    p_agrupaciones TEXT[] DEFAULT NULL
+) RETURNS void AS $$
+DECLARE
+    i INTEGER;
+BEGIN
+    INSERT INTO estudio_en
+    VALUES (id_user, p_dominio, p_grado, p_especialidad, p_ano_inicio, p_ano_fin);
+
+    IF p_agrupaciones IS NOT NULL THEN
+        FOR i IN 1..array_length(p_agrupaciones, 1) LOOP
+            INSERT INTO esta_en_agrupacion
+            VALUES (id_user, p_dominio, p_agrupaciones[i]);
+        END LOOP;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
