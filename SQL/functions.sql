@@ -268,7 +268,7 @@ $$ LANGUAGE plpgsql;
 * Uso: Actualiza la descripcion del perfil de un usuario.
 *
 * Parámetros: 
-*  - id_cuenta       : Valor entero del nombre del usuario a editar la descripcion del perfil.
+*  - id_user       : Valor entero del nombre del usuario a editar la descripcion del perfil.
 *  - new_descripcion : Texto con la nueva descripcion del perfil.
 *
 * Retorna: Nada.
