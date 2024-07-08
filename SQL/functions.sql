@@ -304,27 +304,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-/*
-* Función: check_verified_profile
-*
-* Uso: Verifica si el perfil de un usuario ha sido verificado o no 
-* 
-* Parámetros:
-* 	- user_id: Id del usuario.
-*
-* Retorna:
-* 	- boolean: True si el perfil ha sido verificado, false en caso contrario.
-*/
-CREATE OR REPLACE FUNCTION check_verified_profile(user_id integer) 
-RETURNS BOOLEAN AS $$
-DECLARE
-    verified BOOLEAN;
-BEGIN
-    SELECT verificado INTO verified FROM perfil WHERE id_cuenta = user_id;
-    RETURN verified;
-END;
-$$ LANGUAGE plpgsql;
-
 
 /*
 * Función: set_true_verificado
