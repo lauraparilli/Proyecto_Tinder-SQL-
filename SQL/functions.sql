@@ -1598,7 +1598,7 @@ $$ LANGUAGE plpgsql;
 *
 * Retorna: nada.
 */
-CREATE OR REPLACE FUNCTION insert_like(liker INT, liked INT, superlike BOOL) 
+CREATE OR REPLACE FUNCTION insert_like(liker INT, liked INT, superlike BOOL DEFAULT FALSE) 
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO likes(id_liker, id_liked, super) VALUES (liker, liked, superlike);
