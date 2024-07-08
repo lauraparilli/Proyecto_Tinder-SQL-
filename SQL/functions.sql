@@ -1632,7 +1632,7 @@ $$ LANGUAGE plpgsql;
 *   - estado_pago               : Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado).
 *   - metodo_pago_usuario       : Método de pago utilizado por el usuario (ej. Tarjeta de Crédito).
 *   - monto_pago                : Monto del pago realizado.
-*   - documento_factura_usuario : Documento de la factura en formato BYTEA.
+*   - documento_factura_usuario : Documento de la factura en formato base64.
 *
 * Retorna: Nada.
 */
@@ -1645,7 +1645,7 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     estado_pago               BOOLEAN,
     metodo_pago_usuario       TEXT,
     monto_pago                DECIMAL(10,2),
-    documento_factura_usuario BYTEA
+    documento_factura_usuario TEXT
 ) RETURNS VOID AS $$
 DECLARE
     new_id_pago INT;
@@ -1679,7 +1679,7 @@ BEGIN
 
     -- Insertar el pago
     INSERT INTO pago (numero_factura, estado, metodo, monto, documento_factura)
-    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+    VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario, 'base64'))
     RETURNING id_pago INTO new_id_pago;
 
     -- Insertar en realiza
@@ -1830,7 +1830,7 @@ $$ LANGUAGE plpgsql;
 *   - estado_pago               : Estado del pago (TRUE si el pago fue exitoso, FALSE en caso contrario).
 *   - metodo_pago_usuario       : Método de pago utilizado.
 *   - monto_pago                : Monto del pago.
-*   - documento_factura_usuario : Documento de la factura en formato BYTEA.
+*   - documento_factura_usuario : Documento de la factura en formato base64.
 *
 * Retorna: Nada.
 */
@@ -1842,7 +1842,7 @@ CREATE OR REPLACE FUNCTION update_tier_of_user(
     estado_pago               BOOLEAN,
     metodo_pago_usuario       TEXT,
     monto_pago                DECIMAL(10,2),
-    documento_factura_usuario BYTEA
+    documento_factura_usuario TEXT
 ) RETURNS VOID AS $$
 DECLARE
     new_id_pago                INT;
@@ -1884,7 +1884,7 @@ BEGIN
     IF (cantidad_nueva_de_permisos > cantidad_vieja_de_permisos) THEN
        
         INSERT INTO pago (numero_factura, estado, metodo_pago, monto, documento_factura)
-        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, documento_factura_usuario)
+        VALUES (numero_factura_actual, estado_pago, metodo_pago_usuario, monto_pago, decode(documento_factura_usuario, 'base64'))
         RETURNING id_pago INTO new_id_pago;
 
         INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
