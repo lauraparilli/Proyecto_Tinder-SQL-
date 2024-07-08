@@ -1936,41 +1936,6 @@ $$ LANGUAGE plpgsql;
 
 
 /*
-* Función: insert_file
-*
-* Uso: Crear instancia en la tabla archivo.
-* 
-* Parámetros: 
-*   - chat_id      : Id del chat correspondiente.
-*	- name_file    : Nombre del archivo a obtener.
-*	- type_file    : Tipo del archivo.
-*	- content_file : Contenido del archivo.
-*   - remitente_id : Id del remitente.
-*
-* Retorna: Nada.
-*/
-
-CREATE OR REPLACE FUNCTION insert_file(
-    chat_id      INT, 
-    name_file    TEXT, 
-    type_file    TEXT,
-    content_file TEXT,
-    remitente_id INT
-) RETURNS VOID AS $$
-DECLARE 
-	new_msg_num INT;
-BEGIN
-	INSERT INTO mensaje (id_remitente) 
-	VALUES (remitente_id)
-	RETURNING numero_msj INTO new_msg_num;
-
-	INSERT INTO archivo (id_chat, numero_msj, nombre, tipo, contenido )
-	VALUES (chat_id, new_msg_num, name_file, type_file, decode(content_file, 'base64'));
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
 * Función: get_file
 *
 * Uso: Obtener archivos.
@@ -2153,5 +2118,53 @@ BEGIN
     SELECT agrupacion
     FROM esta_en_agrupacion
     WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio;
+END;
+$$ LANGUAGE plpgsql;
+
+
+/*
+* Función: insert_files
+*
+* Uso: Crear instancias en la tabla archivo.
+* 
+* Parámetros: 
+*   - chat_id      : Id del chat correspondiente.
+*	- name_file    : Arreglo de nombres de un archivo a guardar
+*	- type_file    : Arreglo de tipos de un archivo a guardar
+*	- content_file : Arreglo de contenido de un archivo a guardar en formato base64
+*   - remitente_id : Id del remitente.
+*
+* Retorna: Nada.
+*/
+
+CREATE OR REPLACE FUNCTION insert_files(
+    chat_id      INT, 
+    name_file    TEXT[], 
+    type_file    TEXT[],
+    content_file TEXT[],
+    remitente_id INT
+) RETURNS VOID AS $$
+DECLARE 
+	new_msg_num INT;
+    nro_name_files INT;
+    nro_type_files INT;
+    nro_content_files INT;
+BEGIN
+	INSERT INTO mensaje (id_chat, id_remitente) 
+	VALUES (chat_id, remitente_id)
+	RETURNING numero_msj INTO new_msg_num;
+
+    nro_name_files := array_length(name_file, 1);
+    nro_type_files := array_length(type_file, 1);
+    nro_content_files := array_length(content_file, 1);
+
+    IF nro_name_files != nro_type_files OR nro_name_files != nro_content_files THEN
+        RAISE EXCEPTION 'Los arreglos de nombres, tipos y contenido de los archivos deben tener la misma longitud';
+    END IF;
+
+    FOR i IN 1..nro_name_files LOOP
+        INSERT INTO archivo 
+        VALUES (chat_id, new_msg_num, name_file[i], type_file[i], decode(content_file[i], 'base64'));
+    END LOOP;
 END;
 $$ LANGUAGE plpgsql;
