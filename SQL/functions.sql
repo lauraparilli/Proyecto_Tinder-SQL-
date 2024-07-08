@@ -58,24 +58,6 @@ $$ LANGUAGE plpgsql;
 
 
 /*
-* Función: delete_due_card
-*
-* Uso: Eliminar tarjetas vencidas al momento de realizar una operacion en la tabla realiza.
-*
-* Parámetros: Ninguna.
-*
-* Retorna: La función trigger retorna la tarjeta que se elimino.
-*/
-CREATE OR REPLACE FUNCTION delete_due_card()
-RETURNS TRIGGER AS $$
-BEGIN
-    DELETE FROM tarjeta WHERE tarjeta.fecha_caducidad < CURRENT_DATE;
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
 * Función: insert_institution
 * 
 * Uso: Insertar una institucion a la base de datos.
@@ -1579,40 +1561,6 @@ BEGIN
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
         AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_city(user_id));
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: search_words_msj
-*
-* Uso: Buscar mensajes que contengan las palabras dadas en un chat.
-* 
-* Parámetros:
-*   - words_to_search : Texto con las palabras a buscar en un chat.
-*   - p_id_chat       : Entero del id del chat a buscar las palabras.
-*
-* Retorna: Tabla con los mensajes del chat que contienen las palabras dadas.
-*/
-CREATE OR REPLACE FUNCTION search_words_msj(words_to_search TEXT, p_id_chat INTEGER)
-RETURNS TABLE (
-    r_numero_msj   INTEGER,
-    r_id_remitente INTEGER,
-    r_visto        BOOLEAN,
-    r_texto        TEXT,
-    r_fecha_msj    TIMESTAMP WITHOUT TIME ZONE
-) AS $$
-DECLARE
-    split_words_to_search TEXT;
-BEGIN
-    split_words_to_search := REPLACE(words_to_search, ' ', ' & ');
-    RETURN QUERY
-    SELECT numero_msj, id_remitente, visto, texto, fecha_msj
-    FROM   mensaje as m
-    WHERE  id_chat = p_id_chat AND
-        (to_tsvector('spanish', m.texto) @@ to_tsquery('spanish', split_words_to_search)
-        OR to_tsvector('english', m.texto) @@ to_tsquery('english', split_words_to_search))
-    ORDER BY m.fecha_msj DESC;
 END;
 $$ LANGUAGE plpgsql;
 
