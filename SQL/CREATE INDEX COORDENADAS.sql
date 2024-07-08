@@ -4,8 +4,6 @@ CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen); -- p
 
 CREATE INDEX cuenta_age_index ON cuenta (fecha_nacimiento); -- para buscar personas por preferencias en max o min edad
 
-CREATE INDEX tarjeta_fecha_caducidad_index ON tarjeta(fecha_caducidad); -- identificar rápidamente tarjetas caducadas.
-
 CREATE INDEX perfil_sexo_index ON perfil (sexo); -- para buscar personas por preferencias en genero.
 
 CREATE INDEX empresa_nombre_url_index ON empresa (nombre_empresa, url); -- para buscar si la empresa ya existe en la base de datos o no (se usa en la funcion insert_trabaja_en)
@@ -18,6 +16,8 @@ CREATE INDEX estudio_en_grado ON estudio_en (grado); -- para buscar personas por
 
 CREATE INDEX maneja_nombre_permiso ON maneja (nombre_permiso); -- para buscar si un usuario tiene un permiso en particular segun su tier suscrita
 
+CREATE INDEX realiza_id_cuenta ON realiza (id_cuenta); -- para buscar los pagos realizados por una persona (por ejemplo en reclamos)
+
 -- para obtener los chats de un usuario cada vez que inicie sesión (el usuario puede ser o id_cuenta1 o id_cuenta2)
 CREATE INDEX chatea_con_id_cuenta1 ON chatea_con (id_cuenta1); 
 CREATE INDEX chatea_con_id_cuenta2 ON chatea_con (id_cuenta2); 
@@ -27,11 +27,8 @@ CREATE INDEX chatea_con_id_cuenta2 ON chatea_con (id_cuenta2);
 /*
 Razones de por que no colocamos indices en una tabla
 - cuenta: Solo se hace uso del id_cuenta para buscar usuarios, pero como id_cuenta ya es primary key, no hace falta indexarla.  
-- pago: por la funcionalidad del app, no necesitamos buscar algun pago en particular. 
-- tarjeta: tampoco es necesario buscar alguna tarjeta en particular. Puede que se necesite buscar si existe una tarjeta en la bd antes de insertar una nueva, 
-pero se puede hacer con el PK de digitos_tarjeta
-- registra: tampoco es necesario buscar si alguien tiene registrada una tarjeta en particular
-- realiza: puede que necesitemos buscar un pago por la persona quien lo realizo en caso de reclamos, pero rara vez ocurren los reclamos asi que no hace falta indexar el id_cuenta
+- pago: para buscar un pago se puede hacer con el PK en digitos_tarjeta
+- tarjeta: ya se tiene el PK en digitos_tarjeta
 - tier: solamente tiene la columna nombre_tier que ya es PK
 - permiso: solamente se necesita el nombre_permiso (PK) para buscar algun permiso en particular
 - maneja: hay veces en que se necesita chequear si un usuario tiene un permiso en particular, entonces, en estos casos hay que buscar 
