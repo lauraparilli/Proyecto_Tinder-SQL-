@@ -1492,7 +1492,7 @@ $$ LANGUAGE plpgsql;
 
 
 /*
-* Función: get_all_users_by_city
+* Función: get_all_users_by_10km_radius
 *
 * Uso: Obtener todos los IDs de los usuarios que se encuentren alrededor de 10 km de una coordenada de origen dada.
 *
@@ -1501,7 +1501,7 @@ $$ LANGUAGE plpgsql;
 *
 * Retorno: Retorna una tabla con los IDs de los usuarios que se encuentren en esa coordenada de origen dada y dentro de 10 km de radio.
 */
-CREATE OR REPLACE FUNCTION get_all_users_by_city(user_id integer)
+CREATE OR REPLACE FUNCTION get_all_users_by_10km_radius(user_id integer)
 RETURNS TABLE(r_id_cuenta integer) AS $$
 BEGIN
     RETURN QUERY
@@ -1560,7 +1560,7 @@ BEGIN
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
-        AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_city(user_id));
+        AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_10km_radius(user_id));
 END;
 $$ LANGUAGE plpgsql;
 
