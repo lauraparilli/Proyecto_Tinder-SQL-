@@ -792,26 +792,6 @@ $$ LANGUAGE plpgsql;
 
 
 /*
-* Función: insert_empresa
-* 
-* Uso: Insertar una empresa a la base de datos.
-*
-* Parámetros:
-*  - e_nombre : Nombre de la empresa.
-*  - e_url    : Url de la empresa.
-*
-* Retorno: Nada.
-*/
-CREATE OR REPLACE FUNCTION insert_empresa(e_nombre TEXT, e_url TEXT) 
-RETURNS VOID AS $$
-BEGIN
-    INSERT INTO empresa(nombre_empresa, url)
-    VALUES(e_nombre, e_url);
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
 * Función: get_all_public_info_about_user
 *
 * Uso: Obtener todos los datos que sean considerados como publico de un usuario con su id_cuenta (nombre, apellido, edad, sexo, descripcion, verificado, latitud y longitud para mostrar la ciudad y pais con Nominatim, dominios de las instituciones en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones, fotos, orientaciones sexuales) para mostrarse en el perfil.
