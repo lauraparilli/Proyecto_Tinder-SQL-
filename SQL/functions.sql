@@ -1405,7 +1405,7 @@ BEGIN
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_max_age(pref_max_age))
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_genre(pref_genre))
         AND id_cuenta IN (SELECT r_id_cuenta FROM get_users_by_orientation_sexual(pref_orientation))
-        AND id_cuenta IN (SELECT id_cuenta_at_max_distance FROM get_all_users_by_10km_radius(user_id));
+        AND id_cuenta IN (SELECT r_id_cuenta FROM get_all_users_by_10km_radius(user_id));
 END;
 $$ LANGUAGE plpgsql;
 
