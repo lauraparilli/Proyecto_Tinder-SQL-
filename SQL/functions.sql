@@ -1802,18 +1802,18 @@ BEGIN
         SELECT 1 
         FROM   suscrita
         WHERE  id_cuenta = id_cuenta_usuario
-                AND  fecha_inicio + (plazo || ' months')::INTERVAL > CURRENT_DATE
+                AND  fecha_inicio + (plazo_tier || ' months')::INTERVAL > CURRENT_DATE
     ) THEN
         RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo.';
     END IF;
 
     -- Verificar valor correcto de plazos.
-    IF NOT plazo IN (1, 3, 6, 12) THEN
+    IF NOT plazo_tier IN (1, 3, 6, 12) THEN
         RAISE EXCEPTION 'El plazo debe ser 1, 3, 6 o 12 meses';
     END IF;
 
     -- Verificar el monto con la subscripción a relacionar.
-    IF NOT monto_pago = price_of_tier(nombre_tier_usuario)*plazo THEN
+    IF NOT monto_pago = price_of_tier(nombre_tier_usuario)*plazo_tier THEN
         RAISE EXCEPTION 'El monto del pago no coincide con el monto del tier.';
     END IF;
 
