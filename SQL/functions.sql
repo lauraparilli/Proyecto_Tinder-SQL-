@@ -198,6 +198,27 @@ END;
 $$ LANGUAGE plpgsql;
 
 /***********************************************************************************************************/
+/* 
+    Función:
+        insert_foto
+
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_foto.
+
+    Parámetros:
+        - p_user_id : Entero del id de la cuenta.
+        - p_foto    : TEXT de la foto en formato base64.
+
+    Retorna: Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_foto(p_user_id INTEGER, p_foto TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO tiene_foto (id_cuenta, foto) VALUES (p_user_id, decode(p_foto, 'base64'));
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
 /*
     Función: 
         create_new_user
@@ -277,8 +298,7 @@ BEGIN
     VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
 
     FOR i IN 1..array_length(foto_u, 1) LOOP
-        INSERT INTO tiene_foto (id_cuenta, foto) 
-        VALUES (id_cuenta_u, decode(foto_u[i], 'base64'));
+	PERFORM insert_foto(id_cuenta_u, foto_u[i]);
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
@@ -1203,26 +1223,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-/***********************************************************************************************************/
-/* 
-    Función:
-        insert_foto
-
-    Uso:
-        Inserta un nuevo registro en la tabla tiene_foto.
-
-    Parámetros:
-        - p_user_id : Entero del id de la cuenta.
-        - p_foto    : TEXT de la foto en formato base64.
-
-    Retorna: Nada.
-*/
-CREATE OR REPLACE FUNCTION insert_foto(p_user_id INTEGER, p_foto TEXT)
-RETURNS VOID AS $$
-BEGIN
-    INSERT INTO tiene_foto (id_cuenta, foto) VALUES (p_user_id, decode(p_foto, 'base64'));
-END;
-$$ LANGUAGE plpgsql;
 
 /***********************************************************************************************************/
 /*
