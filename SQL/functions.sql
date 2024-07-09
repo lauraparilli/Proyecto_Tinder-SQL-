@@ -2290,19 +2290,20 @@ $$ LANGUAGE plpgsql;
 
     Parámetros:
         - nombre_nuevo_permiso : Nombre del nuevo permiso.
+        - descripcion_nuevo_permiso : Descripción del nuevo permiso.
 
     Retorna:
         Nada.
 */
-CREATE OR REPLACE FUNCTION insert_new_permission(nombre_nuevo_permiso TEXT)
+CREATE OR REPLACE FUNCTION insert_new_permission(nombre_nuevo_permiso TEXT, descripcion_nuevo_permiso TEXT)
 RETURNS VOID AS $$
 BEGIN
     IF verify_exist_permission(nombre_nuevo_permiso) THEN
         RAISE EXCEPTION 'El permiso % ya existe en el sistema.', nombre_nuevo_permiso;
     END IF;
 
-    INSERT INTO permiso (nombre_permiso)
-    VALUES (nombre_nuevo_permiso);
+    INSERT INTO permiso (nombre_permiso, descripcion_permiso)
+    VALUES (nombre_nuevo_permiso, descripcion_nuevo_permiso);
 END;
 $$ LANGUAGE plpgsql;
 
