@@ -76,42 +76,42 @@ BEGIN
 END;$$;
 
 CREATE TABLE IF NOT EXISTS cuenta(
-	id_cuenta INT GENERATED ALWAYS AS IDENTITY,
-	nombre VARCHAR(64) NOT NULL,
-	apellido VARCHAR(64) NOT NULL,
+	id_cuenta 	     INT GENERATED ALWAYS AS IDENTITY,
+	nombre 			 VARCHAR(64) NOT NULL,
+	apellido 		 VARCHAR(64) NOT NULL,
 	fecha_nacimiento DATE NOT NULL CHECK (EXTRACT(YEAR FROM age(CURRENT_DATE, fecha_nacimiento)) BETWEEN 30 AND 99),
-	fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
-	email VARCHAR(256) UNIQUE NOT NULL,
-	contrasena VARCHAR(128) NOT NULL,
-	telefono VARCHAR(16) UNIQUE NOT NULL,
-	idioma idiomas_app DEFAULT 'ESP' NOT NULL,
-	notificaciones BOOLEAN DEFAULT TRUE NOT NULL, 
-	tema BOOLEAN DEFAULT TRUE NOT NULL,
+	fecha_creacion   DATE NOT NULL DEFAULT CURRENT_DATE,
+	email            VARCHAR(256) UNIQUE NOT NULL,
+	contrasena 	     VARCHAR(128) NOT NULL,
+	telefono 		 VARCHAR(16) UNIQUE NOT NULL,
+	idioma 			 idiomas_app DEFAULT 'ESP' NOT NULL,
+	notificaciones 	 BOOLEAN DEFAULT TRUE NOT NULL, 
+	tema 			 BOOLEAN DEFAULT TRUE NOT NULL,
 	PRIMARY KEY (id_cuenta)
 );
 
 CREATE TABLE IF NOT EXISTS pago(
-	id_pago INT GENERATED ALWAYS AS IDENTITY,
-	numero_factura INT UNIQUE NOT NULL,
-	estado BOOLEAN NOT NULL,
+	id_pago 		   INT GENERATED ALWAYS AS IDENTITY,
+	numero_factura     INT UNIQUE NOT NULL,
+	estado 			   BOOLEAN NOT NULL,
 	metodo metodo_pago NOT NULL,
-	monto DECIMAL(10,2) DEFAULT 0 NOT NULL,
-	fecha DATE NOT NULL DEFAULT CURRENT_DATE, 
-	documento_factura BYTEA NOT NULL,
+	monto 			   DECIMAL(10,2) DEFAULT 0 NOT NULL,
+	fecha 			   DATE NOT NULL DEFAULT CURRENT_DATE, 
+	documento_factura  BYTEA NOT NULL,
  PRIMARY KEY (id_pago)
 );
 
 CREATE TABLE IF NOT EXISTS tarjeta (
-	digitos_tarjeta VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
-	nombre_titular VARCHAR(24) NOT NULL,
-	fecha_caducidad DATE NOT NULL,
-	codigo_cv VARCHAR(4) CHECK (codigo_cv ~ '^[0-9]{3,4}$'),
+	digitos_tarjeta   VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
+	nombre_titular    VARCHAR(24) NOT NULL,
+	fecha_caducidad   DATE NOT NULL,
+	codigo_cv         VARCHAR(4) CHECK (codigo_cv ~ '^[0-9]{3,4}$'),
 	tipo tipo_tarjeta NOT NULL,
 	PRIMARY KEY(digitos_tarjeta)
 );
 
 CREATE TABLE IF NOT EXISTS registra(
-    id_cuenta INT,
+    id_cuenta       INT,
     digitos_tarjeta VARCHAR(19),
     PRIMARY KEY (id_cuenta, digitos_tarjeta),
     CONSTRAINT fk_id_cuenta_registra
@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS registra(
 ); 
 
 CREATE TABLE IF NOT EXISTS realiza(
-	id_cuenta INT NOT NULL,
-	id_pago INT,
+	id_cuenta       INT NOT NULL,
+	id_pago         INT,
 	digitos_tarjeta VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
 	PRIMARY KEY(id_pago),
 	CONSTRAINT fk_id_cuenta_realiza
@@ -140,17 +140,18 @@ CREATE TABLE IF NOT EXISTS realiza(
 
 CREATE TABLE IF NOT EXISTS tier(
 	nombre_tier VARCHAR(16),
+	monto_tier  DECIMAL(10,2),
 	PRIMARY KEY (nombre_tier)
 );
 
 CREATE TABLE IF NOT EXISTS permiso(
-	nombre_permiso VARCHAR(100),
+	nombre_permiso      VARCHAR(100),
 	descripcion_permiso VARCHAR(256) NOT NULL,
 	PRIMARY KEY (nombre_permiso)
 );
 
 CREATE TABLE IF NOT EXISTS maneja(
-	nombre_tier VARCHAR(16),
+	nombre_tier    VARCHAR(16),
 	nombre_permiso VARCHAR(100),
 	PRIMARY KEY (nombre_tier, nombre_permiso),
 	CONSTRAINT fk_nombre_tier_maneja
@@ -162,13 +163,13 @@ CREATE TABLE IF NOT EXISTS maneja(
 );
 
 CREATE TABLE IF NOT EXISTS perfil(
-	id_cuenta INT,
-	sexo sexos NOT NULL,
+	id_cuenta   INT,
+	sexo sexos  NOT NULL,
 	descripcion VARCHAR(1024),
-	verificado BOOLEAN DEFAULT FALSE NOT NULL,
-	latitud DECIMAL(10, 8) NOT NULL,
-	longitud DECIMAL(11, 8) NOT NULL,
-	coordenada geometry(POINT, 4326),
+	verificado  BOOLEAN DEFAULT FALSE NOT NULL,
+	latitud     DECIMAL(10, 8) NOT NULL,
+	longitud    DECIMAL(11, 8) NOT NULL,
+	coordenada  geometry(POINT, 4326),
 	PRIMARY KEY (id_cuenta),
 	CONSTRAINT fk_id_cuenta_perfil
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
@@ -176,13 +177,13 @@ CREATE TABLE IF NOT EXISTS perfil(
 );
 
 CREATE TABLE IF NOT EXISTS preferencias(
-	id_cuenta INT, 
-	estudio estudios,
-	latitud_origen DECIMAL(10, 8),
-	longitud_origen DECIMAL(11, 8),
-	distancia_maxima INT DEFAULT 5 CHECK (distancia_maxima <= 3000) NOT NULL,
-	min_edad INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
-	max_edad INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
+	id_cuenta         INT, 
+	estudio           estudios,
+	latitud_origen    DECIMAL(10, 8),
+	longitud_origen   DECIMAL(11, 8),
+	distancia_maxima  INT DEFAULT 5 CHECK (distancia_maxima <= 3000) NOT NULL,
+	min_edad 		  INT DEFAULT 30 CHECK (min_edad BETWEEN 30 AND 99) NOT NULL,
+	max_edad 		  INT DEFAULT 99 CHECK (max_edad BETWEEN 30 AND 99) NOT NULL,
 	coordenada_origen geometry(POINT, 4326),
 	PRIMARY KEY (id_cuenta), 
 	CONSTRAINT fk_id_cuenta_preferencias
@@ -192,23 +193,23 @@ CREATE TABLE IF NOT EXISTS preferencias(
 
 
 CREATE TABLE IF NOT EXISTS institucion (
-	dominio VARCHAR(64),
-	nombre VARCHAR(256) NOT NULL,
-	tipo tipo_instituciones NOT NULL,
+	dominio		  VARCHAR(64),
+	nombre 		  VARCHAR(256) NOT NULL,
+	tipo 	      tipo_instituciones NOT NULL,
 	ano_fundacion INT NOT NULL,
-	latitud DECIMAL(10, 8) NOT NULL,
-	longitud DECIMAL(11, 8) NOT NULL,
+	latitud 	  DECIMAL(10, 8) NOT NULL,
+	longitud 	  DECIMAL(11, 8) NOT NULL,
 	PRIMARY KEY(dominio)
 );
 
 
 CREATE TABLE IF NOT EXISTS estudio_en(
-	id_cuenta INT,
-	dominio VARCHAR(64),
-	grado estudios,
+	id_cuenta    INT,
+	dominio 	 VARCHAR(64),
+	grado 		 estudios,
 	especialidad VARCHAR(64), 
-	ano_ingreso INT NOT NULL,
-	ano_egreso INT NOT NULL,
+	ano_ingreso  INT NOT NULL,
+	ano_egreso   INT NOT NULL,
 	PRIMARY KEY(id_cuenta, dominio, grado, especialidad),
 	CONSTRAINT fk_id_cuenta_estudio_en
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
@@ -219,16 +220,16 @@ CREATE TABLE IF NOT EXISTS estudio_en(
 );
 
 CREATE TABLE IF NOT EXISTS empresa(
-	id_empresa INT GENERATED ALWAYS AS IDENTITY,
+	id_empresa     INT GENERATED ALWAYS AS IDENTITY,
 	nombre_empresa VARCHAR(100) NOT NULL,
-	url VARCHAR(2084) UNIQUE NOT NULL,
+	url            VARCHAR(2084) UNIQUE NOT NULL,
 	PRIMARY KEY(id_empresa)
 );
 
 CREATE TABLE IF NOT EXISTS trabaja_en(
-	id_cuenta INT,
-	id_empresa INT,
-	cargo VARCHAR(64) NOT NULL,
+	id_cuenta    INT,
+	id_empresa   INT,
+	cargo        VARCHAR(64) NOT NULL,
 	fecha_inicio DATE NOT NULL,
 	PRIMARY KEY(id_cuenta, id_empresa),
 	CONSTRAINT fk_id_cuenta_trabaja_en
@@ -240,10 +241,10 @@ CREATE TABLE IF NOT EXISTS trabaja_en(
 );
 
 CREATE TABLE IF NOT EXISTS suscrita(
-	id_cuenta INT,
-	nombre_tier VARCHAR(16),
+	id_cuenta    INT,
+	nombre_tier  VARCHAR(16),
 	fecha_inicio DATE DEFAULT CURRENT_DATE NOT NULL,
-	fecha_caducidad DATE NOT NULL CHECK (fecha_caducidad > fecha_inicio),
+	plazo		 INTEGER NOT NULL CHECK (plazo IN (1, 3, 6, 12)),
 	PRIMARY KEY (id_cuenta, nombre_tier, fecha_inicio),
 	CONSTRAINT fk_id_cuenta_suscrita
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)
@@ -254,11 +255,11 @@ CREATE TABLE IF NOT EXISTS suscrita(
 );
 
 CREATE TABLE IF NOT EXISTS likes(
-	id_liker INT,  
-	id_liked INT,
-	super BOOLEAN DEFAULT FALSE NOT NULL,
+	id_liker   INT,  
+	id_liked   INT,
+	super      BOOLEAN DEFAULT FALSE NOT NULL,
 	fecha_like TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    	PRIMARY KEY (id_liker, id_liked),
+    PRIMARY KEY (id_liker, id_liked),
 	CONSTRAINT fk_id_liker_likes
 		FOREIGN KEY (id_liker) REFERENCES cuenta(id_cuenta)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
@@ -298,15 +299,15 @@ CREATE TABLE IF NOT EXISTS chat(
 );
 
 CREATE TABLE IF NOT EXISTS mensaje(
-	id_chat INT,
-	numero_msj INT GENERATED ALWAYS AS IDENTITY,
+	id_chat 	 INT,
+	numero_msj   INT GENERATED ALWAYS AS IDENTITY,
 	id_remitente INT NOT NULL,
-	visto BOOLEAN DEFAULT FALSE,
-	texto TEXT DEFAULT '' NOT NULL,
-	fecha_msj TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	visto 		 BOOLEAN DEFAULT FALSE,
+	texto 		 TEXT DEFAULT '' NOT NULL,
+	fecha_msj 	 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(id_chat, numero_msj),
 	CONSTRAINT fk_id_chat_mensaje
-        	FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
+        FOREIGN KEY(id_chat) REFERENCES chat(id_chat)
 			ON DELETE CASCADE	ON UPDATE CASCADE,
 	CONSTRAINT fk_id_cuenta_mensaje
 		FOREIGN KEY(id_remitente) REFERENCES cuenta(id_cuenta)
@@ -314,11 +315,11 @@ CREATE TABLE IF NOT EXISTS mensaje(
 );
 
 CREATE TABLE IF NOT EXISTS archivo(
-	id_chat INT,
+	id_chat    INT,
 	numero_msj INT,
-	nombre VARCHAR(128),
-	tipo VARCHAR(16),
-	contenido BYTEA,
+	nombre     VARCHAR(128),
+	tipo 	   VARCHAR(16),
+	contenido  BYTEA,
 	PRIMARY KEY(id_chat, numero_msj, nombre),
 	CONSTRAINT fk_id_chat_numero_msj_archivo
 		FOREIGN KEY(id_chat, numero_msj) REFERENCES mensaje(id_chat, numero_msj)
@@ -328,7 +329,7 @@ CREATE TABLE IF NOT EXISTS archivo(
 CREATE TABLE IF NOT EXISTS chatea_con(
 	id_cuenta1 INT,
 	id_cuenta2 INT,
-	id_chat INT,
+	id_chat    INT,
 	PRIMARY KEY (id_chat),
 	CONSTRAINT fk_id_cuenta1_chatea_con
 		FOREIGN KEY (id_cuenta1) REFERENCES cuenta(id_cuenta)
@@ -342,8 +343,8 @@ CREATE TABLE IF NOT EXISTS chatea_con(
 );
 
 CREATE TABLE IF NOT EXISTS esta_en_agrupacion(
-	id_cuenta INT,
-	dominio VARCHAR(64),
+	id_cuenta  INT,
+	dominio    VARCHAR(64),
 	agrupacion VARCHAR(64),
 	PRIMARY KEY(id_cuenta, dominio, agrupacion),
 	CONSTRAINT fk_id_cuenta_esta_en_agrupacion
@@ -356,7 +357,7 @@ CREATE TABLE IF NOT EXISTS esta_en_agrupacion(
 
 CREATE TABLE IF NOT EXISTS tiene_hobby(
 	id_cuenta INT,
-	hobby hobbies,
+	hobby     hobbies,
 	PRIMARY KEY(id_cuenta, hobby),
 	CONSTRAINT fk_id_cuenta_tiene_hobby
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
@@ -374,9 +375,9 @@ CREATE TABLE IF NOT EXISTS tiene_habilidades(
 );
 
 CREATE TABLE IF NOT EXISTS tiene_foto(
-    id_foto INT GENERATED ALWAYS AS IDENTITY,
+    id_foto   INT GENERATED ALWAYS AS IDENTITY,
     id_cuenta INT,
-    foto BYTEA NOT NULL,
+    foto      BYTEA NOT NULL,
     PRIMARY KEY (id_cuenta, id_foto),
     CONSTRAINT fk_id_cuenta_tiene_foto
 		FOREIGN KEY(id_cuenta) REFERENCES cuenta(id_cuenta)
@@ -384,7 +385,7 @@ CREATE TABLE IF NOT EXISTS tiene_foto(
 );
 
 CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
-	id_cuenta INT,
+	id_cuenta          INT,
 	orientacion_sexual orientaciones ,
 	PRIMARY KEY (id_cuenta, orientacion_sexual),
 	CONSTRAINT fk_id_cuenta_tiene_orientacion_sexual
@@ -393,7 +394,7 @@ CREATE TABLE IF NOT EXISTS tiene_orientacion_sexual(
 );
 
 CREATE TABLE IF NOT EXISTS tiene_certificaciones(
-	id_cuenta INT,
+	id_cuenta       INT,
 	certificaciones VARCHAR(256),
 	PRIMARY KEY(id_cuenta, certificaciones),
 	CONSTRAINT fk_id_cuenta_tiene_certificaciones
@@ -402,7 +403,7 @@ CREATE TABLE IF NOT EXISTS tiene_certificaciones(
 );
 
 CREATE TABLE IF NOT EXISTS pref_orientacion_sexual(
-	id_cuenta INT,
+	id_cuenta          INT,
 	orientacion_sexual orientaciones,
 	PRIMARY KEY(id_cuenta, orientacion_sexual),
 	CONSTRAINT fk_id_cuenta_pref_orientacion_sexual
@@ -412,7 +413,7 @@ CREATE TABLE IF NOT EXISTS pref_orientacion_sexual(
 
 CREATE TABLE IF NOT EXISTS pref_sexo(
 	id_cuenta INT,
-	sexo sexos,
+	sexo      sexos,
 	PRIMARY KEY (id_cuenta, sexo),
 	CONSTRAINT fk_id_cuenta_pref_sexo
 		FOREIGN KEY (id_cuenta) REFERENCES cuenta(id_cuenta)

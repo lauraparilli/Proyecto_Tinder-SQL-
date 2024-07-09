@@ -1728,6 +1728,28 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
+        price_of_tier
+    
+    Uso:
+        Obtiene el precio de un tier.
+    
+    Parámetros:
+        - nombre_t : Nombre del tier.
+
+    Retorno:
+        Precio del tier en formato DECIMAL(10, 2).
+*/
+CREATE OR REPLACE FUNCTION price_of_tier(nombre_t TEXT)
+RETURNS DECIMAL(10, 2) AS $$
+BEGIN
+    RETURN (SELECT monto_tier FROM tier WHERE nombre_tier = nombre_t);
+END;
+$$ LANGUAGE plpgsql;
+
+
+/***********************************************************************************************************/
+/*
+    Función:
         subscribe_user()
 
     Uso:
@@ -1750,7 +1772,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION subscribe_user(
     id_cuenta_usuario         INT,
     nombre_tier_usuario       TEXT,
-    caducidad                 TIMESTAMP,
+    plazo_tier                INT,
     digitos_tarjeta_usario    TEXT,
     numero_factura_actual     INT,
     estado_pago               BOOLEAN,
@@ -1759,6 +1781,7 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     documento_factura_usuario TEXT
 ) RETURNS VOID AS $$
 DECLARE
+    fecha_caducidad DATE;
     new_id_pago INT;
 BEGIN
     -- Verificar si la cuenta y la tarjeta existen y si el tier está disponible
@@ -1776,16 +1799,22 @@ BEGIN
 
     -- Verificar si el usuario ya está suscrito a un tier activo
     IF EXISTS (
-        SELECT 1 FROM suscrita
+        SELECT 1 
+        FROM   suscrita
         WHERE  id_cuenta = id_cuenta_usuario
-          AND  fecha_caducidad > CURRENT_TIMESTAMP
+                AND  fecha_inicio + (plazo || ' months')::INTERVAL; > CURRENT_DATE
     ) THEN
-        RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo';
+        RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo.';
     END IF;
 
-    -- Verificar que la fecha de caducidad sea mayor que la fecha actual
-    IF caducidad <= CURRENT_TIMESTAMP THEN
-        RAISE EXCEPTION 'La fecha de caducidad debe ser en el futuro';
+    -- Verificar valor correcto de plazos.
+    IF NOT plazo IN (1, 3, 6, 12) THEN
+        RAISE EXCEPTION 'El plazo debe ser 1, 3, 6 o 12 meses';
+    END IF;
+
+    -- Verificar el monto con la subscripción a relacionar.
+    IF NOT monto_pago = price_of_tier(nombre_tier_usuario)*plazo THEN
+        RAISE EXCEPTION 'El monto del pago no coincide con el monto del tier.';
     END IF;
 
     -- Insertar el pago
@@ -1798,9 +1827,9 @@ BEGIN
     VALUES (id_cuenta_usuario, new_id_pago, digitos_tarjeta_usario);
 
     -- Si el pago está aprobado, insertar en suscrita
-    IF estado_pago THEN
-        INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, fecha_caducidad)
-        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, caducidad);
+    IF estado_pago THEN        
+        INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, plazo)
+        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, plazo_tier)
     END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -2156,11 +2185,235 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
+/*
+    Función:
+        verify_exist_tier
+    
+    Uso:
+        Verifica si existe un tier en el sistema.
+    
+    Parámetros:
+        - nombre_t : Nombre del tier a verificar.
+
+    Retorna:
+        Bool. True si el tier existe, False si no.
+*/
+CREATE OR REPLACE FUNCTION verify_exist_tier(nombre_t TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nombre_t);
+END;
+$$ LANGUAGE plpgsql;
 
 /***********************************************************************************************************/
--- CORRIGIENDO
-/***********************************************************************************************************/
+/*
+    Función:
+        verify_exist_permission
 
+    Uso:
+        Verifica si existe un permiso en el sistema.
+    
+    Parámetros:
+        - nombre_p : Nombre del permiso a verificar.
+
+    Retorna:
+        Bool. True si el permiso existe, False si no.
+*/
+CREATE OR REPLACE FUNCTION verify_exist_permission(nombre_p TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (SELECT 1 FROM permiso WHERE nombre_permiso = nombre_p);
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_new_tier
+
+    Uso:
+        Crear un nuevo tier en el sistema.
+
+    Parámetros:
+        - nombre_nuevo_tier : Nombre del nuevo tier.
+        - monto_nuevo_tier  : Monto del nuevo tier.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_tier(nombre_nuevo_tier TEXT, monto_nuevo_tier DECIMAL(10,2))
+RETURNS VOID AS $$
+BEGIN
+    IF verify_exist_tier(nombre_nuevo_tier) THEN
+        RAISE EXCEPTION 'El tier % ya existe en el sistema.', nombre_nuevo_tier;
+    END IF;
+
+    INSERT INTO tier (nombre_tier, monto_tier)
+    VALUES (nombre_nuevo_tier, monto_nuevo_tier);
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        update_price_tier
+    
+    Uso:
+        Actualizar el monto de un tier en el sistema.
+    
+    Parámetros:
+        - nombre_t : Nombre del tier a actualizar.
+        - monto_t  : Monto del tier a actualizar.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION update_price_tier(nombre_t TEXT, monto_t DECIMAL(10,2))
+RETURNS VOID AS $$
+BEGIN
+    IF NOT verify_exist_tier(nombre_t) THEN
+        RAISE EXCEPTION 'El tier % no existe en el sistema.', nombre_t;
+    END IF;
+
+    UPDATE tier SET monto_tier = monto_t WHERE nombre_tier = nombre_t;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_new_permission
+
+    Uso:
+        Crear un nuevo permiso en el sistema.
+
+    Parámetros:
+        - nombre_nuevo_permiso : Nombre del nuevo permiso.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_permission(nombre_nuevo_permiso TEXT)
+RETURNS VOID AS $$
+BEGIN
+    IF verify_exist_permission(nombre_nuevo_permiso) THEN
+        RAISE EXCEPTION 'El permiso % ya existe en el sistema.', nombre_nuevo_permiso;
+    END IF;
+
+    INSERT INTO permiso (nombre_permiso)
+    VALUES (nombre_nuevo_permiso);
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        link_tiers_with_permissions
+
+    Uso:
+        Vincular un tier con un permiso en la tabla maneja.
+
+    Parámetros:
+        - nombre_tier_t : Nombre del tier a vincular con el permiso.
+        - nombre_per_p  : Nombre del permiso a vincular con el tier.
+    
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION link_tiers_with_permissions(nombre_tier_t TEXT, nombre_per_p TEXT)
+RETURNS VOID AS $$
+BEGIN
+    IF NOT verify_exist_tier(nombre_tier_t) THEN
+        RAISE EXCEPTION 'El tier % no existe en el sistema.', nombre_tier_t;
+    END IF;
+
+    IF NOT verify_exist_permission(nombre_per_p) THEN
+        RAISE EXCEPTION 'El permiso % no existe en el sistema.', nombre_per_p;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM maneja WHERE nombre_tier = nombre_tier_t AND nombre_permiso = nombre_per_p) THEN
+        RAISE EXCEPTION 'El tier % ya tiene el permiso %.', nombre_tier_t, nombre_per_p;
+    END IF;
+
+    INSERT INTO maneja (nombre_tier, nombre_permiso)
+    VALUES (nombre_tier_t, nombre_per_p);
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        delete_tier
+    
+    Uso:
+        Eliminar un tier del sistema. Este tier debe no estar relacionado con ningun subcripcion, es decir
+        si existe al menos un usuario subscrito al tier a eliminar entonces se deniega la operación.
+        Asi mismo, en caso de poder eliminar el tier entonces todos los permisos asociados al tier se eliminan.
+    
+    Parámetros:
+        - nombre_t : Nombre del tier a eliminar.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_tier(nombre_t TEXT)
+RETURNS VOID AS $$
+BEGIN
+    IF NOT verify_exist_tier(nombre_t) THEN
+        RAISE EXCEPTION 'El tier % no existe en el sistema.', nombre_t;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM suscrita WHERE nombre_tier = nombre_t) THEN
+        RAISE EXCEPTION 'El tier % no puede ser eliminado porque tiene usuarios subscritos.', nombre_t;
+    END IF;
+
+    DELETE FROM tier WHERE nombre_tier = nombre_t;
+
+    -- Nota: No hace falta eliminar los vinculos del tier con los permisos ya que al eliminar el tier se eliminan
+    --       los permisos vinculados por CASCADE.
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+    Función:
+        delete_permission
+
+    Uso:
+        Eliminar un permiso del sistema. Este permiso debe no estar relacionado con ningun tier, es decir
+    
+    Parámetros:
+        - nombre_p : Nombre del permiso a eliminar.
+    
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_permission(nombre_p TEXT)
+RETURNS VOID AS $$
+BEGIN
+
+    IF NOT verify_exist_permission(nombre_p) THEN
+        RAISE EXCEPTION 'El permiso % no existe en el sistema.', nombre_p;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM maneja WHERE nombre_permiso = nombre_p) THEN
+        RAISE EXCEPTION 'El permiso % no puede ser eliminado porque tiene tiers asociados.', nombre_p;
+    END IF;
+
+    DELETE FROM permiso WHERE nombre_permiso = nombre_p;
+
+    -- Nota: No hace falta eliminar los vinculos del permiso con los tiers ya que al eliminar el permiso se eliminan
+    --       los tiers vinculados por CASCADE.
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+/***********************************************************************************************************/
+-- SECCION PARA ELIMINAR
+/***********************************************************************************************************/
 /*
 * Function update_tier_of_user()
 *
