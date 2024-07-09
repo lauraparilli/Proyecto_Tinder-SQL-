@@ -240,87 +240,38 @@ $$ LANGUAGE plpgsql;
 
 
 /*
-* Función: update_location_account
+* Función: update_info_perfil
 *
-* Uso: Actualiza la ubicacion del usuario.
-*
-* Parámetros:
-*   - p_id_cuenta : Valor entero que representa el id de la cuenta.
-*   - p_latitud   : DECIMAL que representa la nueva latitud del usuario.
-*   - p_longitud  : DECIMAL que representa la nueva longitud del usuario.
-*
-* Retorna: Nada.
-*/
-CREATE OR REPLACE FUNCTION update_location_account(p_id_cuenta INTEGER, p_latitud DECIMAL, p_longitud DECIMAL) 
-RETURNS VOID AS $$
-BEGIN
-    UPDATE perfil 
-    SET    latitud   = p_latitud, 
-           longitud  = p_longitud 
-    WHERE  id_cuenta = p_id_cuenta;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: update_description_on_perfil
-* 
-* Uso: Actualiza la descripcion del perfil de un usuario.
-*
-* Parámetros: 
-*  - id_user       : Valor entero del nombre del usuario a editar la descripcion del perfil.
-*  - new_descripcion : Texto con la nueva descripcion del perfil.
-*
-* Retorna: Nada.
-*/
-CREATE OR REPLACE FUNCTION update_description_on_perfil(id_user INTEGER, new_descripcion TEXT)
-RETURNS VOID
-AS $$
-BEGIN
-    UPDATE perfil SET descripcion = new_descripcion WHERE id_cuenta = id_user;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: update_sexo_perfil
-*
-* Uso: Actualiza el sexo de un perfil de una cuenta.
+* Uso: Actualiza la informacion de un perfil de un usuario
 *
 * Parámetros:
-*   - p_id_cuenta : Valor entero que representa el id de la cuenta.
-*   - p_sexo      : Texto que representa el sexo del perfil a modificar.
+*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
+*  - p_sexo: (OPCIONAL) TEXT del sexo de un usuario
+*  - p_descripcion: (OPCIONAL) TEXT de la descripción de un usuario
+*  - p_verificado: (OPCIONAL) BOOLEAN si el usuario esta verificado. Por default es false
+*  - p_latitud: (OPCIONAL) DECIMAL de la latitud de un usuario
+*  - p_longitud: (OPCIONAL) DECIMAL de la longitud de un usuario
+
 *
 * Retorna: Nada.
 */
-CREATE OR REPLACE FUNCTION update_sexo_perfil(p_id_cuenta integer, p_sexo text)
-RETURNS void AS
-$$
-BEGIN
-    UPDATE perfil
-    SET    sexo      = p_sexo
-    WHERE  id_cuenta = p_id_cuenta;
-END;
-$$ LANGUAGE plpgsql;
-
-
-
-/*
-* Función: set_true_verificado
-*
-* Uso: Setea true cuando el usuario completo exitosamente el proceso de verificar perfil.
-*
-* Parámetros:
-*   - p_id_cuenta: Valor entero que representa el id de la cuenta.
-*
-* Retorna: Nada.
-*/
-CREATE OR REPLACE FUNCTION set_true_verificado(p_id_cuenta integer)
+CREATE OR REPLACE FUNCTION update_info_perfil(
+    p_id_cuenta      INTEGER,
+    p_sexo           TEXT DEFAULT NULL,
+    p_descripcion    TEXT DEFAULT NULL,
+    p_verificado     BOOLEAN DEFAULT FALSE,
+    p_latitud        DECIMAL DEFAULT NULL,
+    p_longitud       DECIMAL DEFAULT NULL
+)
 RETURNS VOID AS $$
 BEGIN
     UPDATE perfil
-    SET    verificado = TRUE
-    WHERE  id_cuenta  = p_id_cuenta;
+    SET sexo           = CASE WHEN p_sexo          IS NOT NULL THEN p_sexo          ELSE sexo          END,
+        descripcion    = CASE WHEN p_descripcion   IS NOT NULL THEN p_descripcion   ELSE descripcion   END,
+        verificado     = CASE WHEN p_verificado    IS NOT FALSE THEN p_verificado   ELSE verificado    END,
+        latitud        = CASE WHEN p_latitud       IS NOT NULL THEN p_latitud       ELSE latitud       END,
+        longitud       = CASE WHEN p_longitud      IS NOT NULL THEN p_longitud      ELSE longitud      END
+    WHERE id_cuenta = p_id_cuenta;
 END;
 $$ LANGUAGE plpgsql;
 
