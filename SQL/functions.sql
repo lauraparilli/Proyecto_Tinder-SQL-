@@ -1802,7 +1802,7 @@ BEGIN
         SELECT 1 
         FROM   suscrita
         WHERE  id_cuenta = id_cuenta_usuario
-                AND  fecha_inicio + (plazo || ' months')::INTERVAL; > CURRENT_DATE
+                AND  fecha_inicio + (plazo || ' months')::INTERVAL > CURRENT_DATE
     ) THEN
         RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo.';
     END IF;
@@ -1829,7 +1829,7 @@ BEGIN
     -- Si el pago está aprobado, insertar en suscrita
     IF estado_pago THEN        
         INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, plazo)
-        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, plazo_tier)
+        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, plazo_tier);
     END IF;
 END;
 $$ LANGUAGE plpgsql;
