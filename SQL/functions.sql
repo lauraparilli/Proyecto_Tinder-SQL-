@@ -1758,7 +1758,7 @@ $$ LANGUAGE plpgsql;
     Parámetros: 
         - id_cuenta_usuario         : ID de la cuenta del usuario que desea suscribirse.
         - nombre_tier_usuario       : Nombre del tier al que desea suscribirse el usuario.
-        - caducidad                 : Fecha de caducidad de la suscripción.
+        - plazo_tier                : Plazo en meses de la suscripción.
         - digitos_tarjeta_usario    : Dígitos de la tarjeta de crédito del usuario para el pago.
         - numero_factura_actual     : Número de factura del pago.
         - estado_pago               : Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado).
