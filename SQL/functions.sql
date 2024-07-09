@@ -1,29 +1,54 @@
+/* 
+    Equipo 1: Tinder para Viejos Egresados (RobbleAffinity)
+    
+    Integrantes: Ana Shek,         19-10096
+			     Jhonaiker Blanco, 18-10784
+				 Junior Lara,      17-10303
+				 Laura Parilli,    17-10778
+
+                    **** FUNCTIONS.sql ****
+
+    Archivo SQL de creacion de funciones para la BD de Tinder para Viejos Egresados.
+*/
+
+/*********************************************************************************************/
 /*
-* Función: prevent_delete_any_row
-*
-* Uso: Prohibir eliminar una fila de una tabla (ejemplo una institucion).
-*
-* Parámetros: Ninguna.
-*
-* Resultado: Función trigger que evita que se elimine una fila de una tabla.
+    Función:
+        prevent_delete_any_row
+
+    Uso: 
+        Prohibir eliminar una fila de una tabla (ejemplo una institucion).
+
+    Parámetros: 
+        Ninguna.
+
+    Resultado: 
+        Función trigger que evita que se elimine una fila de una tabla.
 */
 CREATE OR REPLACE FUNCTION prevent_delete_any_row()
 RETURNS TRIGGER AS $$
 BEGIN
-    RAISE EXCEPTION 'Prohibido eliminar una fila de esta tabla';
+    RAISE EXCEPTION 'Prohibido eliminar una fila de esta tabla.';
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: set_coordenada()
-*
-* Uso: Cuando una fila se hace update o se inserta en una tabla que contenga las columnas de latitud y longitud se ejecuta automaticamente este trigger. Se setea la columna 'coordenada' creando un punto con los valores de 'longitud' y 'latitud'. El punto se asigna el SRID 4326.
-*
-* Parámetros: Ninguna.
-*
-* Retorna: La función trigger retorna la nueva fila con la coordenada seteada.
+    Función:
+        set_coordenada()
+
+    Uso:
+        Cuando una fila se hace update o se inserta en una tabla que contenga las columnas 
+        de latitud y longitud se ejecuta automaticamente este trigger. Se setea la columna 
+        'coordenada' creando un punto con los valores de 'longitud' y 'latitud'. 
+        El punto se asigna el SRID 4326.
+
+    Parámetros: 
+        Ninguna.
+
+    Retorno: 
+        La función trigger retorna la nueva fila con la coordenada seteada.
 */
 CREATE OR REPLACE FUNCTION set_coordenada()
 RETURNS TRIGGER AS $$
@@ -33,15 +58,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: set_latitud_longitud_origen()
-*
-* Uso: Cuando una fila se inserta o se hace update en la tabla 'preferencias' se ejecuta automaticamente este trigger. Se setea la columna 'coordenada_origen' creando un punto con los valores de 'longitud_origen' y 'latitud_origen'. El punto se asigna el SRID 4326. Si los valores de 'longitud_origen' y 'latitud_origen' son nulos (esto ocurre cuando se inserta una nueva fila), se setean con los valores de 'longitud' y 'latitud' de la tabla 'perfil' que tenga el mismo 'id_cuenta' que la fila insertada en 'preferencias'.
-*
-* Parámetros: Ninguna.
-*
-* Retorna: La función trigger retorna la nueva fila con la coordenada de origen insertada en la tabla 'preferencias'.
+    Función:
+        set_latitud_longitud_origen()
+
+    Uso:
+        Cuando una fila se inserta o se hace update en la tabla 'preferencias' se ejecuta 
+        automaticamente este trigger. Se setea la columna 'coordenada_origen' creando un 
+        punto con los valores de 'longitud_origen' y 'latitud_origen'. 
+        El punto se asigna el SRID 4326. Si los valores de 'longitud_origen' y 'latitud_origen'
+        son nulos (esto ocurre cuando se inserta una nueva fila), se setean con los valores de 
+        'longitud' y 'latitud' de la tabla 'perfil' que tenga el mismo 'id_cuenta' que la fila 
+        insertada en 'preferencias'.
+
+    Parámetros: 
+        Ninguna.
+
+    Retorna: 
+        La función trigger retorna la nueva fila con la coordenada de origen insertada en la 
+        tabla 'preferencias'.
 */
 CREATE OR REPLACE FUNCTION set_latitud_longitud_origen()
 RETURNS TRIGGER AS $$
@@ -56,38 +92,103 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
+/*    
+    Función:
+        check_match_exists
 
-/*
-* Función: insert_institution
-* 
-* Uso: Insertar una institucion a la base de datos.
-*
-* Parámetros:
-*  - i_dominio       : Dominio de la institucion.
-*  - i_nombre        : Nombre de la institucion.
-*  - i_tipo          : Tipo de la institucion.
-*  - i_ano_fundacion : Año de fundacion de la institucion.
-*  - i_latitud       : Latitud de la institucion.
-*  - i_longitud      : Longitud de la institucion.
-*
-* Retorno: Nada.
+    Uso:
+        Chequear si dos personas dieron like el uno al otro.
+
+    Parámetros:
+        Ninguno.
+
+    Retorno: 
+        Función trigger que crea un match y un chat entre dos usuarios que dieron likes el 
+        uno al otro.
 */
-CREATE OR REPLACE FUNCTION insert_institution(i_dominio TEXT, i_nombre TEXT, i_tipo TEXT, i_ano_fundacion INTEGER, i_latitud DECIMAL, i_longitud DECIMAL) 
+CREATE OR REPLACE FUNCTION check_match_exists()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM likes WHERE id_liker = NEW.id_liker AND id_liked = NEW.id_liked) AND
+    EXISTS (SELECT 1 FROM likes WHERE  id_liker= NEW.id_liked AND id_liked = NEW.id_liker) THEN
+        PERFORM insert_match(NEW.id_liker, NEW.id_liked);   
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*    
+    Función:
+        prohibir_101_likes
+
+    Uso:
+        Prohibir dar mas de 100 likes al dia si no tiene el permiso infLikes.
+
+    Parámetros:
+        Ninguno.
+
+    Retorna: 
+        Función trigger que no permite dar mas de 100 likes al dia si no tiene el permiso 
+        infLikes.
+*/
+CREATE OR REPLACE FUNCTION prohibir_101_likes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (get_likes_per_day(New.id_liker, CURRENT_DATE)) = 100 THEN
+        IF (check_if_user_has_a_permission(New.id_liker, 'infLikes')) = FALSE THEN
+            RAISE EXCEPTION 'No puedes dar mas de 100 likes al dia';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_institution
+
+    Uso: 
+        Insertar una institucion a la base de datos.
+
+    Parámetros:
+        - i_dominio       : Dominio de la institucion.
+        - i_nombre        : Nombre de la institucion.
+        - i_tipo          : Tipo de la institucion.
+        - i_ano_fundacion : Año de fundacion de la institucion.
+        - i_latitud       : Latitud de la institucion.
+        - i_longitud      : Longitud de la institucion.
+
+    Retorno: 
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_institution(
+    i_dominio       TEXT,
+    i_nombre        TEXT,
+    i_tipo          TEXT,
+    i_ano_fundacion INTEGER,
+    i_latitud       DECIMAL,
+    i_longitud      DECIMAL) 
 RETURNS VOID AS $$
 BEGIN
     INSERT INTO institucion VALUES (i_dominio, i_nombre, i_tipo, i_ano_fundacion, i_latitud, i_longitud);
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_all_Institutions
-*
-* Parámetros: Ninguna.
-*
-* Uso: Retorna una tabla con los dominios y nombres de todas las instituciones registradas en la base de datos para que el usuario pueda seleccionar una de ellas al momento de registrarse.
-*
-* Retorna: Tabla con los dominios y nombres de todas las instituciones.
+    Función: 
+        get_all_Institutions
+    Parámetros: 
+        Ninguna.
+    Uso:
+        Retorna una tabla con los dominios y nombres de todas las instituciones registradas en 
+        la base de datos para que el usuario pueda seleccionar una de ellas al momento de 
+        registrarse.
+    Retorna: 
+        Tabla con los dominios y nombres de todas las instituciones.
 */
 CREATE OR REPLACE FUNCTION get_all_Institutions()
 RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) AS $$
@@ -96,36 +197,56 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: create_new_user
-*
-* Uso: Crea un nuevo usuario en la base de datos con la información proporcionada.
-*
-* Parámetros:
-*   - nombre_u            : Nombre del usuario.
-*   - apellido_u          : Apellido del usuario.
-*   - fecha_nacimiento_u  : Fecha de nacimiento del usuario.
-*   - telefono_u          : Número de teléfono del usuario.
-*   - email_u             : Correo electrónico del usuario.
-*   - password_hash       : Hash de la contraseña del usuario.
-*   - idioma_u            : Idioma preferido del usuario.
-*   - notificaciones_u    : Valor booleano que indica si el usuario desea recibir notificaciones.
-*   - tema_u              : Valor booleano que indica el tema preferido del usuario.
-*   - sexo_u              : Sexo del usuario.
-*   - latitud_u           : Valor decimal que representa la latitud de la ubicación del usuario.
-*   - longitud_u          : Valor decimal que representa la longitud de la ubicación del usuario.
-*   - foto_u              : Arreglo de textos en formato base64 que representa las fotos del usuario.
-*   - dominio_institucion : Dominio de la institución a la que estudio el usuario.
-*   - grado_u             : Grado académico en el titulo del usuario.
-*   - especialidad_u      : Especialidad en el titulo del usuario.
-*   - anio_ingreso        : Valor entero que representa el año de ingreso a la institución.
-*   - anio_egreso         : Valor entero que representa el año de egreso de la institución.
-*
-* Retorna: Nada.
+    Función: 
+        create_new_user
+
+    Uso: 
+        Crea un nuevo usuario en la base de datos con la información proporcionada.
+
+    Parámetros:
+        - nombre_u            : Nombre del usuario.
+        - apellido_u          : Apellido del usuario.
+        - fecha_nacimiento_u  : Fecha de nacimiento del usuario.
+        - telefono_u          : Número de teléfono del usuario.
+        - email_u             : Correo electrónico del usuario.
+        - password_hash       : Hash de la contraseña del usuario.
+        - idioma_u            : Idioma preferido del usuario.
+        - notificaciones_u    : Valor booleano que indica si el usuario desea recibir notificaciones.
+        - tema_u              : Valor booleano que indica el tema preferido del usuario.
+        - sexo_u              : Sexo del usuario.
+        - latitud_u           : Valor decimal que representa la latitud de la ubicación del usuario.
+        - longitud_u          : Valor decimal que representa la longitud de la ubicación del usuario.
+        - foto_u              : Arreglo de textos en formato base64 que representa las fotos del usuario.
+        - dominio_institucion : Dominio de la institución a la que estudio el usuario.
+        - grado_u             : Grado académico en el titulo del usuario.
+        - especialidad_u      : Especialidad en el titulo del usuario.
+        - anio_ingreso        : Valor entero que representa el año de ingreso a la institución.
+        - anio_egreso         : Valor entero que representa el año de egreso de la institución.
+
+    Retorna: Nada.
 */
-CREATE OR REPLACE FUNCTION create_new_user(nombre_u TEXT, apellido_u TEXT, fecha_nacimiento_u DATE, telefono_u TEXT, email_u TEXT, password_hash TEXT, idioma_u TEXT, notificaciones_u BOOLEAN, tema_u BOOLEAN, sexo_u TEXT, latitud_u DECIMAL(10, 8), longitud_u DECIMAL(11,8), foto_u TEXT[], dominio_institucion TEXT, grado_u TEXT, especialidad_u TEXT, anio_ingreso INTEGER, anio_egreso INTEGER) 
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION create_new_user(
+    nombre_u            TEXT, 
+    apellido_u          TEXT, 
+    fecha_nacimiento_u  DATE, 
+    telefono_u          TEXT,
+    email_u             TEXT, 
+    password_hash       TEXT, 
+    idioma_u            TEXT, 
+    notificaciones_u    BOOLEAN, 
+    tema_u              BOOLEAN, 
+    sexo_u              TEXT, 
+    latitud_u           DECIMAL(10, 8), 
+    longitud_u          DECIMAL(11,8), 
+    foto_u              TEXT[], 
+    dominio_institucion TEXT, 
+    grado_u             TEXT, 
+    especialidad_u      TEXT, 
+    anio_ingreso        INTEGER, 
+    anio_egreso         INTEGER
+) RETURNS VOID AS $$
 DECLARE
     id_cuenta_u INTEGER;
     i INTEGER;
@@ -145,28 +266,36 @@ BEGIN
         RAISE EXCEPTION 'El año de egreso debe ser mayor o igual al de ingreso';
     END IF;
 
-    INSERT INTO cuenta (nombre, apellido, fecha_nacimiento, telefono, email, contrasena, idioma, notificaciones, tema) VALUES (nombre_u, apellido_u, fecha_nacimiento_u, telefono_u, email_u, password_hash, idioma_u, notificaciones_u, tema_u) RETURNING id_cuenta INTO id_cuenta_u;
+    INSERT INTO cuenta (nombre, apellido, fecha_nacimiento, telefono, email, contrasena, idioma, notificaciones, tema) 
+    VALUES (nombre_u, apellido_u, fecha_nacimiento_u, telefono_u, email_u, password_hash, idioma_u, notificaciones_u, tema_u) 
+    RETURNING id_cuenta INTO id_cuenta_u;
 
-    INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
+    INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) 
+    VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
 
-    INSERT INTO estudio_en(id_cuenta, dominio, grado, especialidad, ano_ingreso, ano_egreso) VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
+    INSERT INTO estudio_en(id_cuenta, dominio, grado, especialidad, ano_ingreso, ano_egreso) 
+    VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
 
     FOR i IN 1..array_length(foto_u, 1) LOOP
-        INSERT INTO tiene_foto (id_cuenta, foto) VALUES (id_cuenta_u, decode(foto_u[i], 'base64'));
+        INSERT INTO tiene_foto (id_cuenta, foto) 
+        VALUES (id_cuenta_u, decode(foto_u[i], 'base64'));
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_email_and_hashpassword_user
-*
-* Uso: Obtener el correo y el hash de la contrasena del usuario (para logins y cambios de contrasenas).
-*
-* Parámetros:
-*   - id_user: Valor entero del id del usuario.
-*
-* Retorna: El email y el hash de la contrasena del usuario.
+    Función:
+        get_email_and_hashpassword_user
+
+    Uso:
+        Obtener el correo y el hash de la contrasena del usuario (para logins y cambios de contrasenas).
+
+    Parámetros:
+        - id_user: Valor entero del id del usuario.
+
+    Retorna:
+        El email y el hash de la contrasena del usuario.
 */
 CREATE OR REPLACE FUNCTION get_email_and_hashpassword_user(id_user integer)
 RETURNS TABLE(r_email CHARACTER VARYING, r_contrasena CHARACTER VARYING) AS $$
@@ -178,16 +307,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_settings_app_user
-*
-* Uso: Obtener el idioma, notificaciones y tema del app que tiene un usuario.
-*
-* Parámetros:
-*   - id_user: Entero del id de la cuenta.
-*
-* Retorna: Una tabla con el idioma, notificaciones y tema del app que tiene un usuario.
+    Función: 
+        get_settings_app_user
+
+    Uso: 
+        Obtener el idioma, notificaciones y tema del app que tiene un usuario.
+
+    Parámetros:
+        - id_user: Entero del id de la cuenta.
+
+    Retorna:
+        Una tabla con el idioma, notificaciones y tema del app que tiene un usuario.
 */
 CREATE OR REPLACE FUNCTION get_settings_app_user(id_user INTEGER)
 RETURNS TABLE (r_idioma idiomas_app, r_notificaciones BOOLEAN, r_tema BOOLEAN) AS $$
@@ -199,22 +331,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: update_info_account
-*
-* Uso: Actualiza la informacion de la cuenta de un usuario en la tabla de cuenta. Recordar que el usuario no puede cambiar su nombre ni apellido.
-*
-* Parámetros:
-*  - c_id_cuenta      : Valor entero del ID de la cuenta del usuario.
-*  - c_email          : (OPCIONAL) Texto con el nuevo email del usuario.
-*  - c_contrasena     : (OPCIONAL) Texto con el nuevo hash de contrasena del usuario.
-*  - c_telefono       : (OPCIONAL) Texto con el nuevo telefono del usuario.
-*  - c_idioma         : (OPCIONAL) Texto con el nuevo idioma del usuario.
-*  - c_tema           : (OPCIONAL) Texto con el nuevo tema del usuario.
-*  - c_notificaciones : (OPCIONAL) Valor booleano con el nuevo valor de notificaciones del usuario.
-*
-* Retorna: Nada.
+    Función:  
+        update_info_account
+
+    Uso: 
+        Actualiza la informacion de la cuenta de un usuario en la tabla de cuenta. 
+        Recordar que el usuario no puede cambiar su nombre ni apellido.
+
+    Parámetros:
+        - c_id_cuenta      : Valor entero del ID de la cuenta del usuario.
+        - c_email          : (OPCIONAL) Texto con el nuevo email del usuario.
+        - c_contrasena     : (OPCIONAL) Texto con el nuevo hash de contrasena del usuario.
+        - c_telefono       : (OPCIONAL) Texto con el nuevo telefono del usuario.
+        - c_idioma         : (OPCIONAL) Texto con el nuevo idioma del usuario.
+        - c_tema           : (OPCIONAL) Texto con el nuevo tema del usuario.
+        - c_notificaciones : (OPCIONAL) Valor booleano con el nuevo valor de notificaciones del usuario.
+
+    Retorna: 
+        Nada.
 */
 CREATE OR REPLACE FUNCTION update_info_account(
     c_id_cuenta      INTEGER,
@@ -238,59 +374,63 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: update_info_perfil
-*
-* Uso: Actualiza la informacion de un perfil de un usuario
-*
-* Parámetros:
-*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
-*  - p_sexo: (OPCIONAL) TEXT del sexo de un usuario
-*  - p_descripcion: (OPCIONAL) TEXT de la descripción de un usuario
-*  - p_verificado: (OPCIONAL) BOOLEAN si el usuario esta verificado. Por default es false
-*  - p_latitud: (OPCIONAL) DECIMAL de la latitud de un usuario
-*  - p_longitud: (OPCIONAL) DECIMAL de la longitud de un usuario
+    Función: 
+        update_info_perfil
 
-*
-* Retorna: Nada.
+    Uso: 
+        Actualiza la informacion de un perfil de un usuario.
+
+    Parámetros:
+        - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
+        - p_sexo: (OPCIONAL) TEXT del sexo de un usuario.
+        - p_descripcion: (OPCIONAL) TEXT de la descripción de un usuario.
+        - p_verificado: (OPCIONAL) BOOLEAN si el usuario esta verificado. Por default es false.
+        - p_latitud: (OPCIONAL) DECIMAL de la latitud de un usuario.
+        - p_longitud: (OPCIONAL) DECIMAL de la longitud de un usuario.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION update_info_perfil(
-    p_id_cuenta      INTEGER,
-    p_sexo           TEXT DEFAULT NULL,
-    p_descripcion    TEXT DEFAULT NULL,
-    p_verificado     BOOLEAN DEFAULT FALSE,
-    p_latitud        DECIMAL DEFAULT NULL,
-    p_longitud       DECIMAL DEFAULT NULL
+    p_id_cuenta   INTEGER,
+    p_sexo        TEXT DEFAULT NULL,
+    p_descripcion TEXT DEFAULT NULL,
+    p_verificado  BOOLEAN DEFAULT FALSE,
+    p_latitud     DECIMAL DEFAULT NULL,
+    p_longitud    DECIMAL DEFAULT NULL
 )
 RETURNS VOID AS $$
 BEGIN
     UPDATE perfil
-    SET sexo           = CASE WHEN p_sexo          IS NOT NULL THEN p_sexo          ELSE sexo          END,
-        descripcion    = CASE WHEN p_descripcion   IS NOT NULL THEN p_descripcion   ELSE descripcion   END,
-        verificado     = CASE WHEN p_verificado    IS NOT FALSE THEN p_verificado   ELSE verificado    END,
-        latitud        = CASE WHEN p_latitud       IS NOT NULL THEN p_latitud       ELSE latitud       END,
-        longitud       = CASE WHEN p_longitud      IS NOT NULL THEN p_longitud      ELSE longitud      END
+    SET sexo        = CASE WHEN p_sexo        IS NOT NULL THEN p_sexo        ELSE sexo        END,
+        descripcion = CASE WHEN p_descripcion IS NOT NULL THEN p_descripcion ELSE descripcion END,
+        verificado  = CASE WHEN p_verificado  IS NOT FALSE THEN p_verificado ELSE verificado  END,
+        latitud     = CASE WHEN p_latitud     IS NOT NULL THEN p_latitud     ELSE latitud     END,
+        longitud    = CASE WHEN p_longitud    IS NOT NULL THEN p_longitud    ELSE longitud    END
     WHERE id_cuenta = p_id_cuenta;
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_preferences
-*
-* Uso: Insertar las preferencias de un usuario en la tabla de preferencias.
-*
-* Parámetros:
-*  - p_id_cuenta        : Valor entero del ID de la cuenta del usuario.
-*  - p_estudio          : (Opcional) TEXT del nivel de estudio del usuario.
-*  - p_latitud_origen   : (Opcional) DECIMAL de la latitud de preferencia del usuario.
-*  - p_longitud_origen  : (Opcional) DECIMAL de la longitud de preferencia del usuario.
-*  - p_distancia_maxima : (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
-*  - p_min_edad         : (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
-*  - p_max_edad         : (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
-*
-* Retorna: Nada.
+    Función:
+        insert_preferences
+
+    Uso: 
+        Insertar las preferencias de un usuario en la tabla de preferencias.
+
+    Parámetros:
+        - p_id_cuenta        : Valor entero del ID de la cuenta del usuario.
+        - p_estudio          : (Opcional) TEXT del nivel de estudio del usuario.
+        - p_latitud_origen   : (Opcional) DECIMAL de la latitud de preferencia del usuario.
+        - p_longitud_origen  : (Opcional) DECIMAL de la longitud de preferencia del usuario.
+        - p_distancia_maxima : (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
+        - p_min_edad         : (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
+        - p_max_edad         : (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
+
+    Retorna: 
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_preferences(
     p_id_cuenta        INTEGER,
@@ -308,23 +448,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: update_preferences
-*
-* Uso: Actualiza las preferencias de un usuario en la tabla de preferencias.
-*
-* Parámetros:
-*    - p_id_cuenta        : Valor entero del ID de la cuenta del usuario.
-*    - p_estudio          : (Opcional) TEXT del nivel de estudio del usuario.
-*    - p_latitud_origen   : (Opcional) DECIMAL de la latitud de preferencia del usuario.
-*    - p_longitud_origen  : (Opcional) DECIMAL de la longitud de preferencia del usuario.
-*    - p_distancia_maxima : (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
-*    - p_min_edad         : (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
-*    - p_max_edad         : (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
-*
-* Retorna: Nada.
+    Función: update_preferences
+
+    Uso: Actualiza las preferencias de un usuario en la tabla de preferencias.
+
+    Parámetros:
+        - p_id_cuenta        : Valor entero del ID de la cuenta del usuario.
+        - p_estudio          : (Opcional) TEXT del nivel de estudio del usuario.
+        - p_latitud_origen   : (Opcional) DECIMAL de la latitud de preferencia del usuario.
+        - p_longitud_origen  : (Opcional) DECIMAL de la longitud de preferencia del usuario.
+        - p_distancia_maxima : (Opcional) Valor entero de la distancia máxima de búsqueda del usuario.
+        - p_min_edad         : (Opcional) Valor entero de la edad mínima de búsqueda del usuario.
+        - p_max_edad         : (Opcional) Valor entero de la edad máxima de búsqueda del usuario.
+
+    Retorna: 
+        Nada.
 */
+-- Ejemplo de uso SELECT update_preferences(p_id_cuenta := 19, p_estudio := 'Doctorado', p_distancia_maxima := 50);
 CREATE OR REPLACE FUNCTION update_preferences(
     p_id_cuenta        INTEGER,
     p_estudio          TEXT DEFAULT NULL,
@@ -345,20 +487,21 @@ BEGIN
         max_edad         = CASE WHEN p_max_edad         IS NOT NULL THEN p_max_edad         ELSE max_edad         END
     WHERE id_cuenta = p_id_cuenta;
 END;
-$$
- LANGUAGE plpgsql;
--- Ejemplo de uso SELECT update_preferences(p_id_cuenta := 19, p_estudio := 'Doctorado', p_distancia_maxima := 50);
+$$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_preferencias()
-*
-* Uso: Obtener las preferencias de un usuario.
-*
-* Parámetros: 
-*    - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
-*
-* Retorna : Todos los datos de preferencias de un usuario.
+    Función: 
+        get_preferencias
+
+    Uso: 
+        Obtener las preferencias de un usuario.
+
+    Parámetros: 
+        - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
+
+    Retorna: 
+        Todos los datos de preferencias de un usuario.
 */
 CREATE OR REPLACE FUNCTION get_preferencias(p_id_cuenta integer)
 RETURNS TABLE(
@@ -395,18 +538,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_estudio
-*
-* Uso: Obtener usuarios por preferencias en estudio.
-*
-* Parámetros:
-*   - estudio : TEXT de estudio.
-*
-* Retorna: Una tabla con los usuarios que cumplen con el estudio especificado.
-*/
+    Función:
+        get_users_by_estudio
 
+    Uso:
+        Obtener usuarios por preferencias en estudio.
+
+    Parámetros:
+        - estudio : TEXT de estudio.
+
+    Retorna: 
+        Una tabla con los usuarios que cumplen con el estudio especificado.
+*/
 CREATE OR REPLACE FUNCTION get_users_by_estudio(p_estudio TEXT)
 RETURNS TABLE (r_id_cuenta INTEGER) AS $$
 BEGIN
@@ -417,21 +562,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_genre
-*
-* Uso: Obtener usuarios por preferencias en generos.
-*
-* Parámetros:
-*   - genre : Arreglo de TEXT de generos.
-*
-* Retorna: Una tabla con los usuarios que cumplen con alguno de los generos especificados.
-*/
+    Función:
+        get_users_by_genre
 
+    Uso:
+        Obtener usuarios por preferencias en generos.
+
+    Parámetros:
+        - genre : Arreglo de TEXT de generos.
+
+    Retorna:
+        Una tabla con los usuarios que cumplen con alguno de los generos especificados.
+*/
 CREATE OR REPLACE FUNCTION get_users_by_genre(genre TEXT[])
-RETURNS TABLE (r_id_cuenta INTEGER)
-AS $$
+RETURNS TABLE (r_id_cuenta INTEGER) AS $$
 BEGIN
     /* Si el usuario no seteo el genero de preferencia */
     IF genre IS NULL THEN
@@ -447,16 +593,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_min_age
-*
-* Uso: Obtener usuarios por preferencias en min edad
-*
-* Parámetros: 
-*   - min_age: Entero de la edad minima
-*
-* Retorna: Una tabla con los usuarios que cumplen con el min edad.
+    Función:
+        get_users_by_min_age
+
+    Uso:
+        Obtener usuarios por preferencias en min edad.
+
+    Parámetros: 
+        - min_age: Entero de la edad minima.
+
+    Retorna:
+        Una tabla con los usuarios que cumplen con el min edad.
 */
 CREATE OR REPLACE FUNCTION get_users_by_min_age(min_age INTEGER)
 RETURNS TABLE (r_id_cuenta INTEGER) AS $$
@@ -464,42 +613,47 @@ BEGIN
     RETURN QUERY
     SELECT id_cuenta
     FROM   cuenta
-    WHERE (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) >= min_age);
+    WHERE  (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) >= min_age);
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_max_age
-*
-* Uso: Obtener usuarios por preferencias en max edad.
-*
-* Parámetros:
-*   - max_age: Entero de la edad maxima.
-*
-* Retorna: Una tabla con los usuarios que cumplen con el max edad.
+    Función:
+        get_users_by_max_age
+
+    Uso:
+        Obtener usuarios por preferencias en max edad.
+
+    Parámetros:
+        - max_age: Entero de la edad maxima.
+
+    Retorna:
+        Una tabla con los usuarios que cumplen con el max edad.
 */
 CREATE OR REPLACE FUNCTION get_users_by_max_age(max_age INTEGER)
-RETURNS TABLE (r_id_cuenta INTEGER)
-AS $$
+RETURNS TABLE (r_id_cuenta INTEGER) AS $$
 BEGIN
     RETURN QUERY
     SELECT id_cuenta
-    FROM cuenta
-    WHERE (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) <= max_age);
+    FROM   cuenta
+    WHERE  (EXTRACT(YEAR FROM AGE(fecha_nacimiento)) <= max_age);
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_orientation_sexual
-*
-* Uso: Obtener los usuarios por preferencias de un arreglo de TEXT de orientaciones sexuales.
-*
-* Parámetros:
-*   - orientation_sexual : Arreglo de TEXT con las orientaciones sexuales.
-*
-* Retorna: Tabla con los IDs de usuarios que tienen alguna de las orientaciones sexuales especificadas.
+    Función:
+        get_users_by_orientation_sexual
+
+    Uso:
+        Obtener los usuarios por preferencias de un arreglo de TEXT de orientaciones sexuales.
+
+    Parámetros:
+        - orientation_sexual : Arreglo de TEXT con las orientaciones sexuales.
+
+    Retorna:
+        Tabla con los IDs de usuarios que tienen alguna de las orientaciones sexuales especificadas.
 */
 CREATE OR REPLACE FUNCTION get_users_by_orientation_sexual(orientation_sexual TEXT[])
 RETURNS TABLE(r_id_cuenta INTEGER) AS $$
@@ -518,16 +672,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_all_users_by_max_distance
-*
-* Uso: Obtener todos los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado (no se considera en el resultado el usuario dado).
-*
-* Parámetros:
-*  - user_id : Valor entero del Id de la cuenta del usuario a partir del cual se calculará la distancia..
-*
-* Retorno: Una tabla con los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado.
+    Función:
+        get_all_users_by_max_distance
+
+    Uso:
+        Obtener todos los IDs de los usuarios que se encuentren a una distancia máxima de un usuario 
+        dado (no se considera en el resultado el usuario dado).
+
+    Parámetros:
+        - user_id : Valor entero del Id de la cuenta del usuario a partir del cual se calculará la distancia.
+
+    Retorno:
+        Una tabla con los IDs de los usuarios que se encuentren a una distancia máxima de un usuario dado.
 */
 CREATE OR REPLACE FUNCTION get_all_users_by_max_distance(user_id INTEGER)
 RETURNS TABLE (id_cuenta_at_max_distance INTEGER) AS $$
@@ -548,15 +706,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_preferences_free_user
-*
-* Uso: Obtener los ids cuentas de los usuarios que cumplen con las preferencias de otro usuario que no tiene suscripcion con passport.
-*
-* Parámetros:
-*  - user_id : id del usuario que tiene las preferencias.
-*
-* Retorna: Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias.
+    Función:
+        get_users_by_preferences_free_user
+
+    Uso:
+        Obtener los ids cuentas de los usuarios que cumplen con las preferencias de otro usuario que 
+        no tiene suscripcion con passport.
+
+    Parámetros:
+        - user_id : id del usuario que tiene las preferencias.
+
+    Retorna:
+        Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias.
 */
 CREATE OR REPLACE FUNCTION get_users_by_preferences_free_user(user_id integer)
 RETURNS TABLE(pref_id_cuentas integer) AS $$
@@ -595,17 +758,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_pref_sexo
-*
-* Uso: Inserta una nueva preferencia de sexo para un usuario en la tabla de pref_sexo.
-* 
-* Parámetros: 
-*  - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
-*  - p_sexo      : Texto que indica el nuevo sexo de preferencia del usuario.
-* 
-* Retorna: Nada.
+    Función:
+        insert_pref_sexo
+
+    Uso:
+        Inserta una nueva preferencia de sexo para un usuario en la tabla de pref_sexo.
+ 
+    Parámetros: 
+        - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
+        - p_sexo      : Texto que indica el nuevo sexo de preferencia del usuario.
+ 
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION insert_pref_sexo(p_id_cuenta INTEGER, p_sexo TEXT)
 RETURNS VOID AS $$
@@ -614,17 +779,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_pref_sexo
-*
-* Uso: Elimina una preferencia de sexo de un usuario en la tabla de pref_sexo.
-*
-* Parámetros:
-*  - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
-*  - p_sexo      : Texto que indica el sexo a eliminar de las preferencias del usuario.
-*
-* Retorna: Nada.
+    Función:
+        delete_pref_sexo
+
+    Uso:
+        Elimina una preferencia de sexo de un usuario en la tabla de pref_sexo.
+
+    Parámetros:
+        - p_id_cuenta : Valor entero del ID de la cuenta del usuario.
+        - p_sexo      : Texto que indica el sexo a eliminar de las preferencias del usuario.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION delete_pref_sexo(p_id_cuenta INTEGER, p_sexo TEXT)
 RETURNS VOID AS $$
@@ -633,61 +800,81 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_pref_orientacion_sexual
-*
-* Uso: Inserta una nueva preferencia de orientacion sexual para un usuario en la tabla de pref_orientacion_sexual.
-*
-* Parámetros:
-*  - p_id_cuenta: Valor entero del ID de la cuenta del usuario.
-*  - p_orientacion_sexual: Texto que indica la nueva orientacion sexual de preferencia del usuario.
-*
-* Retorna: Nada.
+    Función:
+        insert_pref_orientacion_sexual
+
+    Uso:
+        Inserta una nueva preferencia de orientacion sexual para un usuario en la tabla de pref_orientacion_sexual.
+
+    Parámetros:
+        - p_id_cuenta          : Valor entero del ID de la cuenta del usuario.
+        - p_orientacion_sexual : Texto que indica la nueva orientacion sexual de preferencia del usuario.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_pref_orientacion_sexual(p_id_cuenta INTEGER, p_orientacion_sexual TEXT)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO pref_orientacion_sexual(id_cuenta, orientacion_sexual) VALUES (p_id_cuenta, p_orientacion_sexual);
+    INSERT INTO pref_orientacion_sexual(id_cuenta, orientacion_sexual) 
+    VALUES (p_id_cuenta, p_orientacion_sexual);
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_pref_orientacion_sexual
-*
-* Uso: Elimina una preferencia de orientacion sexual de un usuario en la tabla de pref_orientacion_sexual.
-*
-* Parámetros:
-*  - p_id_cuenta          : Valor entero del ID de la cuenta del usuario.
-*  - p_orientacion_sexual : Texto que indica la orientacion sexual a eliminar de las preferencias del usuario.
-*
-* Retorno: Nada.
+    Función:
+        delete_pref_orientacion_sexual
+
+    Uso:
+        Elimina una preferencia de orientacion sexual de un usuario en la tabla de pref_orientacion_sexual.
+
+    Parámetros:
+        - p_id_cuenta          : Valor entero del ID de la cuenta del usuario.
+        - p_orientacion_sexual : Texto que indica la orientacion sexual a eliminar de las preferencias del usuario.
+
+    Retorno:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_pref_orientacion_sexual(p_id_cuenta INTEGER, p_orientacion_sexual TEXT)
 RETURNS VOID AS $$
 BEGIN
-    DELETE FROM pref_orientacion_sexual WHERE id_cuenta = p_id_cuenta AND orientacion_sexual = p_orientacion_sexual;
+    DELETE FROM pref_orientacion_sexual 
+    WHERE id_cuenta = p_id_cuenta AND orientacion_sexual = p_orientacion_sexual;
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
-* Función: insert_user_tarjeta
-*
-* Uso: Cuando el usuario registra una tarjeta, se inserta una instancia en la tabla tarjeta (si es que aun no existen en la base de datos), y se asocia a la cuenta del usuario creando una instancia en la tabla registra.
-* 
-* Parámetros:
-* 	- user_id     : Valor entero que indica el id del usuario.
-* 	- card_number : TEXT numero de la tarjeta.
-*   - titular     : TEXT nombre del titular de la tarjeta.
-*   - due_date    : DATE fecha de vencimiento de la tarjeta.
-*   - cvv         : TEXT codigo de seguridad de la tarjeta.
-*   - type_card   : TEXT tipo de tarjeta.
-*
-* Retorna: Nada.
+    Función:
+        insert_user_tarjeta
+
+    Uso:
+        Cuando el usuario registra una tarjeta, se inserta una instancia en la tabla tarjeta 
+        (si es que aun no existen en la base de datos), y se asocia a la cuenta del usuario 
+        creando una instancia en la tabla registra.
+ 
+    Parámetros:
+        - user_id     : Valor entero que indica el id del usuario.
+        - card_number : TEXT numero de la tarjeta.
+        - titular     : TEXT nombre del titular de la tarjeta.
+        - due_date    : DATE fecha de vencimiento de la tarjeta.
+        - cvv         : TEXT codigo de seguridad de la tarjeta.
+        - type_card   : TEXT tipo de tarjeta.
+
+    Retorna:
+        Nada.
 */
-CREATE OR REPLACE FUNCTION insert_user_tarjeta(user_id INT, card_number TEXT, titular TEXT, due_date DATE, cvv TEXT, type_card TEXT) 
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION insert_user_tarjeta(
+    user_id     INT, 
+    card_number TEXT, 
+    titular     TEXT, 
+    due_date    DATE, 
+    cvv         TEXT, 
+    type_card   TEXT
+) RETURNS VOID AS $$
 BEGIN
     /* Chequear que no este vencida la tarjeta */
     IF due_date < current_date THEN
@@ -701,17 +888,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_instance_registra
-*
-* Uso: Elimina una instancia de la tabla registra.
-* 
-* Parámetros:
-* 	- user_id     : Valor entero que indica el id del usuario.
-* 	- card_number : TEXT numero de la tarjeta.
-*
-* Retorna: Nada.
+    Función:
+        delete_instance_registra
+
+    Uso:
+        Elimina una instancia de la tabla registra.
+
+    Parámetros:
+        - user_id     : Valor entero que indica el id del usuario.
+        - card_number : TEXT numero de la tarjeta.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION delete_instance_registra(user_id INTEGER, card_number TEXT) 
 RETURNS VOID AS $$
@@ -720,17 +909,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: update_due_date_card
-*
-* Uso: Actualizar la fecha de vencimiento de una tarjeta.
-*
-* Parámetros: 
-*     - card_number  : TEXT indica los numeros de la tarjeta a modificar fecha de caducidad.
-*     - new_due_date : DATE indica la nueva fecha de vencimiento de la tarjeta.
-*
-* Retorna: Nada.
+    Función:
+        update_due_date_card
+
+    Uso:
+        Actualizar la fecha de vencimiento de una tarjeta.
+
+    Parámetros: 
+        - card_number  : TEXT indica los numeros de la tarjeta a modificar fecha de caducidad.
+        - new_due_date : DATE indica la nueva fecha de vencimiento de la tarjeta.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION update_due_date_card(card_number TEXT, new_due_date DATE)
 RETURNS VOID AS $$
@@ -741,16 +932,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_all_public_info_about_user
-*
-* Uso: Obtener todos los datos que sean considerados como publico de un usuario con su id_cuenta (nombre, apellido, edad, sexo, descripcion, verificado, latitud y longitud para mostrar la ciudad y pais con Nominatim, dominios de las instituciones en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones, fotos, orientaciones sexuales) para mostrarse en el perfil.
-*
-* Parámetros:
-*   - id_user : id de la cuenta del usuario.
-*
-* Retorno: Devuelve una tabla de una fila con todos los datos (mencionados en el Uso) del usuario con el id_cuenta.
+    Función:
+        get_all_public_info_about_user
+
+    Uso:
+        Obtener todos los datos que sean considerados como publico de un usuario con su 
+        id_cuenta (nombre, apellido, edad, sexo, descripcion, verificado, latitud y 
+        longitud para mostrar la ciudad y pais con Nominatim, dominios de las instituciones 
+        en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones, 
+        fotos, orientaciones sexuales) para mostrarse en el perfil.
+
+    Parámetros:
+        - id_user : id de la cuenta del usuario.
+
+    Retorno:
+        Devuelve una tabla de una fila con todos los datos (mencionados en el Uso) del usuario 
+        con el id_cuenta.
 */
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
@@ -817,116 +1016,33 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_new_tier_with_new_permissions
-* 
-* Uso: Insertar una nueva tier a la base de datos con sus nuevos permisos.
-*
-* Parámetros:
-*  - t_nombre                 : nombre de la nueva tier.
-*  - p_nombre_permisos[]      : lista de TEXT de nombres de nuevos permisos.
-*  - p_descripcion_permisos[] : Lista de TEXT de descripciones de nuevos permisos.
-*
-* Retorno: Nada.
+    Función:
+        insert_trabaja_en
+
+    Uso:
+        Cuando el usuario quiere agregar en que empresa trabaja actualmente, se inserta una 
+        nueva instancia de empresa (si es que no existe en la bd) y se inserta una nueva 
+        instancia de trabaja_en.
+
+    Parámetros: 
+        - id_user          : Entero del id de la cuenta del usuario.
+        - e_nombre_empresa : TEXT con el nombre de la empresa.
+        - e_url_empresa    : TEXT con el url de la empresa.
+        - e_puesto         : TEXT con el cargo del usuario en la empresa.
+        - e_fecha_inicio   : DATE con la fecha de inicio en que trabaja en la empresa.
+
+    Retorno: 
+        Nada.
 */
-CREATE OR REPLACE FUNCTION insert_new_tier_with_new_permissions(t_nombre TEXT, p_nombre_permisos TEXT[], p_descripcion_permisos TEXT[])
-RETURNS VOID AS $$
-DECLARE
-    nombre_permisos_size      INT;
-    descripcion_permisos_size INT;
-    i                         INT;
-BEGIN
-    /* verificar que el size de las listas sean iguales */
-    nombre_permisos_size      := array_length(p_nombre_permisos, 1);
-    descripcion_permisos_size := array_length(p_descripcion_permisos, 1);
-
-    IF nombre_permisos_size != descripcion_permisos_size THEN
-        RAISE EXCEPTION 'El tamaño de las listas de permisos y descripciones no son iguales';
-    END IF;
-
-    /* Insertar el nuevo tier a la bd */
-    INSERT INTO tier VALUES(t_nombre);
-
-    /* Insertar cada permiso con su tier en maneja  */
-    FOR i IN 1..nombre_permisos_size LOOP
-        /* Insertar el permiso en permiso */
-        INSERT INTO permiso VALUES(p_nombre_permisos[i], p_descripcion_permisos[i]);
-
-        /* Insertar el permiso en maneja */
-        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: insert_new_tier_with_old_permissions
-* 
-* Uso: Insertar una nueva tier a la base de datos con permisos ya existente en la base de datos.
-*
-* Parámetros:
-*  - t_nombre            : Nombre de la nueva tier.
-*  - p_nombre_permisos[] : Lista de TEXT de nombres de permisos.
-*
-* Retorno: Nada.
-*/
-CREATE OR REPLACE FUNCTION insert_new_tier_with_old_permissions(t_nombre TEXT, p_nombre_permisos TEXT[])
-RETURNS VOID AS $$
-DECLARE
-    nombre_permisos_size INT;
-    i                    INT;
-BEGIN
-    nombre_permisos_size := array_length(p_nombre_permisos, 1);
-
-    /* Insertar el nuevo tier a la bd */
-    INSERT INTO tier VALUES(t_nombre);
-
-    /* Insertar cada permiso con su tier en maneja  */
-    FOR i IN 1..nombre_permisos_size LOOP
-        /* Insertar el permiso en maneja */
-        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: insert_new_permission
-*
-* Uso: insertar un nuevo permiso a la base de datos y asociarlo con un tier.
-* 
-* Parámetros: 
-*  - p_nombre_permiso      : Nombre del permiso.
-*  - p_descripcion_permiso : Descripcion del permiso.
-*  - p_nombre_tier         : Nombre del tier asociado.
-*
-* Retorna: Nada.
-*/
-CREATE OR REPLACE FUNCTION insert_new_permission(p_nombre_permiso TEXT, p_descripcion_permiso TEXT, p_nombre_tier TEXT) RETURNS VOID AS $$
-BEGIN
-    INSERT INTO permiso VALUES (p_nombre_permiso, p_descripcion_permiso);
-    INSERT INTO maneja  VALUES (p_nombre_tier, p_nombre_permiso);
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: insert_trabaja_en
-*
-* Uso: Cuando el usuario quiere agregar en que empresa trabaja actualmente, se inserta una nueva instancia de empresa (si es que no existe en la bd) y se inserta una nueva instancia de trabaja_en.
-* 
-* Parámetros: 
-*  - id_user          : Entero del id de la cuenta del usuario.
-*  - e_nombre_empresa : TEXT con el nombre de la empresa.
-*  - e_url_empresa    : TEXT con el url de la empresa.
-*  - e_puesto         : TEXT con el cargo del usuario en la empresa.
-*  - e_fecha_inicio   : DATE con la fecha de inicio en que trabaja en la empresa.
-*
-* Retorno: Nada.
-*/
-CREATE OR REPLACE FUNCTION insert_trabaja_en(id_user INT, e_nombre_empresa TEXT, e_url_empresa TEXT, e_puesto TEXT, e_fecha_inicio DATE) 
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION insert_trabaja_en(
+    id_user          INT,
+    e_nombre_empresa TEXT,
+    e_url_empresa    TEXT,
+    e_puesto         TEXT,
+    e_fecha_inicio   DATE
+) RETURNS VOID AS $$
 DECLARE
     e_id_empresa INT;
 BEGIN
@@ -943,20 +1059,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_agrupation
-*
-* Uso: Insertar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion.
-*
-* Parámetros:
-*  - p_id_cuenta  : Entero del id de la cuenta de un usuario.
-*  - p_id_dominio : TEXT dominio de una institucion.
-*  - p_agrupacion : TEXT de la agrupacion a insertar.
-*
-* Retorna: Nada.
-*/
+    Función:
+        insert_agrupation
 
+    Uso:
+        Insertar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion.
+
+    Parámetros:
+        - p_id_cuenta  : Entero del id de la cuenta de un usuario.
+        - p_id_dominio : TEXT dominio de una institucion.
+        - p_agrupacion : TEXT de la agrupacion a insertar.
+
+    Retorna:
+        Nada.
+*/
 CREATE OR REPLACE FUNCTION insert_agrupation(p_id_cuenta integer, p_id_dominio TEXT, p_agrupacion TEXT)
 RETURNS VOID AS $$
 BEGIN
@@ -965,17 +1083,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /* 
-* Función: get_all_info_about_a_user_trabaja_en
-* 
-* Uso: Obtener todos los datos de trabaja_en (cargo y fechas de inicio) de un usuario en una empresa.
-*
-* Parámetros: 
-*  - p_id_cuenta  : Entero del id de la cuenta de un usuario.
-*  - p_id_empresa : Entero del id de la empresa en que trabaja.
-*
-* Retorna: Una tabla de una fila con los datos de trabaja_en asociados a la id_cuenta = p_id_cuenta y id_empresa = p_id_empresa.
+    Función:
+        get_all_info_about_a_user_trabaja_en
+
+    Uso:
+        Obtener todos los datos de trabaja_en (cargo y fechas de inicio) de un usuario en una empresa.
+
+    Parámetros: 
+        - p_id_cuenta  : Entero del id de la cuenta de un usuario.
+        - p_id_empresa : Entero del id de la empresa en que trabaja.
+
+    Retorna: 
+        Una tabla de una fila con los datos de trabaja_en asociados a la id_cuenta = p_id_cuenta 
+        e id_empresa = p_id_empresa.
 */
 CREATE OR REPLACE FUNCTION get_all_info_about_a_user_trabaja_en(p_id_cuenta integer, p_id_empresa integer)
 RETURNS TABLE(puesto CHARACTER VARYING, fecha_de_inicio DATE) AS $$
@@ -987,16 +1109,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_all_info_about_a_empresa
-*
-* Uso: Obtener toda la informacion de una empresa (url y nombre).
-*
-* Parámetros:
-*   - idEmpresa: Entero del id de la empresa.
-*
-* Resultado: Tabla de una fila con el nombre y url de la empresa.
+    Función:
+        get_all_info_about_a_empresa
+
+    Uso:
+        Obtener toda la informacion de una empresa (url y nombre).
+
+    Parámetros:
+        - idEmpresa: Entero del id de la empresa.
+
+    Retorna:
+        Tabla de una fila con el nombre y url de la empresa.
 */
 CREATE OR REPLACE FUNCTION get_all_info_about_a_empresa(idEmpresa integer)
 RETURNS TABLE(nombreEmpresa CHARACTER VARYING, urlEmpresa CHARACTER VARYING) AS $$
@@ -1008,17 +1133,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /* 
-* Función: update_visto_msj
-* 
-* Uso: Actualizar el true del visto de un mensaje en la tabla mensaje.
-*
-* Parámetros: 
-*  - p_id_chat     : entero que representa el id del chat.
-*  - p_nro_mensaje : entero que representa el nro del mensaje en el chat.
-*
-* Retorna: Nada.
+    Función:
+        update_visto_msj
+
+    Uso:
+        Actualizar el true del visto de un mensaje en la tabla mensaje.
+
+    Parámetros: 
+        - p_id_chat     : entero que representa el id del chat.
+        - p_nro_mensaje : entero que representa el nro del mensaje en el chat.
+
+    Retorna: 
+        Nada.
 */
 CREATE OR REPLACE FUNCTION update_visto_msj(p_id_chat integer, p_nro_mensaje integer) 
 RETURNS VOID AS $$
@@ -1029,17 +1157,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_hobbies
 
-/* 
-* Función: insert_hobbies
-*
-* Uso: Inserta un nuevo registro en la tabla tiene_hobby.
-*
-* Parámetros:
-*  - p_user_id : Entero del id de la cuenta.
-*  - p_hobby   : TEXT del hobby.
-*
-* Retorna: Nada.
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_hobby.
+
+    Parámetros:
+        - p_user_id : Entero del id de la cuenta.
+        - p_hobby   : TEXT del hobby.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_hobbies(p_user_id INTEGER, p_hobby TEXT)
 RETURNS VOID AS $$
@@ -1049,16 +1180,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /* 
-* Función: insert_habilidad
-*
-* Uso: Inserta un nuevo registro en la tabla tiene_habilidades.
-*
-* Parámetros:
-*  - p_user_id   : Entero del id de la cuenta.
-*  - p_habilidad : TEXT del habilidad.
-*
-* Retorna: Nada.
+    Función:
+        insert_habilidades
+
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_habilidades.
+
+    Parámetros:
+        - p_user_id   : Entero del id de la cuenta.
+        - p_habilidad : TEXT del habilidad.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_habilidades(p_user_id INTEGER, p_habilidad TEXT)
 RETURNS VOID AS $$
@@ -1068,17 +1203,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /* 
-* Función: insert_foto
-*
-* Uso: Inserta un nuevo registro en la tabla tiene_foto.
-*
-* Parámetros:
-*  - p_user_id : Entero del id de la cuenta.
-*  - p_foto    : TEXT de la foto en formato base64.
-*
-* Retorna: Nada.
+    Función:
+        insert_foto
+
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_foto.
+
+    Parámetros:
+        - p_user_id : Entero del id de la cuenta.
+        - p_foto    : TEXT de la foto en formato base64.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION insert_foto(p_user_id INTEGER, p_foto TEXT)
 RETURNS VOID AS $$
@@ -1087,17 +1224,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_certificacion
-*
-* Uso: Inserta un nuevo registro en la tabla tiene_certificaciones.
-*
-* Parámetros:
-*  - p_user_id       : Entero del id de la cuenta.
-*  - p_certificacion : TEXT de la certificacion.
-*
-* Retorna: Nada.
+    Función:
+        insert_certificacion
+
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_certificaciones.
+
+    Parámetros:
+        - p_user_id       : Entero del id de la cuenta.
+        - p_certificacion : TEXT de la certificacion.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION insert_certificacion(p_user_id INTEGER, p_certificacion TEXT)
 RETURNS VOID AS $$
@@ -1106,17 +1245,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: insert_orientacion_sexual_perfil
-*
-* Uso: Inserta un nuevo registro en la tabla tiene_orientacion_sexual.
-*
-* Parámetros:
-*  - p_user_id            : Entero del id de la cuenta.
-*  - p_orientacion_sexual : TEXT de la orientacion sexual.
-*
-* Retorna: Nada.
+    Función:
+        insert_orientacion_sexual_perfil
+
+    Uso:
+        Inserta un nuevo registro en la tabla tiene_orientacion_sexual.
+
+    Parámetros:
+        - p_user_id            : Entero del id de la cuenta.
+        - p_orientacion_sexual : TEXT de la orientacion sexual.
+
+    Retorna: Nada.
 */
 CREATE OR REPLACE FUNCTION insert_orientacion_sexual_perfil(p_user_id INTEGER, p_orientacion_sexual TEXT)
 RETURNS VOID AS $$
@@ -1126,17 +1267,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /* 
-* Función: delete_hobby
-*
-* Uso: Eliminar una instancia en tiene_hobby dado el id_cuenta de un usuario.
-*
-* Parámetros:
-*   - p_user_id : Entero del id de la cuenta.
-*   - p_hobby   : TEXT del hobby.
-*
-* Retorna: Nada.
+    Función:
+        delete_hobby
+
+    Uso:
+        Eliminar una instancia en tiene_hobby dado el id_cuenta de un usuario.
+
+    Parámetros:
+        - p_user_id : Entero del id de la cuenta.
+        - p_hobby   : TEXT del hobby.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_hobby(p_user_id INTEGER, p_hobby TEXT) 
 RETURNS VOID AS $$
@@ -1146,17 +1290,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_habilidad
-*
-* Uso: Eliminar una instancia en tiene_habilidades dado el id_cuenta de un usuario.
-*
-* Parámetros:
-*   - p_user_id   : Entero del id de la cuenta.
-*   - p_habilidad : TEXT de la habilidad.
-*
-* Retorna: Nada
+    Función:
+        delete_habilidad
+
+    Uso:
+        Eliminar una instancia en tiene_habilidades dado el id_cuenta de un usuario.
+
+    Parámetros:
+        - p_user_id   : Entero del id de la cuenta.
+        - p_habilidad : TEXT de la habilidad.
+
+    Retorna:
+        Nada
 */
 CREATE OR REPLACE FUNCTION delete_habilidad(p_user_id INTEGER, p_habilidad TEXT) RETURNS VOID AS $$
 BEGIN
@@ -1165,16 +1312,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
-* Función: delete_foto
-*
-* Uso: Eliminar una instancia en tiene_foto dado el id_cuenta de un usuario, pero si es la unica foto que queda no se elimina.
-*
-* Parámetros:
-*   - p_user_id : Entero del id de la cuenta.
-*   - p_id_foto : Entero del id de la foto a eliminar.
-*
-* Retorna: Nada.
+    Función:
+        delete_foto
+
+    Uso:
+        Eliminar una instancia en tiene_foto dado el id_cuenta de un usuario, pero si es la unica 
+        foto que queda no se elimina.
+
+    Parámetros:
+        - p_user_id : Entero del id de la cuenta.
+        - p_id_foto : Entero del id de la foto a eliminar.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_foto(p_user_id INTEGER, p_id_foto INTEGER)
 RETURNS VOID AS $$
@@ -1189,22 +1341,25 @@ BEGIN
         DELETE FROM tiene_foto
         WHERE id_cuenta = p_user_id AND id_foto = p_id_foto;
     ELSE
-        RAISE EXCEPTION 'No se puede eliminar la unica foto';
+        RAISE EXCEPTION 'No se puede eliminar la unica foto.';
     END IF;
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_certificacion
-*
-* Uso: Eliminar una instancia en tiene_certificacion dado el id_cuenta de un usuario.
-*
-* Parámetros:
-*   - p_user_id       : Entero del id de la cuenta.
-*   - p_certificacion : TEXT de la certificacion.
-*
-* Retorna: Nada.
+    Función:
+        delete_certificacion
+
+    Uso:
+        Eliminar una instancia en tiene_certificacion dado el id_cuenta de un usuario.
+
+    Parámetros:
+        - p_user_id       : Entero del id de la cuenta.
+        - p_certificacion : TEXT de la certificacion.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_certificacion(p_user_id INTEGER, p_certificacion TEXT)
 RETURNS VOID AS $$
@@ -1214,17 +1369,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: delete_orientacion_sexual_perfil
-*
-* Uso: Eliminar una instancia en tiene_orientacion_sexual dado el id_cuenta de un usuario.
-*
-* Parámetros:
-*   - p_user_id            : Entero del id de la cuenta.
-*   - p_orientacion_sexual : TEXT de la orientacion sexual.
-*
-* Retorna: Nada.
+    Función:
+        delete_orientacion_sexual_perfil
+
+    Uso:
+        Eliminar una instancia en tiene_orientacion_sexual dado el id_cuenta de un usuario.
+
+    Parámetros:
+        - p_user_id            : Entero del id de la cuenta.
+        - p_orientacion_sexual : TEXT de la orientacion sexual.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_orientacion_sexual_perfil(p_user_id INTEGER, p_orientacion_sexual TEXT) 
 RETURNS VOID AS $$
@@ -1234,19 +1392,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: update_institution
-*
-* Uso: modificar el nombre, tipo o año de fundacion de una institucion.
-*
-* Parámetros:
-*   - p_dominio       : TEXT dominio de la institucion a modificar.
-*   - p_nombre        : (OPCIONAL) TEXT nombre de la institucion.
-*   - p_tipo          : (OPCIONAL) TEXT tipo de la institucion.
-*   - p_ano_fundacion : (OPCIONAL) entero del año de fundacion de la institucion (por si se equivoco al principio colocarlo).
-*
-* Retorna: Nada.
+    Función:
+        update_institution
+
+    Uso:
+        Modificar el nombre, tipo o año de fundacion de una institucion.
+
+    Parámetros:
+        - p_dominio       : TEXT dominio de la institucion a modificar.
+        - p_nombre        : (OPCIONAL) TEXT nombre de la institucion.
+        - p_tipo          : (OPCIONAL) TEXT tipo de la institucion.
+        - p_ano_fundacion : (OPCIONAL) entero del año de fundacion de la institucion 
+                            (por si se equivoco al principio colocarlo).
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION update_institution(
     p_dominio       TEXT, 
@@ -1267,17 +1429,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-
+/***********************************************************************************************************/
 /*
-* Función: get_data_pago()
-*
-* Uso: Obtener todos los datos de un pago.
-*
-* Parámetros: 
-*    - p_id_pago : Entero ID del pago.
-*
-* Retorno: Devuelve un registro con todos los datos del pago.
+    Función:
+        get_data_pago()
+
+    Uso:
+        Obtener todos los datos de un pago.
+
+    Parámetros: 
+        - p_id_pago : Entero ID del pago.
+
+    Retorno:
+        Devuelve un registro con todos los datos del pago.
 */
 CREATE OR REPLACE FUNCTION get_data_pago(p_id_pago integer)
 RETURNS TABLE(
@@ -1304,17 +1468,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: check_if_user_has_a_permission
-*
-* Uso: Verificar si un usuario tiene un permiso en particular.
-*
-* Parámetros:
-*  - user_id         : Valor entero del Id de la cuenta del usuario.
-*  - permission_name : Valor texto del nombre del permiso que se desea verificar.
-*
-* Retorno: Retorna un valor booleano que indica si el usuario tiene el permiso o no.
+    Función:
+        check_if_user_has_a_permission
+
+    Uso:
+        Verificar si un usuario tiene un permiso en particular.
+
+    Parámetros:
+        - user_id         : Valor entero del Id de la cuenta del usuario.
+        - permission_name : Valor texto del nombre del permiso que se desea verificar.
+
+    Retorno: 
+        Retorna un valor booleano que indica si el usuario tiene el permiso o no.
 */
 CREATE OR REPLACE FUNCTION check_if_user_has_a_permission(user_id integer, permission_name TEXT)
 RETURNS BOOLEAN AS $$
@@ -1327,24 +1494,30 @@ BEGIN
             AND nombre_tier IN (
                 SELECT nombre_tier FROM suscrita
                 WHERE  id_cuenta = user_id
-                AND    fecha_caducidad > CURRENT_DATE
-            )
+                    AND fecha_caducidad > CURRENT_DATE
+                )
     ) INTO permission_exists;
 
     RETURN permission_exists;
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_all_users_by_10km_radius
-*
-* Uso: Obtener todos los IDs de los usuarios que se encuentren alrededor de 10 km de una coordenada de origen dada.
-*
-* Parámetros:
-*  - user_id : Valor entero del Id de la cuenta del usuario que desea encontrar a las otras personas por su coordenada origen de preferencias.
-*
-* Retorno: Retorna una tabla con los IDs de los usuarios que se encuentren en esa coordenada de origen dada y dentro de 10 km de radio.
+    Función: 
+        get_all_users_by_10km_radius
+
+    Uso: 
+        Obtener todos los IDs de los usuarios que se encuentren alrededor de 10 km de una 
+        coordenada de origen dada.
+
+    Parámetros:
+        - user_id : Valor entero del Id de la cuenta del usuario que desea encontrar a las 
+                    otras personas por su coordenada origen de preferencias.
+
+    Retorno: 
+        Retorna una tabla con los IDs de los usuarios que se encuentren en esa coordenada 
+        de origen dada y dentro de 10 km de radio.
 */
 CREATE OR REPLACE FUNCTION get_all_users_by_10km_radius(user_id integer)
 RETURNS TABLE(r_id_cuenta integer) AS $$
@@ -1360,17 +1533,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_users_by_preferences_passport_user
-*
-* Uso: Obtener los ids cuentas de los usuarios que se encuentra en una ciudad (por coordenada origen en preferencias)
-* y que cumplen con las preferencias de estudio, min y max edad, sexos y orientaciones sexuales de otro usuario.
-*
-* Parámetros:
-*  - user_id : id del usuario que tiene las preferencias y con permiso passport.
-*
-* Retorno: Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias.
+    Función:
+        get_users_by_preferences_passport_user
+
+    Uso: 
+        Obtener los ids cuentas de los usuarios que se encuentra en una ciudad 
+        (por coordenada origen en preferencias) y que cumplen con las preferencias 
+        de estudio, min y max edad, sexos y orientaciones sexuales de otro usuario.
+
+    Parámetros:
+        - user_id : id del usuario que tiene las preferencias y con permiso passport.
+
+    Retorno: 
+        Tabla con los ids de las cuentas de los usuarios que cumplen con las preferencias.
 */
 CREATE OR REPLACE FUNCTION get_users_by_preferences_passport_user(user_id integer)
 RETURNS TABLE(pref_id_cuentas integer) AS $$
@@ -1409,16 +1586,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Función: get_chats_by_user
-*
-* Uso: Obtener los ids chats que participa un usuario.
-*
-* Parámetros:
-*  - user_id : Id del usuario.
-*
-* Retorno: Tabla con los ids de los chats
+    Función:
+        get_chats_by_user
+
+    Uso:
+        Obtener los ids chats que participa un usuario.
+
+    Parámetros:
+        - user_id : Id del usuario.
+
+    Retorno:
+        Tabla con los ids de los chats.
 */
 CREATE OR REPLACE FUNCTION get_chats_by_user(user_id integer)
 RETURNS TABLE (r_id_chat integer) AS $$
@@ -1430,18 +1610,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function insert_like()
-*
-* Uso: Para agregar un nuevo like a la tabla de likes.
-*
-* Parámetros: 
-*	- liker     : Id de quien da like.
-*	- liked     : Id de quien recibe el like.
-*	- superlike : True si fue un superlike, false en caso contrario.
-*
-* Retorna: nada.
+    Función:
+        insert_like()
+
+    Uso:
+        Para agregar un nuevo like a la tabla de likes.
+
+    Parámetros: 
+        - liker     : Id de quien da like.
+        - liked     : Id de quien recibe el like.
+        - superlike : True si fue un superlike, false en caso contrario.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_like(liker INT, liked INT, superlike BOOL DEFAULT FALSE) 
 RETURNS VOID AS $$
@@ -1450,17 +1633,20 @@ BEGIN
 END; 
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function insert_swipe()
-*
-* Uso: Para agregar un nuevo dislike a la tabla de swipes.
-*
-* Parámetros: 
-*	- disliker : Id de quien da dislike.
-*	- disliked : Id de quien recibe el dislike.
-*
-* Retorna: Nada.
+    Función:
+        insert_swipe()
+
+    Uso:
+        Para agregar un nuevo dislike a la tabla de swipes.
+
+    Parámetros: 
+        - disliker : Id de quien da dislike.
+        - disliked : Id de quien recibe el dislike.
+
+    Retorna: 
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_swipe(disliker INT, disliked INT)
 	RETURNS VOID AS $$
@@ -1469,18 +1655,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function delete_like()
-*
-* Uso: Para que un usuario elimine un like que dio anteriormente
-*	   con la condicion de que dicho usuario debe estar suscrito a un tier.
-*
-* Parámetros: 
-*	- id_user  : Id de quien elimina el like.
-*	- disliked : Id de quien se borra el like.
-*
-* Retorna: Nada.
+    Función: 
+        delete_like()
+
+    Uso: 
+        Para que un usuario elimine un like que dio anteriormente
+        con la condicion de que dicho usuario debe estar suscrito a un tier.
+
+    Parámetros: 
+        - id_user  : Id de quien elimina el like.
+        - disliked : Id de quien se borra el like.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION delete_like(id_user INT, disliked INT)
 RETURNS VOID AS $$
@@ -1493,17 +1682,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function insert_match()
-*
-* Uso: Agregar un match en caso de que dos usuarios se den like mutuamente
-*	   y crear un chat entre ambos.
-* Parámetros: 
-*	- id_user1: Id de uno de los dos usuarios del match.
-*	- id_user2: Id de uno de los dos usuarios del match.
-*
-* Retorna: Nada.
+    Función:
+        insert_match()
+
+    Uso:
+        Agregar un match en caso de que dos usuarios se den like mutuamente 
+        y crear un chat entre ambos.
+
+    Parámetros: 
+        - id_user1 : Id de uno de los dos usuarios del match.
+        - id_user2 : Id de uno de los dos usuarios del match.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION insert_match(id_user1 INT, id_user2 INT)
 	RETURNS VOID AS $$
@@ -1532,24 +1725,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function subscribe_user()
-*
-* Uso: Realiza la suscripción de un usuario a un tier y gestiona el proceso de pago.
-*
-* Parámetros: 
-*   - id_cuenta_usuario         : ID de la cuenta del usuario que desea suscribirse.
-*   - nombre_tier_usuario       : Nombre del tier al que desea suscribirse el usuario.
-*   - caducidad                 : Fecha de caducidad de la suscripción.
-*   - digitos_tarjeta_usario    : Dígitos de la tarjeta de crédito del usuario para el pago.
-*   - numero_factura_actual     : Número de factura del pago.
-*   - estado_pago               : Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado).
-*   - metodo_pago_usuario       : Método de pago utilizado por el usuario (ej. Tarjeta de Crédito).
-*   - monto_pago                : Monto del pago realizado.
-*   - documento_factura_usuario : Documento de la factura en formato base64.
-*
-* Retorna: Nada.
+    Función:
+        subscribe_user()
+
+    Uso:
+        Realiza la suscripción de un usuario a un tier y gestiona el proceso de pago.
+
+    Parámetros: 
+        - id_cuenta_usuario         : ID de la cuenta del usuario que desea suscribirse.
+        - nombre_tier_usuario       : Nombre del tier al que desea suscribirse el usuario.
+        - caducidad                 : Fecha de caducidad de la suscripción.
+        - digitos_tarjeta_usario    : Dígitos de la tarjeta de crédito del usuario para el pago.
+        - numero_factura_actual     : Número de factura del pago.
+        - estado_pago               : Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado).
+        - metodo_pago_usuario       : Método de pago utilizado por el usuario (ej. Tarjeta de Crédito).
+        - monto_pago                : Monto del pago realizado.
+        - documento_factura_usuario : Documento de la factura en formato base64.
+
+    Retorna:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION subscribe_user(
     id_cuenta_usuario         INT,
@@ -1609,40 +1805,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-/*    
-* Función: check_match_exists
-*
-* Uso: Chequear si dos personas dieron like el uno al otro.
-*
-* Parámetros: Ninguna.
-*
-* Retorno: Función trigger que crea un match y un chat entre dos usuarios que dieron likes el uno al otro.
-*/
-CREATE OR REPLACE FUNCTION check_match_exists()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM likes WHERE id_liker = NEW.id_liker AND id_liked = NEW.id_liked) AND
-    EXISTS (SELECT 1 FROM likes WHERE  id_liker= NEW.id_liked AND id_liked = NEW.id_liker) THEN
-        PERFORM insert_match(NEW.id_liker, NEW.id_liked);   
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
+/***********************************************************************************************************/
 /*
-* Función: cancel_match
-*
-* Uso: Eliminar el match entre dos usuarios, eliminando tambien el chat y los likes 
-*      que se hayan dado entre ellos. Ademas, ya al eliminar el chat se elimina los mensajes y la instancia
-*      de chatea_con.
-*
-* Parámetros:
-*    - id_user_canceling : INT del usuario que cancela el match.
-*    - id_user_canceled  : INT del usuario que se cancela el match.
-*
-* Retorno: Nada.
+    Función:
+        cancel_match
+
+    Uso:
+        Eliminar el match entre dos usuarios, eliminando tambien el chat y los likes 
+        que se hayan dado entre ellos. Ademas, ya al eliminar el chat se elimina los 
+        mensajes y la instancia de chatea_con.
+
+    Parámetros:
+        - id_user_canceling : INT del usuario que cancela el match.
+        - id_user_canceled  : INT del usuario que se cancela el match.
+
+    Retorno:
+        Nada.
 */
 CREATE OR REPLACE FUNCTION cancel_match(id_user_canceling INT, id_user_canceled INT)
 RETURNS VOID AS $$
@@ -1663,16 +1841,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function get_number_of_likes()
-*
-* Uso: Calcular el numero de likes que ha recibido una persona.
-*	
-* Parámetros: 
-*	- id_user : Id de uno del usuario.
-*	
-* Retorna: Entero que representa el total de likes.
+    Función:
+        get_number_of_likes
+
+    Uso:
+        Calcular el numero de likes que ha recibido una persona.
+
+    Parámetros: 
+        - id_user : Id de uno del usuario.
+
+    Retorna:
+        Entero que representa el total de likes.
 */
 CREATE OR REPLACE FUNCTION get_number_of_likes(id_user INT)
 RETURNS INTEGER AS $$
@@ -1687,19 +1868,21 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
-
+/***********************************************************************************************************/
 /*
-* Function get_likes_per_day()
-*
-* Uso: Calcular el numero de likes que da un usuario al dia.
-*
-* Parámetros: 
-*	- id_user  : Id del usuario a calcular.
-*	- from_day : Fecha a buscar.
-*
-* Retorna: Entero que representa el numero de likes dados en un dia.
-*/
+    Función:
+        get_likes_per_day
 
+    Uso:
+        Calcular el numero de likes que da un usuario al dia.
+
+    Parámetros: 
+        - id_user  : Id del usuario a calcular.
+        - from_day : Fecha a buscar.
+
+    Retorna:
+        Entero que representa el numero de likes dados en un dia.
+*/
 CREATE OR REPLACE FUNCTION get_likes_per_day(id_user INTEGER, from_day DATE)
 RETURNS INTEGER AS $$
 DECLARE
@@ -1713,17 +1896,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
-* Función: delete_cuenta
-*
-* Uso: Elimina una cuenta.
-*
-* Parámetros:
-*  - p_id_cuenta : Valor entero del ID de la cuenta del usuario a eliminar.
-*
-* Retorna: Nada.
-*/
+    Función:
+        delete_cuenta
 
+    Uso:
+        Elimina una cuenta.
+
+    Parámetros:
+        - p_id_cuenta : Valor entero del ID de la cuenta del usuario a eliminar.
+
+    Retorna: 
+        Nada.
+*/
 CREATE OR REPLACE FUNCTION delete_cuenta(p_id_cuenta INT)
 RETURNS VOID AS $$
 BEGIN
@@ -1731,6 +1917,249 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
+/*
+    Función:
+        get_file
+
+    Uso:
+        Obtener archivos.
+
+    Parámetros: 
+        - chat_id   : Id del chat correspondiente.
+        - message   : Numero del mensaje correspondiente.
+        - name_file : Nombre del archivo a obtener.
+
+    Returno:
+        Tabla con los datos del archivo.
+*/
+CREATE OR REPLACE FUNCTION get_file(
+    chat_id     INT, 
+    message_num INT, 
+    name_file   TEXT)
+RETURNS TABLE(
+	msg_num           INT,
+	file_name         CHARACTER VARYING,
+	tipo_archivo      CHARACTER VARYING,
+	contenido_archivo TEXT
+) AS $$
+BEGIN
+	RETURN QUERY
+	SELECT numero_msj, nombre, tipo, encode(contenido, 'base64')
+	FROM   archivo
+	WHERE  id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        set_null_estudio
+
+    Uso:
+        Si el usuario ya no quiere buscar personas por su estudio, se setea null a este 
+        atributo en la tabla preferencias.
+
+    Parámetros: 
+        - p_id_cuenta: id de la cuenta del usuario
+
+    Returna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION set_null_estudio(p_id_cuenta integer)
+RETURNS void AS $$
+BEGIN
+    UPDATE preferencias
+    SET    estudio = NULL
+    WHERE  id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        set_default_latitud_longitud_origen
+
+    Uso:
+        Si el usuario ya no quiere buscar personas por un punto de coordenada o se termina
+        su suscripcion a un tier con permiso passport, se setea la coordenada origen al 
+        valor defecto (que es la coordenada donde esta el usuario) en la tabla preferencias.
+
+    Parámetros
+        - p_id_cuenta: id de la cuenta del usuario.
+
+    Returna: 
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION set_default_latitud_longitud_origen(p_id_cuenta integer)
+RETURNS VOID AS $$
+BEGIN
+    -- Se setea null, ya que hay un trigger que setea por default a las coordenadas del usuario.
+    UPDATE preferencias
+    SET    latitud_origen = NULL, longitud_origen = NULL
+    WHERE  id_cuenta = p_id_cuenta;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_new_estudio_en
+
+    Uso:
+        Insertar una nueva instancia en estudio_en y en esta_en_agrupacion.
+
+    Parámetros:
+        - id_user              : Id de la cuenta del usuario.
+        - p_dominio            : Dominio de la institucion.
+        - p_nombre_institucion : Nombre de la institucion.
+        - p_grado              : Grado academico.
+        - p_especialidad       : Especialidad.
+        - p_ano_inicio         : Año de ingreso.
+        - p_ano_fin            : Año de egreso.
+        - p_agrupaciones       : OPCIONAL, Arreglo de nombre de agrupaciones.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_estudio_en(
+    id_user        INTEGER,
+    p_dominio      TEXT,
+    p_grado        TEXT,
+    p_especialidad TEXT,
+    p_ano_inicio   INTEGER,
+    p_ano_fin      INTEGER,
+    p_agrupaciones TEXT[] DEFAULT NULL
+) RETURNS void AS $$
+DECLARE
+    i INTEGER;
+BEGIN
+    INSERT INTO estudio_en
+    VALUES (id_user, p_dominio, p_grado, p_especialidad, p_ano_inicio, p_ano_fin);
+
+    IF p_agrupaciones IS NOT NULL THEN
+        FOR i IN 1..array_length(p_agrupaciones, 1) LOOP
+            INSERT INTO esta_en_agrupacion
+            VALUES (id_user, p_dominio, p_agrupaciones[i]);
+        END LOOP;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/* 
+    Función:
+        get_user_estudio_en
+
+    Uso:
+        Obtener todos los datos (grados academicos con sus especialidades, años de ingreso y egreso) 
+        de estudio_en dado por su dominio de institucion e id_cuenta.
+        Las agrupaciones se obtienen con otra funcion.
+
+    Parámetros: 
+        - p_id_cuenta  : Entero del id de la cuenta de un usuario.
+        - p_id_dominio : TEXT dominio de una institucion.
+
+    Retorno:
+        Una tabla con los datos de estudio_en asociados a la id_cuenta = p_id_cuenta 
+        y dominio = p_id_dominio.
+*/
+CREATE OR REPLACE FUNCTION get_user_estudio_en(p_id_cuenta integer, p_id_dominio TEXT)
+RETURNS TABLE(
+    r_grado        estudios, 
+    r_especialidad CHARACTER VARYING, 
+    r_ano_ingreso  INTEGER, 
+    r_ano_egreso   INTEGER
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT grado, especialidad, ano_ingreso, ano_egreso
+    FROM   estudio_en
+    WHERE  id_cuenta = p_id_cuenta AND dominio = p_id_dominio;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        get_user_agrupaciones_in_a_institution
+
+    Uso:
+        Obtener todas las agrupaciones de estudio_en de un usuario dado por su id_cuenta y dominio de la institucion
+
+    Parámetros:
+        - p_id_cuenta  : Entero del id de la cuenta de un usuario.
+        - p_id_dominio : TEXT dominio de una institucion.
+
+    Retorno:
+        Una tabla de los nombres de las agrupaciones.
+*/
+CREATE OR REPLACE FUNCTION get_user_agrupaciones_in_a_institution(p_id_cuenta integer, p_id_dominio TEXT)
+RETURNS TABLE(
+    r_agrupacion CHARACTER VARYING
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT agrupacion
+    FROM   esta_en_agrupacion
+    WHERE  id_cuenta = p_id_cuenta AND dominio = p_id_dominio;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        insert_files
+
+    Uso:
+        Crear instancias en la tabla archivo.
+ 
+    Parámetros: 
+        - chat_id      : Id del chat correspondiente.
+        - name_file    : Arreglo de nombres de un archivo a guardar.
+        - type_file    : Arreglo de tipos de un archivo a guardar.
+        - content_file : Arreglo de contenido de un archivo a guardar en formato base64.
+        - remitente_id : Id del remitente.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_files(
+    chat_id      INT, 
+    name_file    TEXT[], 
+    type_file    TEXT[],
+    content_file TEXT[],
+    remitente_id INT
+) RETURNS VOID AS $$
+DECLARE 
+	new_msg_num       INT;
+    nro_name_files    INT;
+    nro_type_files    INT;
+    nro_content_files INT;
+BEGIN
+	INSERT INTO mensaje (id_chat, id_remitente) 
+	VALUES (chat_id, remitente_id)
+	RETURNING numero_msj INTO new_msg_num;
+
+    nro_name_files    := array_length(name_file, 1);
+    nro_type_files    := array_length(type_file, 1);
+    nro_content_files := array_length(content_file, 1);
+
+    IF nro_name_files != nro_type_files OR nro_name_files != nro_content_files THEN
+        RAISE EXCEPTION 'Los arreglos de nombres, tipos y contenido de los archivos deben tener la misma longitud';
+    END IF;
+
+    FOR i IN 1..nro_name_files LOOP
+        INSERT INTO archivo 
+        VALUES (chat_id, new_msg_num, name_file[i], type_file[i], decode(content_file[i], 'base64'));
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+/***********************************************************************************************************/
+-- CORRIGIENDO
+/***********************************************************************************************************/
 
 /*
 * Function update_tier_of_user()
@@ -1819,25 +2248,109 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-/*    
-* Función: prohibir_101_likes
-*
-* Uso: prohibir dar mas de 100 likes al dia si no tiene el permiso infLikes
-*
-* Parámetros: Ninguna
-*
-* Resultado: Función trigger que no permite dar mas de 100 likes al dia si no tiene el permiso infLikes
-*/
+/*
+    Función:
+        insert_new_tier_with_new_permissions
 
-CREATE OR REPLACE FUNCTION prohibir_101_likes()
-RETURNS TRIGGER AS $$
+    Uso:
+        Insertar una nueva tier a la base de datos con sus nuevos permisos.
+
+    Parámetros:
+        - t_nombre                 : nombre de la nueva tier.
+        - p_nombre_permisos[]      : lista de TEXT de nombres de nuevos permisos.
+        - p_descripcion_permisos[] : Lista de TEXT de descripciones de nuevos permisos.
+
+    Retorno:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_tier_with_new_permissions(
+    t_nombre               TEXT, 
+    p_nombre_permisos      TEXT[], 
+    p_descripcion_permisos TEXT[]
+) RETURNS VOID AS $$
+DECLARE
+    nombre_permisos_size      INT;
+    descripcion_permisos_size INT;
+    i                         INT;
 BEGIN
-    IF (get_likes_per_day(New.id_liker, CURRENT_DATE)) = 100 THEN
-        IF (check_if_user_has_a_permission(New.id_liker, 'infLikes')) = FALSE THEN
-            RAISE EXCEPTION 'No puedes dar mas de 100 likes al dia';
-        END IF;
+    /* verificar que el size de las listas sean iguales */
+    nombre_permisos_size      := array_length(p_nombre_permisos, 1);
+    descripcion_permisos_size := array_length(p_descripcion_permisos, 1);
+
+    IF nombre_permisos_size != descripcion_permisos_size THEN
+        RAISE EXCEPTION 'El tamaño de las listas de permisos y descripciones no son iguales';
     END IF;
-    RETURN NEW;
+
+    /* Insertar el nuevo tier a la bd */
+    INSERT INTO tier VALUES(t_nombre);
+
+    /* Insertar cada permiso con su tier en maneja  */
+    FOR i IN 1..nombre_permisos_size LOOP
+        /* Insertar el permiso en permiso */
+        INSERT INTO permiso VALUES(p_nombre_permisos[i], p_descripcion_permisos[i]);
+
+        /* Insertar el permiso en maneja */
+        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+    Función:
+        insert_new_tier_with_old_permissions
+
+    Uso:
+        Insertar una nueva tier a la base de datos con permisos ya existente en la base de datos.
+
+    Parámetros:
+        - t_nombre            : Nombre de la nueva tier.
+        - p_nombre_permisos[] : Lista de TEXT de nombres de permisos.
+
+    Retorno: 
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_tier_with_old_permissions(t_nombre TEXT, p_nombre_permisos TEXT[])
+RETURNS VOID AS $$
+DECLARE
+    nombre_permisos_size INT;
+    i                    INT;
+BEGIN
+    nombre_permisos_size := array_length(p_nombre_permisos, 1);
+
+    /* Insertar el nuevo tier a la bd */
+    INSERT INTO tier VALUES(t_nombre);
+
+    /* Insertar cada permiso con su tier en maneja  */
+    FOR i IN 1..nombre_permisos_size LOOP
+        /* Insertar el permiso en maneja */
+        INSERT INTO maneja VALUES(t_nombre, p_nombre_permisos[i]);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+    Función:
+        insert_new_permission
+
+    Uso:
+        insertar un nuevo permiso a la base de datos y asociarlo con un tier.
+
+    Parámetros: 
+        - p_nombre_permiso      : Nombre del permiso.
+        - p_descripcion_permiso : Descripcion del permiso.
+        - p_nombre_tier         : Nombre del tier asociado.
+
+    Retorna: 
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION insert_new_permission(
+    p_nombre_permiso      TEXT, 
+    p_descripcion_permiso TEXT, 
+    p_nombre_tier         TEXT
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO permiso VALUES (p_nombre_permiso, p_descripcion_permiso);
+    INSERT INTO maneja  VALUES (p_nombre_tier, p_nombre_permiso);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1885,48 +2398,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 /*
-* Función: get_file
-*
-* Uso: Obtener archivos.
-*
-* Parámetros: 
-*	- chat_id   : Id del chat correspondiente.
-*	- message   : Numero del mensaje correspondiente.
-*	- name_file : Nombre del archivo a obtener.
-*
-* Returno: Tabla con los datos del archivo.
-*/
+    Funcion:
+        insert_old_tier_old_permissions
 
-CREATE OR REPLACE FUNCTION get_file(
-    chat_id     INT, 
-    message_num INT, 
-    name_file   TEXT)
-RETURNS TABLE(
-	msg_num           INT,
-	file_name         CHARACTER VARYING,
-	tipo_archivo      CHARACTER VARYING,
-	contenido_archivo TEXT
-) AS $$
-BEGIN
-	RETURN QUERY
-	SELECT numero_msj, nombre, tipo, encode(contenido, 'base64')
-	FROM   archivo
-	WHERE  id_chat = chat_id AND numero_msj = message_num AND nombre = name_file ;
-END;
-$$ LANGUAGE plpgsql;
+    Uso:
+        Insertar unos permisos existentes a un tier existente en la bd
 
-/*
-* Funcion: insert_old_tier_old_permissions
-*
-* Uso: Insertar unos permisos existentes a un tier existente en la bd
-*
-* Parametros: 
-*    - old_nombre_tier: nombre de un tier existente
-*    - old_permissions: lista de nombre de permisos existentes
-*
-* Returna: Nada
+    Parametros: 
+        - old_nombre_tier : nombre de un tier existente
+        - old_permissions : lista de nombre de permisos existentes
+
+    Returna:
+        Nada
 */
 CREATE OR REPLACE FUNCTION insert_old_tier_old_permissions (
 	old_nombre_tier TEXT, 
@@ -1939,183 +2423,6 @@ BEGIN
     FOR i IN 1..array_length(old_permissions, 1) LOOP
         INSERT INTO maneja (nombre_tier, nombre_permiso)
         VALUES (old_nombre_tier, old_permissions[i]);
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-/*
-* Funcion: set_null_estudio
-*
-* Uso: Si el usuario ya no quiere buscar personas por su estudio, se setea null a este atributo en la tabla preferencias
-*
-* Parametros: 
-*    - p_id_cuenta: id de la cuenta del usuario
-*
-* Returna: Nada
-*/
-CREATE OR REPLACE FUNCTION set_null_estudio(p_id_cuenta integer)
-RETURNS void AS $$
-BEGIN
-    UPDATE preferencias
-    SET estudio = NULL
-    WHERE id_cuenta = p_id_cuenta;
-END;
-$$ LANGUAGE plpgsql;
-
-/*
-* Funcion: set_default_latitud_longitud_origen
-*
-* Uso: Si el usuario ya no quiere buscar personas por un punto de coordenada o se termina su suscripcion a un tier con permiso passport, se setea la coordenada origen al valor defecto (que es la coordenada donde esta el usuario) en la tabla preferencias
-*
-* Parametros: 
-*    - p_id_cuenta: id de la cuenta del usuario
-*
-* Returna: Nada
-*/
-CREATE OR REPLACE FUNCTION set_default_latitud_longitud_origen(p_id_cuenta integer)
-RETURNS void AS $$
-BEGIN
-    /* se setea null, ya que hay un trigger que setea por default a las coordenadas del usuario */
-    UPDATE preferencias
-    SET latitud_origen = NULL, longitud_origen = NULL
-    WHERE id_cuenta = p_id_cuenta;
-END;
-$$ LANGUAGE plpgsql;
-
-/*
-* Funcion: insert_new_estudio_en
-*
-* Uso: insertar una nueva instancia en estudio_en y en esta_en_agrupacion
-*
-* Parametros:
-*  - id_user: id de la cuenta del usuario
-*  - p_dominio: dominio de la institucion
-*  - p_nombre_institucion: nombre de la institucion
-*  - p_grado: grado academico 
-*  - p_especialidad: especialidad
-*  - p_ano_inicio: año de ingreso
-*  - p_ano_fin: año de egreso
-*  - p_agrupaciones: OPCIONAL, arreglo de nombre de agrupaciones
-*
-* Retorna: Nada
-*/
-CREATE OR REPLACE FUNCTION insert_new_estudio_en(
-    id_user integer,
-    p_dominio TEXT,
-    p_grado TEXT,
-    p_especialidad TEXT,
-    p_ano_inicio integer,
-    p_ano_fin integer,
-    p_agrupaciones TEXT[] DEFAULT NULL
-) RETURNS void AS $$
-DECLARE
-    i INTEGER;
-BEGIN
-    INSERT INTO estudio_en
-    VALUES (id_user, p_dominio, p_grado, p_especialidad, p_ano_inicio, p_ano_fin);
-
-    IF p_agrupaciones IS NOT NULL THEN
-        FOR i IN 1..array_length(p_agrupaciones, 1) LOOP
-            INSERT INTO esta_en_agrupacion
-            VALUES (id_user, p_dominio, p_agrupaciones[i]);
-        END LOOP;
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-/* 
-* Función: get_user_estudio_en
-* 
-* Uso: Obtener todos los datos  (grados academicos con sus especialidades, años de ingreso y egreso) de estudio_en dado por su dominio de institucion e id_cuenta. Las agrupaciones se obtienen con otra funcion.
-*
-* Parámetros: 
-*  - p_id_cuenta  : Entero del id de la cuenta de un usuario.
-*  - p_id_dominio : TEXT dominio de una institucion.
-*
-* Retorno: Una tabla con los datos de estudio_en asociados a la id_cuenta = p_id_cuenta y dominio = p_id_dominio.
-*/
-CREATE OR REPLACE FUNCTION get_user_estudio_en(p_id_cuenta integer, p_id_dominio TEXT)
-RETURNS TABLE(
-    r_grado        estudios, 
-    r_especialidad character varying, 
-    r_ano_ingreso  INTEGER, 
-    r_ano_egreso   INTEGER
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT grado, especialidad, ano_ingreso, ano_egreso
-    FROM estudio_en
-    WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio;
-END;
-$$ LANGUAGE plpgsql;
-
-/*
-* Funcion: get_user_agrupaciones_in_a_institution
-*
-* Uso: Obtener todas las agrupaciones de estudio_en de un usuario dado por su id_cuenta y dominio de la institucion
-*
-* Parámetros:
-*  - p_id_cuenta  : Entero del id de la cuenta de un usuario.
-*  - p_id_dominio : TEXT dominio de una institucion.
-*
-* Retorno: Una tabla de los nombres de las agrupaciones
-*/
-CREATE OR REPLACE FUNCTION get_user_agrupaciones_in_a_institution(p_id_cuenta integer, p_id_dominio TEXT)
-RETURNS TABLE(
-    r_agrupacion character varying
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT agrupacion
-    FROM esta_en_agrupacion
-    WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio;
-END;
-$$ LANGUAGE plpgsql;
-
-
-/*
-* Función: insert_files
-*
-* Uso: Crear instancias en la tabla archivo.
-* 
-* Parámetros: 
-*   - chat_id      : Id del chat correspondiente.
-*	- name_file    : Arreglo de nombres de un archivo a guardar
-*	- type_file    : Arreglo de tipos de un archivo a guardar
-*	- content_file : Arreglo de contenido de un archivo a guardar en formato base64
-*   - remitente_id : Id del remitente.
-*
-* Retorna: Nada.
-*/
-
-CREATE OR REPLACE FUNCTION insert_files(
-    chat_id      INT, 
-    name_file    TEXT[], 
-    type_file    TEXT[],
-    content_file TEXT[],
-    remitente_id INT
-) RETURNS VOID AS $$
-DECLARE 
-	new_msg_num INT;
-    nro_name_files INT;
-    nro_type_files INT;
-    nro_content_files INT;
-BEGIN
-	INSERT INTO mensaje (id_chat, id_remitente) 
-	VALUES (chat_id, remitente_id)
-	RETURNING numero_msj INTO new_msg_num;
-
-    nro_name_files := array_length(name_file, 1);
-    nro_type_files := array_length(type_file, 1);
-    nro_content_files := array_length(content_file, 1);
-
-    IF nro_name_files != nro_type_files OR nro_name_files != nro_content_files THEN
-        RAISE EXCEPTION 'Los arreglos de nombres, tipos y contenido de los archivos deben tener la misma longitud';
-    END IF;
-
-    FOR i IN 1..nro_name_files LOOP
-        INSERT INTO archivo 
-        VALUES (chat_id, new_msg_num, name_file[i], type_file[i], decode(content_file[i], 'base64'));
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;

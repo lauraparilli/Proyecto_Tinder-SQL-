@@ -1,3 +1,16 @@
+/* 
+    Equipo 1: Tinder para Viejos Egresados (RobbleAffinity)
+    
+    Integrantes: Ana Shek,         19-10096
+			     Jhonaiker Blanco, 18-10784
+				 Junior Lara,      17-10303
+				 Laura Parilli,    17-10778
+
+                    **** TRIGGERS.sql ****
+
+    Archivo SQL de creacion de triggers para la BD de Tinder para Viejos Egresados.
+*/
+
 CREATE OR REPLACE TRIGGER perfil_set_coordenada_trigger
 BEFORE INSERT OR UPDATE ON perfil
 FOR EACH ROW

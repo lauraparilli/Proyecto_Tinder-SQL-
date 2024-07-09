@@ -1,9 +1,15 @@
--- Equipo 1: Tinder para Viejos Egresados (RobbleAffinity)
--- Integrantes: Ana Shek, 19-10096
--- 				Jhonaiker Blanco, 18-10784
---				Junior Lara, 17-10303
---				Laura Parilli, 17-10778
--- DDL_v2.0_Funcional.sql Archivo de creacion de tablas y funciones para la BD de Tinder para Viejos Egresados.
+/* 
+    Equipo 1: Tinder para Viejos Egresados (RobbleAffinity)
+    
+    Integrantes: Ana Shek,         19-10096
+			     Jhonaiker Blanco, 18-10784
+				 Junior Lara,      17-10303
+				 Laura Parilli,    17-10778
+
+                    **** DDL.sql ****
+
+    Archivo SQL de creacion de tablas (Entidades y Relaciones) para la BD de Tinder para Viejos Egresados.
+*/
 
 -- IMPORTANTE!! Ejecutar esto primero.
 SET search_path TO tinder_viejos_egresados, public;
