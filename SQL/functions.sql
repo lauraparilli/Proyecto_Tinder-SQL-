@@ -1812,14 +1812,22 @@ BEGIN
         RAISE EXCEPTION 'La cuenta con id % no existe', id_cuenta_usuario;
     END IF;
 
+    -- Verificar que la tarjeta existe.
     IF NOT EXISTS (SELECT 1 FROM tarjeta WHERE digitos_tarjeta = digitos_tarjeta_usario) THEN
         RAISE EXCEPTION 'La tarjeta con dígitos % no existe', digitos_tarjeta_usario;
     END IF;
 
+    -- Verificar que la tarjeta no esté vencida.
     IF check_due_card(digitos_tarjeta_usario) THEN
         RAISE EXCEPTION 'La tarjeta con dígitos % está vencida.', digitos_tarjeta_usario;
     END IF;
 
+    -- Verificar que la tarjeta sea una registrada por el usuario.
+    IF NOT EXISTS (SELECT 1 FROM registra WHERE id_cuenta = id_cuenta_usuario AND digitos_tarjeta = digitos_tarjeta_usario) THEN
+        RAISE EXCEPTION 'La tarjeta con dígitos % no está registrada por el usuario %.', digitos_tarjeta_usario, id_cuenta_usuario;
+    END IF;
+
+    -- Verificar que el tier exista.
     IF NOT EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nombre_tier_usuario) THEN
         RAISE EXCEPTION 'El tier % no existe', nombre_tier_usuario;
     END IF;
