@@ -121,7 +121,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*    
     Función:
-        check_count_likes_or_superlikes
+        check_count_likes_or_superlikes()
 
     Uso:
         Verificar si un usuario ha dado mas de 100 likes al dia y no tiene el permiso
@@ -194,13 +194,16 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        get_all_Institutions
-    Parámetros: 
-        Ninguna.
+        get_all_Institutions()
+
     Uso:
         Retorna una tabla con los dominios y nombres de todas las instituciones registradas en 
         la base de datos para que el usuario pueda seleccionar una de ellas al momento de 
         registrarse.
+    
+    Parámetros: 
+        Ninguna.
+    
     Retorna: 
         Tabla con los dominios y nombres de todas las instituciones.
 */
@@ -214,7 +217,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        insert_foto
+        insert_foto()
 
     Uso:
         Inserta un nuevo registro en la tabla tiene_foto.
@@ -235,7 +238,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        create_new_user
+        create_new_user()
 
     Uso: 
         Crea un nuevo usuario en la base de datos con la información proporcionada.
@@ -320,7 +323,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_email_and_hashpassword_user
+        get_email_and_hashpassword_user()
 
     Uso:
         Obtener el correo y el hash de la contrasena del usuario (para logins y cambios de contrasenas).
@@ -344,7 +347,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        get_settings_app_user
+        get_settings_app_user()
 
     Uso: 
         Obtener el idioma, notificaciones y tema del app que tiene un usuario.
@@ -368,7 +371,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:  
-        update_info_account
+        update_info_account()
 
     Uso: 
         Actualiza la informacion de la cuenta de un usuario en la tabla de cuenta. 
@@ -411,7 +414,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        update_info_perfil
+        update_info_perfil()
 
     Uso: 
         Actualiza la informacion de un perfil de un usuario.
@@ -449,7 +452,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_preferences
+        insert_preferences()
 
     Uso: 
         Insertar las preferencias de un usuario en la tabla de preferencias.
@@ -484,9 +487,11 @@ $$ LANGUAGE plpgsql;
 
 /***********************************************************************************************************/
 /*
-    Función: update_preferences
+    Función: 
+        update_preferences()
 
-    Uso: Actualiza las preferencias de un usuario en la tabla de preferencias.
+    Uso: 
+        Actualiza las preferencias de un usuario en la tabla de preferencias.
 
     Parámetros:
         - p_id_cuenta        : Valor entero del ID de la cuenta del usuario.
@@ -526,7 +531,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        get_preferencias
+        get_preferences()
 
     Uso: 
         Obtener las preferencias de un usuario.
@@ -537,7 +542,7 @@ $$ LANGUAGE plpgsql;
     Retorna: 
         Todos los datos de preferencias de un usuario.
 */
-CREATE OR REPLACE FUNCTION get_preferencias(p_id_cuenta integer)
+CREATE OR REPLACE FUNCTION get_preferences(p_id_cuenta integer)
 RETURNS TABLE(
     r_estudio                     estudios,
     r_latitud_origen              NUMERIC,
@@ -575,7 +580,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_estudio
+        get_users_by_estudio()
 
     Uso:
         Obtener usuarios por preferencias en estudio.
@@ -599,7 +604,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_genre
+        get_users_by_genre()
 
     Uso:
         Obtener usuarios por preferencias en generos.
@@ -630,7 +635,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_min_age
+        get_users_by_min_age()
 
     Uso:
         Obtener usuarios por preferencias en min edad.
@@ -654,7 +659,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_max_age
+        get_users_by_max_age()
 
     Uso:
         Obtener usuarios por preferencias en max edad.
@@ -678,7 +683,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_orientation_sexual
+        get_users_by_orientation_sexual()
 
     Uso:
         Obtener los usuarios por preferencias de un arreglo de TEXT de orientaciones sexuales.
@@ -709,7 +714,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_all_users_by_max_distance
+        get_all_users_by_max_distance()
 
     Uso:
         Obtener todos los IDs de los usuarios que se encuentren a una distancia máxima de un usuario 
@@ -743,7 +748,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_preferences_free_user
+        get_users_by_preferences_free_user()
 
     Uso:
         Obtener los ids cuentas de los usuarios que cumplen con las preferencias de otro usuario que 
@@ -795,7 +800,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_pref_sexo
+        insert_pref_sexo()
 
     Uso:
         Inserta una nueva preferencia de sexo para un usuario en la tabla de pref_sexo.
@@ -816,7 +821,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_pref_sexo
+        delete_pref_sexo()
 
     Uso:
         Elimina una preferencia de sexo de un usuario en la tabla de pref_sexo.
@@ -837,7 +842,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_pref_orientacion_sexual
+        insert_pref_orientacion_sexual()
 
     Uso:
         Inserta una nueva preferencia de orientacion sexual para un usuario en la tabla de pref_orientacion_sexual.
@@ -860,7 +865,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_pref_orientacion_sexual
+        delete_pref_orientacion_sexual()
 
     Uso:
         Elimina una preferencia de orientacion sexual de un usuario en la tabla de pref_orientacion_sexual.
@@ -883,7 +888,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_user_tarjeta
+        insert_user_tarjeta()
 
     Uso:
         Cuando el usuario registra una tarjeta, se inserta una instancia en la tabla tarjeta 
@@ -925,7 +930,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_instance_registra
+        delete_instance_registra()
 
     Uso:
         Elimina una instancia de la tabla registra.
@@ -946,7 +951,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        update_due_date_card
+        update_due_date_card()
 
     Uso:
         Actualizar la fecha de vencimiento de una tarjeta.
@@ -969,7 +974,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_all_public_info_about_user
+        get_all_public_info_about_user()
 
     Uso:
         Obtener todos los datos que sean considerados como publico de un usuario con su 
@@ -1053,7 +1058,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_trabaja_en
+        insert_trabaja_en()
 
     Uso:
         Cuando el usuario quiere agregar en que empresa trabaja actualmente, se inserta una 
@@ -1096,7 +1101,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_or_delete_agrupation
+        insert_or_delete_agrupation()
 
     Uso:
         Insertar o eliminar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion.
@@ -1126,7 +1131,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        get_all_info_about_a_user_trabaja_en
+        get_all_info_about_a_user_trabaja_en()
 
     Uso:
         Obtener todos los datos de trabaja_en (cargo y fechas de inicio) de un usuario en una empresa.
@@ -1152,7 +1157,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_all_info_about_a_empresa
+        get_all_info_about_a_empresa()
 
     Uso:
         Obtener toda la informacion de una empresa (url y nombre).
@@ -1176,7 +1181,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        update_visto_msj
+        update_visto_msj()
 
     Uso:
         Actualizar el true del visto de un mensaje en la tabla mensaje.
@@ -1200,7 +1205,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_hobbies
+        insert_hobbies()
 
     Uso:
         Inserta un nuevo registro en la tabla tiene_hobby.
@@ -1223,7 +1228,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        insert_habilidades
+        insert_habilidades()
 
     Uso:
         Inserta un nuevo registro en la tabla tiene_habilidades.
@@ -1247,7 +1252,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_certificacion
+        insert_certificacion()
 
     Uso:
         Inserta un nuevo registro en la tabla tiene_certificaciones.
@@ -1268,7 +1273,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_orientacion_sexual_perfil
+        insert_orientacion_sexual_perfil()
 
     Uso:
         Inserta un nuevo registro en la tabla tiene_orientacion_sexual.
@@ -1290,7 +1295,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        delete_hobby
+        delete_hobby()
 
     Uso:
         Eliminar una instancia en tiene_hobby dado el id_cuenta de un usuario.
@@ -1313,7 +1318,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_habilidad
+        delete_habilidad()
 
     Uso:
         Eliminar una instancia en tiene_habilidades dado el id_cuenta de un usuario.
@@ -1335,7 +1340,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_foto
+        delete_foto()
 
     Uso:
         Eliminar una instancia en tiene_foto dado el id_cuenta de un usuario, pero si es la unica 
@@ -1369,7 +1374,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_certificacion
+        delete_certificacion()
 
     Uso:
         Eliminar una instancia en tiene_certificacion dado el id_cuenta de un usuario.
@@ -1392,7 +1397,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_orientacion_sexual_perfil
+        delete_orientacion_sexual_perfil()
 
     Uso:
         Eliminar una instancia en tiene_orientacion_sexual dado el id_cuenta de un usuario.
@@ -1415,7 +1420,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        update_institution
+        update_institution()
 
     Uso:
         Modificar el nombre, tipo o año de fundacion de una institucion.
@@ -1491,7 +1496,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        check_if_user_has_a_permission
+        check_if_user_has_a_permission()
 
     Uso:
         Verificar si un usuario tiene un permiso en particular.
@@ -1526,7 +1531,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función: 
-        get_all_users_by_10km_radius
+        get_all_users_by_10km_radius()
 
     Uso: 
         Obtener todos los IDs de los usuarios que se encuentren alrededor de 10 km de una 
@@ -1557,7 +1562,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_users_by_preferences_passport_user
+        get_users_by_preferences_passport_user()
 
     Uso: 
         Obtener los ids cuentas de los usuarios que se encuentra en una ciudad 
@@ -1610,7 +1615,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_chats_by_user
+        get_chats_by_user()
 
     Uso:
         Obtener los ids chats que participa un usuario.
@@ -1686,20 +1691,20 @@ $$ LANGUAGE plpgsql;
         con la condicion de que dicho usuario debe estar suscrito a un tier.
 
     Parámetros: 
-        - id_user  : Id de quien elimina el like.
-        - disliked : Id de quien se borra el like.
+        - id_user : Id de quien elimina el like.
+        - liked   : Id de quien se borra el like.
 
     Retorna:
         Nada.
 */
-CREATE OR REPLACE FUNCTION delete_like(id_user INT, disliked INT)
+CREATE OR REPLACE FUNCTION delete_like(id_user INT, liked INT)
 RETURNS VOID AS $$
 BEGIN
-	IF EXISTS( SELECT 1 FROM suscrita WHERE id_cuenta = id_user AND fecha_caducidad > CURRENT_DATE ) THEN
-		DELETE FROM likes WHERE id_liker = id_user AND id_liked = disliked;
-	ELSE
-		RAISE EXCEPTION 'El usuario no está suscrito a ningún tier.';
-	END IF;
+    IF (check_if_user_has_a_permission(id_user, 'rewinds_ilimitados')) THEN 
+        DELETE FROM likes WHERE id_liker = id_user AND id_liked = liked;
+    ELSE
+        RAISE EXCEPTION 'El usuario no tiene permiso para realizar esta acción.';
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1856,7 +1861,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        cancel_match
+        cancel_match()
 
     Uso:
         Eliminar el match entre dos usuarios, eliminando tambien el chat y los likes 
@@ -1892,7 +1897,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_number_of_likes
+        get_number_of_likes()
 
     Uso:
         Calcular el numero de likes que ha recibido una persona.
@@ -1919,7 +1924,7 @@ $$LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_likes_per_day
+        get_likes_per_day()
 
     Uso:
         Calcular el numero de likes que da un usuario al dia.
@@ -1947,7 +1952,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_cuenta
+        delete_cuenta()
 
     Uso:
         Elimina una cuenta.
@@ -1968,7 +1973,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_file
+        get_file()
 
     Uso:
         Obtener archivos.
@@ -2002,7 +2007,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        set_null_estudio
+        set_null_estudio()
 
     Uso:
         Si el usuario ya no quiere buscar personas por su estudio, se setea null a este 
@@ -2052,7 +2057,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_new_estudio_en
+        insert_new_estudio_en()
 
     Uso:
         Insertar una nueva instancia en estudio_en y en esta_en_agrupacion.
@@ -2096,7 +2101,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /* 
     Función:
-        get_user_estudio_en
+        get_user_estudio_en()
 
     Uso:
         Obtener todos los datos (grados academicos con sus especialidades, años de ingreso y egreso) 
@@ -2129,7 +2134,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        get_user_agrupaciones_in_a_institution
+        get_user_agrupaciones_in_a_institution()
 
     Uso:
         Obtener todas las agrupaciones de estudio_en de un usuario dado por su id_cuenta y dominio de la institucion
@@ -2156,7 +2161,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_files
+        insert_files()
 
     Uso:
         Crear instancias en la tabla archivo.
@@ -2206,7 +2211,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        verify_exist_tier
+        verify_exist_tier()
     
     Uso:
         Verifica si existe un tier en el sistema.
@@ -2227,7 +2232,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        verify_exist_permission
+        verify_exist_permission()
 
     Uso:
         Verifica si existe un permiso en el sistema.
@@ -2248,7 +2253,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_new_tier
+        insert_new_tier()
 
     Uso:
         Crear un nuevo tier en el sistema.
@@ -2275,7 +2280,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        update_price_tier
+        update_price_tier()
     
     Uso:
         Actualizar el monto de un tier en el sistema.
@@ -2301,7 +2306,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_new_permission
+        insert_new_permission()
 
     Uso:
         Crear un nuevo permiso en el sistema.
@@ -2328,7 +2333,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        link_tiers_with_permissions
+        link_tiers_with_permissions()
 
     Uso:
         Vincular un tier con un permiso en la tabla maneja.
@@ -2363,7 +2368,7 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        delete_tier
+        delete_tier()
     
     Uso:
         Eliminar un tier del sistema. Este tier debe no estar relacionado con ningun subcripcion, es decir
@@ -2396,7 +2401,7 @@ $$ LANGUAGE plpgsql;
 
 /*
     Función:
-        delete_permission
+        delete_permission()
 
     Uso:
         Eliminar un permiso del sistema. Este permiso debe no estar relacionado con ningun tier, es decir
@@ -2427,9 +2432,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
     Función:
-        delete_estudio_en
+        delete_estudio_en()
 
     Uso:
         Eliminar una instancia en estudio_en 
@@ -2450,12 +2456,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
     Función:
-        delete_trabaja_en
+        delete_trabaja_en()
 
     Uso:
-        Eliminar una instancia en trabaja_en 
+        Eliminar una instancia en trabaja_en.
 
     Parámetros:
         - id_user              : Id de la cuenta del usuario.
@@ -2471,9 +2478,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
 /*
     Función:
-        get_super_likes_per_day
+        get_super_likes_per_day()
 
     Uso:
         Calcular el numero de superlikes que da un usuario al dia.
@@ -2498,3 +2506,78 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/***********************************************************************************************************/
+/*
+    Función:
+        change_permission_on_tiers
+
+    Uso:
+        Permite cambiar un permiso de un tier por otro en la tabla maneja.
+
+    Parámetros:
+        - nombre_tier_t     : Nombre del tier a desvincular con el permiso.
+        - nombre_per_unlink : Nombre del permiso a desvincular con el tier.
+        - nombre_per_link   : Nombre del nuevo permiso a vincular con el tier.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION change_permission_on_tiers(
+    nombre_tier_t     TEXT,
+    nombre_per_unlink TEXT,
+    nombre_per_link   TEXT
+) RETURNS VOID AS $$
+BEGIN
+    IF NOT verify_exist_tier(nombre_tier_t) THEN
+        RAISE EXCEPTION 'El tier % no existe en el sistema.', nombre_tier_t;
+    END IF;
+
+    IF NOT verify_exist_permission(nombre_per_unlink) THEN
+        RAISE EXCEPTION 'El permiso % no existe en el sistema.', nombre_per_unlink;
+    END IF;
+
+    IF NOT verify_exist_permission(nombre_per_link) THEN
+        RAISE EXCEPTION 'El permiso % no existe en el sistema.', nombre_per_link;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM maneja WHERE nombre_tier = nombre_tier_t AND nombre_permiso = nombre_per_unlink) THEN
+        RAISE EXCEPTION 'El tier % no tiene el permiso %.', nombre_tier_t, nombre_per_p;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM maneja WHERE nombre_tier = nombre_tier_t AND nombre_permiso = nombre_per_link) THEN
+        RAISE EXCEPTION 'El tier % ya tiene el permiso %.', nombre_tier_t, nombre_per_link;
+    END IF;
+
+    DELETE FROM maneja WHERE nombre_tier = nombre_tier_t AND nombre_permiso = nombre_per_unlink;
+
+    INSERT INTO maneja (nombre_tier, nombre_permiso)
+    VALUES (nombre_tier_t, nombre_per_link);
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función: 
+        delete_swipe()
+
+    Uso: 
+        Para que un usuario elimine un swipe que dio anteriormente
+        con la condicion de que dicho usuario debe estar suscrito a un tier.
+
+    Parámetros: 
+        - id_user  : Id de quien elimina el dislike.
+        - disliked : Id de quien se borra el dislike.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_swipe(id_user INT, disliked INT)
+RETURNS VOID AS $$
+BEGIN
+    IF (check_if_user_has_a_permission(id_user, 'rewinds_ilimitados')) THEN 
+        DELETE FROM swipes WHERE id_disliker = id_user AND id_disliked = disliked;
+    ELSE
+        RAISE EXCEPTION 'El usuario no tiene el permiso para realizar tal accion.';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
