@@ -36,7 +36,7 @@ BEFORE DELETE ON pago
 FOR EACH ROW
 EXECUTE FUNCTION prevent_delete_any_row();
 
-CREATE OR REPLACE TRIGGER prohibir_more_than_100_likes_a_day
+CREATE OR REPLACE TRIGGER prohibir_likes_and_superlikes
 BEFORE INSERT ON likes
 FOR EACH ROW
-EXECUTE FUNCTION prohibir_101_likes();
+EXECUTE FUNCTION check_count_likes_or_superlikes();

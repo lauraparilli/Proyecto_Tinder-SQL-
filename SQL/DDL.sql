@@ -32,9 +32,6 @@ CREATE DOMAIN estudios AS VARCHAR(16)
 CREATE DOMAIN tipo_instituciones AS VARCHAR(16)
 	CONSTRAINT tipo_instituciones_validos CHECK (VALUE IN ('Politica', 'Economica', 'Juridica', 'Laboral', 'Cientifica', 'Universitaria', 'Artistica', 'Otro'));
 
-CREATE DOMAIN metodo_pago AS VARCHAR(16)
-	CONSTRAINT metodo_pago_validos CHECK (VALUE IN ('Tarjeta', 'Paypal', 'Crypto', 'Otro'));
-
 CREATE DOMAIN tipo_tarjeta AS VARCHAR(16)
 	CONSTRAINT tipo_tarjeta_validos CHECK (VALUE IN ('Credito', 'Debito'));
 
@@ -94,7 +91,6 @@ CREATE TABLE IF NOT EXISTS pago(
 	id_pago 		   INT GENERATED ALWAYS AS IDENTITY,
 	numero_factura     INT UNIQUE NOT NULL,
 	estado 			   BOOLEAN NOT NULL,
-	metodo metodo_pago NOT NULL,
 	monto 			   DECIMAL(10,2) DEFAULT 0 NOT NULL,
 	fecha 			   DATE NOT NULL DEFAULT CURRENT_DATE, 
 	documento_factura  BYTEA NOT NULL,
