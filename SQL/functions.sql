@@ -2414,6 +2414,49 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/*
+    Función:
+        delete_estudio_en
+
+    Uso:
+        Eliminar una instancia en estudio_en 
+
+    Parámetros:
+        - id_user              : Id de la cuenta del usuario.
+        - p_dominio            : Dominio de la institucion.
+        - p_grado              : Grado de estudio.
+        - p_especialidad       : Especialidad de estudio.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_estudio_en(id_user integer, p_dominio TEXT, p_grado TEXT, p_especialidad TEXT)
+RETURNS void AS $$
+BEGIN
+    DELETE FROM estudio_en WHERE id_cuenta = id_user AND dominio = p_dominio AND grado = p_grado AND especialidad = p_especialidad;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+    Función:
+        delete_trabaja_en
+
+    Uso:
+        Eliminar una instancia en trabaja_en 
+
+    Parámetros:
+        - id_user              : Id de la cuenta del usuario.
+        - p_id_empresa         : Id de la empresa.
+
+    Retorna:
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_trabaja_en(id_user integer, p_id_empresa integer)
+RETURNS void AS $$  
+BEGIN
+    DELETE FROM trabaja_en WHERE id_cuenta = id_user AND id_empresa = p_id_empresa;
+END;
+$$ LANGUAGE plpgsql;
 
 
 
