@@ -1500,13 +1500,14 @@ BEGIN
             AND nombre_tier IN (
                 SELECT nombre_tier FROM suscrita
                 WHERE  id_cuenta = user_id
-                    AND fecha_caducidad > CURRENT_DATE
+                    AND fecha_inicio + (plazo || ' months')::INTERVAL > CURRENT_DATE
                 )
     ) INTO permission_exists;
 
     RETURN permission_exists;
 END;
 $$ LANGUAGE plpgsql;
+
 
 /***********************************************************************************************************/
 /*
