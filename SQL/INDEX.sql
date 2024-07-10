@@ -49,6 +49,10 @@ CREATE INDEX chatea_con_id_cuenta2 ON chatea_con (id_cuenta2);
 -- Razon: Para el parmiso de un tier que requiere saber cuantas personas te han dado like.
 CREATE INDEX likes_id_liked ON likes (id_liked);
 
+-- Para buscar los usuarios que han dado swipes a un usuario.
+-- Razon: Para el parmiso de un tier que requiere saber cuantas personas te han dado swipes.
+CREATE INDEX swipes_id_disliked ON swipes (id_disliked);
+
 -- Para buscar los archivos y tipo de archivo que un usuario tiene.
 CREATE INDEX archivo_nombre_archivo ON archivo (nombre, tipo);
 
