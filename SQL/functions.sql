@@ -2074,8 +2074,7 @@ BEGIN
 
     IF p_agrupaciones IS NOT NULL THEN
         FOR i IN 1..array_length(p_agrupaciones, 1) LOOP
-            INSERT INTO esta_en_agrupacion
-            VALUES (id_user, p_dominio, p_agrupaciones[i]);
+	    PERFORM insert_or_delete_agrupation(id_user, p_dominio, p_agrupaciones[i], FALSE);
         END LOOP;
     END IF;
 END;
