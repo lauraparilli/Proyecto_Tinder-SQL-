@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS pago(
  PRIMARY KEY (id_pago)
 );
 
-CREATE TABLE IF NOT EXISTS tarjeta (
+CREATE TABLE IF NOT EXISTS tarjeta(
 	digitos_tarjeta   VARCHAR(19) CHECK (digitos_tarjeta ~ '^[0-9]{16,19}$'),
 	nombre_titular    VARCHAR(24) NOT NULL,
 	fecha_caducidad   DATE NOT NULL,

@@ -1805,7 +1805,6 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     documento_factura_usuario TEXT
 ) RETURNS VOID AS $$
 DECLARE
-    fecha_caducidad DATE;
     new_id_pago INT;
 BEGIN
     -- Verificar si la cuenta y la tarjeta existen y si el tier está disponible
@@ -1815,6 +1814,10 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM tarjeta WHERE digitos_tarjeta = digitos_tarjeta_usario) THEN
         RAISE EXCEPTION 'La tarjeta con dígitos % no existe', digitos_tarjeta_usario;
+    END IF;
+
+    IF check_due_card(digitos_tarjeta_usario) THEN
+        RAISE EXCEPTION 'La tarjeta con dígitos % está vencida.', digitos_tarjeta_usario;
     END IF;
 
     IF NOT EXISTS (SELECT 1 FROM tier WHERE nombre_tier = nombre_tier_usuario) THEN
@@ -2579,5 +2582,53 @@ BEGIN
     ELSE
         RAISE EXCEPTION 'El usuario no tiene el permiso para realizar tal accion.';
     END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        check_due_card()
+
+    Uso:
+        Verificar si la tarjeta esta vencida al momento de realizar una compra.
+
+    Parámetros:
+        - digitostarjeta_dt : Numero de la tarjeta a verificar.
+
+    Retorna:
+        Bool, True si la tarjeta esta vencida, False si no lo esta.
+*/
+CREATE OR REPLACE FUNCTION check_due_card(digitostarjeta_dt TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM tarjeta WHERE digitos_tarjeta = digitostarjeta_dt) THEN
+        RAISE EXCEPTION 'La tarjeta % no existe en el sistema.', digitostarjeta_dt;
+    END IF;
+
+    RETURN (SELECT fecha_caducidad FROM tarjeta WHERE digitos_tarjeta = digitostarjeta_dt) > CURRENT_DATE;
+    
+END;
+$$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        delete_instance_registra()
+
+    Uso:
+        Elimina una instancia de la tabla registra.
+    
+    Parámetros:
+        - user_id     : Valor entero que indica el id del usuario.
+        - card_number : TEXT numero de la tarjeta.
+
+    Retorna: 
+        Nada.
+*/
+CREATE OR REPLACE FUNCTION delete_instance_registra(user_id INTEGER, card_number TEXT) 
+RETURNS VOID AS $$
+BEGIN
+    DELETE FROM registra WHERE id_cuenta = user_id AND digitos_tarjeta = card_number;
 END;
 $$ LANGUAGE plpgsql;
