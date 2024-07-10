@@ -1082,24 +1082,30 @@ $$ LANGUAGE plpgsql;
 /***********************************************************************************************************/
 /*
     Función:
-        insert_agrupation
+        insert_or_delete_agrupation
 
     Uso:
-        Insertar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion.
+        Insertar o eliminar una agrupacion de un usuario en una institucion en la tabla esta_en_agrupacion.
 
     Parámetros:
         - p_id_cuenta  : Entero del id de la cuenta de un usuario.
         - p_id_dominio : TEXT dominio de una institucion.
         - p_agrupacion : TEXT de la agrupacion a insertar.
+        - wanna_delete : BOOLEAN True si es delete, False si es insert. 
 
     Retorna:
         Nada.
 */
-CREATE OR REPLACE FUNCTION insert_agrupation(p_id_cuenta integer, p_id_dominio TEXT, p_agrupacion TEXT)
+CREATE OR REPLACE FUNCTION insert_or_delete_agrupation(p_id_cuenta integer, p_id_dominio TEXT, p_agrupacion TEXT, wanna_delete BOOLEAN)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO esta_en_agrupacion(id_cuenta, dominio, agrupacion)
-    VALUES (p_id_cuenta, p_id_dominio, p_agrupacion);
+    IF wanna_delete THEN
+        DELETE FROM esta_en_agrupacion
+        WHERE id_cuenta = p_id_cuenta AND dominio = p_id_dominio AND agrupacion = p_agrupacion;
+    ELSE
+        INSERT INTO esta_en_agrupacion(id_cuenta, dominio, agrupacion)
+        VALUES (p_id_cuenta, p_id_dominio, p_agrupacion);
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
