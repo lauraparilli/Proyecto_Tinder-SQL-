@@ -1807,6 +1807,11 @@ CREATE OR REPLACE FUNCTION subscribe_user(
 DECLARE
     new_id_pago INT;
 BEGIN
+    -- Verificar el estado del pago.
+    IF NOT estado_pago THEN
+        RAISE EXCEPTION 'El pago debe estar aprobado para poder suscribirse al tier.';
+    END IF;
+
     -- Verificar si la cuenta y la tarjeta existen y si el tier está disponible
     IF NOT EXISTS (SELECT 1 FROM cuenta WHERE id_cuenta = id_cuenta_usuario) THEN
         RAISE EXCEPTION 'La cuenta con id % no existe', id_cuenta_usuario;
@@ -1832,6 +1837,11 @@ BEGIN
         RAISE EXCEPTION 'El tier % no existe', nombre_tier_usuario;
     END IF;
 
+    -- Verificar valor correcto de plazos.
+    IF NOT plazo_tier IN (1, 3, 6, 12) THEN
+        RAISE EXCEPTION 'El plazo debe ser 1, 3, 6 o 12 meses';
+    END IF;
+
     -- Verificar si el usuario ya está suscrito a un tier activo
     IF EXISTS (
         SELECT 1 
@@ -1842,30 +1852,25 @@ BEGIN
         RAISE EXCEPTION 'El usuario ya está suscrito a un tier activo.';
     END IF;
 
-    -- Verificar valor correcto de plazos.
-    IF NOT plazo_tier IN (1, 3, 6, 12) THEN
-        RAISE EXCEPTION 'El plazo debe ser 1, 3, 6 o 12 meses';
-    END IF;
-
     -- Verificar el monto con la subscripción a relacionar.
     IF NOT monto_pago = price_of_tier(nombre_tier_usuario)*plazo_tier THEN
         RAISE EXCEPTION 'El monto del pago no coincide con el monto del tier.';
     END IF;
 
-    -- Insertar el pago
+    -- INSERCION DE DATOS
+    -- Insertar el pago.
     INSERT INTO pago (numero_factura, estado, monto, documento_factura)
     VALUES (numero_factura_actual, estado_pago, monto_pago, decode(documento_factura_usuario, 'base64'))
     RETURNING id_pago INTO new_id_pago;
 
-    -- Insertar en realiza
+    -- Insertar la realizacion del pago.
     INSERT INTO realiza (id_cuenta, id_pago, digitos_tarjeta)
     VALUES (id_cuenta_usuario, new_id_pago, digitos_tarjeta_usario);
 
-    -- Si el pago está aprobado, insertar en suscrita
-    IF estado_pago THEN        
-        INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, plazo)
-        VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, plazo_tier);
-    END IF;
+    -- Insertar la subscripcion del usuario al tier.
+    INSERT INTO suscrita (id_cuenta, nombre_tier, fecha_inicio, plazo)
+    VALUES (id_cuenta_usuario, nombre_tier_usuario, CURRENT_DATE, plazo_tier);
+    
 END;
 $$ LANGUAGE plpgsql;
 

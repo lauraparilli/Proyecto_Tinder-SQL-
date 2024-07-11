@@ -11,23 +11,17 @@
     Archivo SQL de creacion de indices para la BD de Tinder para Viejos Egresados.
 */
 
--- Para buscar personas por max distancia.
-CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
-
--- Para buscar personas por coordenada origen.
-CREATE INDEX pref_geo_index ON preferencias USING GIST (coordenada_origen);
-
 -- Para buscar personas por preferencias en max o min edad.
 CREATE INDEX cuenta_age_index ON cuenta (fecha_nacimiento);
+
+-- Para buscar personas por max distancia.
+CREATE INDEX perfil_geo_index ON perfil USING GIST (coordenada);
 
 -- Para buscar personas por preferencias en genero.
 CREATE INDEX perfil_sexo_index ON perfil (sexo); 
 
 -- Para buscar si la empresa ya existe en la base de datos o no (se usa en la funcion insert_trabaja_en).
 CREATE INDEX empresa_nombre_url_index ON empresa (nombre_empresa, url);
-
--- Para buscar rapidamente las suscripciones expiradas y quitarle los permisos a los usuarios con suscripciones expiradas.
-CREATE INDEX suscrita_fecha_caducidad_index ON suscrita(fecha_caducidad);
 
 -- Para buscar personas por preferencia en orientacion sexual.
 CREATE INDEX tiene_orientacion_sexual_index ON tiene_orientacion_sexual (orientacion_sexual);
@@ -53,8 +47,11 @@ CREATE INDEX likes_id_liked ON likes (id_liked);
 -- Razon: Para el parmiso de un tier que requiere saber cuantas personas te han dado swipes.
 CREATE INDEX swipes_id_disliked ON swipes (id_disliked);
 
--- Para buscar los archivos y tipo de archivo que un usuario tiene.
-CREATE INDEX archivo_nombre_archivo ON archivo (nombre, tipo);
+-- Para buscar los archivos que un usuario ha subido a un chat.
+CREATE INDEX archivo_nombre_archivo ON archivo (id_chat, nombre);
+
+-- Para buscar, en una fecha o rango de fecha, mensajes para mostrar en el chat.
+CREATE INDEX fecha_mensaje_chat ON mensaje (fecha_msj);
 
 /*  
     NOTA: Segun internet, en PostgreSQL, cuando se define una clave primaria (PRIMARY KEY) sobre una 
@@ -64,9 +61,6 @@ CREATE INDEX archivo_nombre_archivo ON archivo (nombre, tipo);
 /* *********************************************************************************************************************
 
     **** Razones de por que no colocamos indices en una tabla ****
-
-- cuenta: 
-    Solo se hace uso del id_cuenta para buscar usuarios, pero como id_cuenta ya es primary key, no hace falta indexarla.
 
 - pago: 
     Para buscar un pago se puede hacer con el PK en digitos_tarjeta.
@@ -81,7 +75,8 @@ CREATE INDEX archivo_nombre_archivo ON archivo (nombre, tipo);
     Solamente se necesita el nombre_permiso (PK) para buscar algun permiso en particular.
 
 - maneja: 
-    Hay veces en que se necesita chequear si un usuario tiene un permiso en particular, entonces, en estos casos hay que buscar.
+    Hay veces en que se necesita chequear si un usuario tiene un permiso en particular,
+    pero como no existen muchos tiers ni permisos, no es necesario indexarlo.
 
 - Preferencias: 
     En preferencias, solo necesita buscar la preferencia de un usuario por su id_cuenta (PK).
@@ -92,17 +87,11 @@ CREATE INDEX archivo_nombre_archivo ON archivo (nombre, tipo);
 - trabaja_en: 
     Solo se busca que empresas trabaja un usuario, por lo tanto, con poner en el PK el id_cuenta antes de id_empresa es suficiente.
 
-- dislikes: 
-    No se requiere buscar a los usuarios que han dado dislike a otros usuarios, por lo tanto, no hace falta indexarlo.
-
 - match_with: 
     No hace falta realizar ninguna búsqueda de una instancia en particular en ninguna de sus columnas.
 
 - chat: 
     Su unica columna es el id_chat que ya está como PK.
-
-- mensaje: 
-    El usuario puede querer buscar una palabra en un mensaje, pero eso se puede hacer con el front.
 
 - Todas las siguientes tablas:
     - esta_en_agrupacion
