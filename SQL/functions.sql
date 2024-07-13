@@ -1473,7 +1473,6 @@ RETURNS TABLE(
     r_id_pago           INTEGER,
     r_numero_factura    INTEGER,
     r_estado            BOOLEAN,
-    r_metodo            metodo_pago,
     r_monto             NUMERIC,
     r_fecha             DATE,
     r_documento_factura TEXT
@@ -1484,7 +1483,6 @@ BEGIN
         id_pago,
         numero_factura,
         estado,
-        metodo,
         monto,
         fecha,
         encode(documento_factura, 'base64')
