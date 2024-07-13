@@ -208,7 +208,7 @@ $$ LANGUAGE plpgsql;
         Tabla con los dominios y nombres de todas las instituciones.
 */
 CREATE OR REPLACE FUNCTION get_all_Institutions()
-RETURNS TABLE (dominio VARCHAR, nombre VARCHAR) AS $$
+RETURNS TABLE (r_dominio VARCHAR, r_nombre VARCHAR) AS $$
 BEGIN
     RETURN QUERY SELECT dominio, nombre FROM institucion;
 END;
