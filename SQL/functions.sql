@@ -256,6 +256,7 @@ $$ LANGUAGE plpgsql;
         - sexo_u              : Sexo del usuario.
         - latitud_u           : Valor decimal que representa la latitud de la ubicación del usuario.
         - longitud_u          : Valor decimal que representa la longitud de la ubicación del usuario.
+        - descripcion_u       : Descripcion del usuario.
         - foto_u              : Arreglo de textos en formato base64 que representa las fotos del usuario.
         - dominio_institucion : Dominio de la institución a la que estudio el usuario.
         - grado_u             : Grado académico en el titulo del usuario.
@@ -308,8 +309,8 @@ BEGIN
     VALUES (nombre_u, apellido_u, fecha_nacimiento_u, telefono_u, email_u, password_hash, idioma_u, notificaciones_u, tema_u) 
     RETURNING id_cuenta INTO id_cuenta_u;
 
-    INSERT INTO perfil (id_cuenta, sexo, latitud, longitud) 
-    VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u);
+    INSERT INTO perfil (id_cuenta, sexo, latitud, longitud, descripcion) 
+    VALUES (id_cuenta_u, sexo_u, latitud_u, longitud_u, descripcion_u);
 
     INSERT INTO estudio_en(id_cuenta, dominio, grado, especialidad, ano_ingreso, ano_egreso) 
     VALUES (id_cuenta_u, dominio_institucion, grado_u, especialidad_u, anio_ingreso, anio_egreso);
