@@ -57,7 +57,7 @@ CREATE DOMAIN habilidades AS VARCHAR(64)
 	'Capacidad para trabajar bajo presión', 'Creatividad', 'Empatía', 'Energía', 'Flexibilidad', 'Habilidades de comunicación',
 	'Habilidades de liderazgo', 'Habilidades de venta', 'Habilidades interpersonales', 'Habilidades matemáticas', 
 	'Habilidades técnicas', 'Iniciativa', 'Inteligencia emocional', 'Motivación', 'Paciencia', 'Perseverancia', 
-	'Resiliencia', 'Visión estratégica', 'Chambeo', 'Procrastinacion productiva', 'Buenisimo en Memardos', 'Llorando pero pa'' lante', 
+	'Resiliencia', 'Visión estratégica', 'Chambeo', 'Procrastinacion productiva', 'Buenisimo en Memardos', 'Llorando pero pa" lante', 
 	'Canta y no llores', 'Otro'));
 
 -- Funcion para importar archivos a la base de datos.
