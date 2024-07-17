@@ -982,7 +982,7 @@ $$ LANGUAGE plpgsql;
         id_cuenta (nombre, apellido, edad, sexo, descripcion, verificado, latitud y 
         longitud para mostrar la ciudad y pais con Nominatim, dominios de las instituciones 
         en que estudio, Ids de la empresa que trabaja, hobbies, habilidades, certificaciones, 
-        fotos, orientaciones sexuales) para mostrarse en el perfil.
+        orientaciones sexuales) para mostrarse en el perfil.
 
     Parámetros:
         - id_user : id de la cuenta del usuario.
@@ -991,6 +991,7 @@ $$ LANGUAGE plpgsql;
         Devuelve una tabla de una fila con todos los datos (mencionados en el Uso) del usuario 
         con el id_cuenta.
 */
+DROP function get_all_public_info_about_user(integer);
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
     r_nombre             CHARACTER VARYING,
@@ -1006,7 +1007,6 @@ RETURNS TABLE (
     r_hobbies            hobbies[],
     r_certificaciones    CHARACTER VARYING[],
     r_habilidades        habilidades[],
-    r_fotos              TEXT[],
     r_orientacion_sexual orientaciones[]
 ) AS $$
 DECLARE
@@ -1042,11 +1042,6 @@ BEGIN
             WHERE  h.id_cuenta = id_user
         ),
         ARRAY(
-            SELECT encode(f.foto, 'base64')
-            FROM   tiene_foto as f
-            WHERE  f.id_cuenta = id_user
-        ),
-        ARRAY(
             SELECT o.orientacion_sexual
             FROM   tiene_orientacion_sexual AS o
             WHERE  o.id_cuenta = id_user
@@ -1055,6 +1050,34 @@ BEGIN
     WHERE cuenta.id_cuenta = perfil.id_cuenta AND cuenta.id_cuenta = id_user;
 END;
 $$ LANGUAGE plpgsql;
+/***********************************************************************************************************/
+
+/*
+    Función:
+        get_photos_user()
+
+    Uso:
+        Obtener los ids y contenido de las fotos de un usuario
+
+    Parámetros:
+        - id_user : id de la cuenta del usuario.
+
+    Retorno:
+        Devuelve una tabla con el id y el contenido de las fotos de un usuario
+*/
+CREATE OR REPLACE FUNCTION get_photos_user(id_user integer)
+RETURNS TABLE (
+    r_id_foto INTEGER,
+    r_foto TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT f.id_foto, encode(f.foto, 'base64')
+    FROM   tiene_foto as f
+    WHERE  f.id_cuenta = id_user;
+END;
+$$ LANGUAGE plpgsql;
+
 
 /***********************************************************************************************************/
 /*
