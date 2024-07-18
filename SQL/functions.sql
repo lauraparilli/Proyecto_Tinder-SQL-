@@ -991,7 +991,6 @@ $$ LANGUAGE plpgsql;
         Devuelve una tabla de una fila con todos los datos (mencionados en el Uso) del usuario 
         con el id_cuenta.
 */
-DROP function get_all_public_info_about_user(integer);
 CREATE OR REPLACE FUNCTION get_all_public_info_about_user(id_user integer)
 RETURNS TABLE (
     r_nombre             CHARACTER VARYING,
@@ -1017,12 +1016,12 @@ BEGIN
         nombre, apellido, EXTRACT(YEAR FROM AGE(fecha_nacimiento))::INTEGER as edad,
         sexo, descripcion, verificado, latitud, longitud,
         ARRAY(
-            SELECT e.dominio
+            SELECT DISTINCT e.dominio
             FROM   estudio_en AS e
             WHERE  e.id_cuenta = id_user
         ),
         ARRAY(
-            SELECT t.id_empresa
+            SELECT DISTINCT t.id_empresa
             FROM   trabaja_en AS t
             WHERE  t.id_cuenta = id_user
         ),
