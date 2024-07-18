@@ -40,3 +40,9 @@ CREATE OR REPLACE TRIGGER prohibir_likes_and_superlikes
 BEFORE INSERT ON likes
 FOR EACH ROW
 EXECUTE FUNCTION check_count_likes_or_superlikes();
+
+CREATE OR REPLACE TRIGGER delete_agrupations_trigger
+AFTER DELETE ON estudio_en
+FOR EACH ROW
+EXECUTE FUNCTION delete_agrupations();
+
