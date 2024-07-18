@@ -12,6 +12,32 @@
 */
 
 /*********************************************************************************************/
+/*    
+    Función:
+        delete_agrupations()
+
+    Uso:
+        Si el usuario ya no tiene nada que ver con una institucion, se eliminan las agrupaciones
+        que tenia con ella.
+
+    Parámetros:
+        Ninguno.
+
+    Retorna: 
+        Función trigger que se ejecuta luego de eliminar una instancia en estudio_en
+*/
+CREATE OR REPLACE FUNCTION delete_agrupations() 
+RETURNS TRIGGER AS $$
+BEGIN
+   /* verificar si no queda una instancia asociada a la institucion y al id cuenta */
+    IF NOT EXISTS (SELECT * FROM estudio_en WHERE id_cuenta = OLD.id_cuenta AND dominio = OLD.dominio) THEN
+        DELETE FROM esta_en_agrupacion WHERE id_cuenta = OLD.id_cuenta AND dominio = OLD.dominio;
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+/*********************************************************************************************/
 /*
     Función:
         prevent_delete_any_row
