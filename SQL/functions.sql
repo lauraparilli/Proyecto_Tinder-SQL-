@@ -2476,6 +2476,7 @@ $$ LANGUAGE plpgsql;
 
     Uso:
         Eliminar una instancia en estudio_en 
+        Si queda una sola instancia asociada al id de la cuenta dado, se alerta un error
 
     Parámetros:
         - id_user              : Id de la cuenta del usuario.
@@ -2489,6 +2490,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION delete_estudio_en(id_user integer, p_dominio TEXT, p_grado TEXT, p_especialidad TEXT)
 RETURNS void AS $$
 BEGIN
+    IF (SELECT COUNT(*) FROM estudio_en WHERE id_cuenta = id_user) = 1 THEN
+        RAISE EXCEPTION 'No se puede eliminar la unica instancia asociada a la cuenta';
+    END IF;
     DELETE FROM estudio_en WHERE id_cuenta = id_user AND dominio = p_dominio AND grado = p_grado AND especialidad = p_especialidad;
 END;
 $$ LANGUAGE plpgsql;
