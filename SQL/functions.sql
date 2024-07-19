@@ -1836,7 +1836,7 @@ $$ LANGUAGE plpgsql;
         - numero_factura_actual     : Número de factura del pago.
         - estado_pago               : Estado del pago (TRUE si está aprobado, FALSE si está pendiente o rechazado).
         - monto_pago                : Monto del pago realizado.
-        - documento_factura_usuario : Documento de la factura en formato base64.
+        - documento_factura_usuario : Documento de la factura en bytea 
 
     Retorna:
         Nada.
@@ -1849,7 +1849,7 @@ CREATE OR REPLACE FUNCTION subscribe_user(
     numero_factura_actual     INT,
     estado_pago               BOOLEAN,
     monto_pago                DECIMAL(10,2),
-    documento_factura_usuario TEXT
+    documento_factura_usuario bytea
 ) RETURNS VOID AS $$
 DECLARE
     new_id_pago INT;
@@ -1907,7 +1907,7 @@ BEGIN
     -- INSERCION DE DATOS
     -- Insertar el pago.
     INSERT INTO pago (numero_factura, estado, monto, documento_factura)
-    VALUES (numero_factura_actual, estado_pago, monto_pago, decode(documento_factura_usuario, 'base64'))
+    VALUES (numero_factura_actual, estado_pago, monto_pago, documento_factura_usuario)
     RETURNING id_pago INTO new_id_pago;
 
     -- Insertar la realizacion del pago.
