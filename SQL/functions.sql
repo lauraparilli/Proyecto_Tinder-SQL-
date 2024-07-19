@@ -2696,3 +2696,40 @@ BEGIN
     DELETE FROM registra WHERE id_cuenta = user_id AND digitos_tarjeta = card_number;
 END;
 $$ LANGUAGE plpgsql;
+
+/***********************************************************************************************************/
+/*
+    Función:
+        get_active_subscription_user
+
+    Uso:
+        Ver la subscripcion activa del usuario y obtener el tier activo
+
+    Parámetros: 
+        - id_cuenta_usuario: INT
+
+    Retorna:
+        - nombre_tier_usuario: TEXT
+        
+*/
+CREATE OR REPLACE FUNCTION get_active_subscription_user(
+    id_cuenta_usuario INT
+) RETURNS TEXT AS $$
+DECLARE
+    tier_activo TEXT;
+BEGIN
+    
+    SELECT  nombre_tier
+    FROM   suscrita
+    WHERE  id_cuenta = id_cuenta_usuario
+        AND  fecha_inicio + (plazo || ' months')::INTERVAL > CURRENT_DATE
+    INTO tier_activo;
+
+    -- chequear si esta vacio
+    IF tier_activo IS NULL THEN
+        RETURN 'No tiene subscripción activa';
+    ELSE
+        RETURN tier_activo;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
