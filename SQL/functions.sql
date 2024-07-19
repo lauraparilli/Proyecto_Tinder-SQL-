@@ -2670,7 +2670,7 @@ BEGIN
         RAISE EXCEPTION 'La tarjeta % no existe en el sistema.', digitostarjeta_dt;
     END IF;
 
-    RETURN (SELECT fecha_caducidad FROM tarjeta WHERE digitos_tarjeta = digitostarjeta_dt) > CURRENT_DATE;
+    RETURN (SELECT fecha_caducidad FROM tarjeta WHERE digitos_tarjeta = digitostarjeta_dt) < CURRENT_DATE;
     
 END;
 $$ LANGUAGE plpgsql;
